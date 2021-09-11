@@ -156,7 +156,7 @@ if __name__ == "__main__":
     mobilenet_lock = threading.Lock()
     vggnet_lock = threading.Lock()
     vggfnet_lock = threading.Lock()
-    
+
     procs = []
     procs.append(threading.Thread(target=recv_data, args=(alexnet_port, alexnet_data_list, alexnet_lock, _stop_event)))
     procs.append(threading.Thread(target=image_sender, args=(alexnet_next_sock, images, labels, alexnet_data_list, alexnet_lock, args.alexnet_wait_time, args.alexnet_arrival_rate, _stop_event)))

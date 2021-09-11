@@ -48,33 +48,33 @@ if __name__ == "__main__":
     model.inception4e_branch2.load_weights('./GoogLeNet_inception4e_branch2_weights')
     model.inception4e_branch3.load_weights('./GoogLeNet_inception4e_branch3_weights')
     model.inception4e_branch4.load_weights('./GoogLeNet_inception4e_branch4_weights')
-    
+
     # for cuDNN loading
     model(np.zeros((1,13,13,480)))
-    
+
     print('Pretrained model loading done!')
-    
+
     prev_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     prev_sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     prev_sock.bind((args.prev_addr, args.prev_port))
     prev_sock.listen()
     p, addr = prev_sock.accept()
     print('Previous node is ready, Connected by', addr)
-    
+
     next_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     next_sock.settimeout(600) # 10 minutes
     next_sock.connect((args.next_addr, args.next_port))
     print('Next node is ready, Connected by', args.next_addr)
-    
+
     # for time record
     total, took1, took2, took3 = 0, 0, 0, 0
-    
+
     # for data multi-processing
     data_list = []
     lock = threading.Lock()
     _stop_event = threading.Event()
     threading.Thread(target=recv_data, args=(p, data_list, lock, _stop_event)).start()
-    
+
     try:
         while True:
             start = time.time()

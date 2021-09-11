@@ -16,7 +16,7 @@ class AlexNet_layer_1(keras.Model):
         ], name='features_2')
 
     def call(self, inputs):
-        x = tf.image.resize(inputs, size=(224, 224), method='nearest')
+        x = tf.image.resize(inputs, size=(224,224), method='nearest')
         x = self.features_1(x)
         x = self.features_2(x)
         return x

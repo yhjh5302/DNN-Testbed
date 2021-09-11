@@ -33,33 +33,33 @@ if __name__ == "__main__":
     model.separable_conv13.load_weights('./MobileNet_separable_conv13_weights')
     model.separable_conv14.load_weights('./MobileNet_separable_conv14_weights')
     model.fully_connected.load_weights('./MobileNet_fully_connected_weights')
-    
+
     # for cuDNN loading
     model(np.zeros((1,14,14,512)))
-    
+
     print('Pretrained model loading done!')
-    
+
     prev_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     prev_sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     prev_sock.bind((args.prev_addr, args.prev_port))
     prev_sock.listen()
     p, addr = prev_sock.accept()
     print('Previous node is ready, Connected by', addr)
-    
+
     next_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     next_sock.settimeout(600) # 10 minutes
     next_sock.connect((args.next_addr, args.next_port))
     print('Next node is ready, Connected by', args.next_addr)
-    
+
     # for time record
     total, took1, took2, took3 = 0, 0, 0, 0
-    
+
     # for data multi-processing
     data_list = []
     lock = threading.Lock()
     _stop_event = threading.Event()
     threading.Thread(target=recv_data, args=(p, data_list, lock, _stop_event)).start()
-    
+
     try:
         while True:
             start = time.time()

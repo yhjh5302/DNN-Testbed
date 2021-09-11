@@ -4,7 +4,6 @@ from tensorflow import keras
 class GoogLeNet_layer_1(keras.Model):
     def __init__(self, name=None):
         super(GoogLeNet_layer_1, self).__init__(name=name)
-        self.resize = keras.layers.Resizing(height=224, width=224, interpolation='nearest', name='resize')
         self.conv1 = keras.models.Sequential([
             keras.layers.Conv2D(filters=64, kernel_size=(7,7), strides=2, activation='relu', padding='same'),
             keras.layers.BatchNormalization(),
@@ -66,7 +65,7 @@ class GoogLeNet_layer_1(keras.Model):
         self.inception3b_maxpool = keras.layers.MaxPool2D(pool_size=(3,3), strides=2)
 
     def call(self, inputs):
-        x = self.resize(inputs)
+        x = tf.image.resize(inputs, size=(224,224), method='nearest')
         # conv1 and max pool()
         x = self.conv1(x)
         x = self.conv1_maxpool(x)

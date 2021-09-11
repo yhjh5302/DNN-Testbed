@@ -4,7 +4,6 @@ from tensorflow import keras
 class VGGNet_layer_1(keras.Model):
     def __init__(self, name=None):
         super(VGGNet_layer_1, self).__init__(name=name)
-        self.resize = keras.layers.Resizing(height=224, width=224, interpolation='nearest', name='resize')
         self.features1 = keras.models.Sequential([
             keras.layers.Conv2D(filters=64, kernel_size=(3,3), activation='relu', padding='same'),
             keras.layers.Conv2D(filters=64, kernel_size=(3,3), activation='relu', padding='same'),
@@ -23,7 +22,7 @@ class VGGNet_layer_1(keras.Model):
         ], name='features3')
 
     def call(self, inputs):
-        x = self.resize(inputs)
+        x = tf.image.resize(inputs, size=(224,224), method='nearest')
         x = self.features1(x)
         x = self.features2(x)
         x = self.features3(x)
