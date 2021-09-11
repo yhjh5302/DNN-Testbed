@@ -74,8 +74,7 @@ spec:
         #resources:
         #  limits:
         #    nvidia.com/gpu: 1
-        command: ["/bin/bash","-c","while true; do sleep 1000; done"]
-        #command: ["/bin/bash","-c","python3 AlexNetLayer1.py --set_gpu='false' --prev_addr='' --prev_port=30001 --next_addr='10.96.0.202' --next_port=30002"]
+        command: ["/bin/bash","-c","python3 AlexNetLayer1.py --set_gpu='true' --prev_addr='' --prev_port=30001 --next_addr='10.96.0.202' --next_port=30002"]
         ports:
         - containerPort: 30001
 
@@ -117,8 +116,7 @@ spec:
         #resources:
         #  limits:
         #    nvidia.com/gpu: 1
-        command: ["/bin/bash","-c","while true; do sleep 1000; done"]
-        #command: ["/bin/bash","-c","python3 AlexNetLayer2.py --set_gpu='true' --prev_addr='' --prev_port=30002 --next_addr='10.96.0.203' --next_port=30003"]
+        command: ["/bin/bash","-c","python3 AlexNetLayer2.py --set_gpu='true' --prev_addr='' --prev_port=30002 --next_addr='10.96.0.203' --next_port=30003"]
         ports:
         - containerPort: 30002
 
@@ -160,8 +158,7 @@ spec:
         #resources:
         #  limits:
         #    nvidia.com/gpu: 1
-        command: ["/bin/bash","-c","while true; do sleep 1000; done"]
-        #command: ["/bin/bash","-c","python3 AlexNetLayer3.py --set_gpu='true' --prev_addr='' --prev_port=30003 --next_addr='10.96.0.200' --next_port=30000"]
+        command: ["/bin/bash","-c","python3 AlexNetLayer3.py --set_gpu='true' --prev_addr='' --prev_port=30003 --next_addr='10.96.0.200' --next_port=30000"]
         ports:
         - containerPort: 30003
 
