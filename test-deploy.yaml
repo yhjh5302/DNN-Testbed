@@ -1,0 +1,179 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: data-uploader
+  labels:
+    app: data-uploader
+spec:
+  selector:
+    matchLabels:
+      app: data-uploader
+  template:
+    metadata:
+      labels:
+        app: data-uploader
+    spec:
+      nodeSelector:
+        kubernetes.io/hostname: wnlab-labtop-2
+      containers:
+      - name: data-uploader
+        image: yhjh5302/data-uploader:latest
+        command: ["/bin/bash","-c","while true; do sleep 1000; done"]
+        #command: ["/bin/bash","-c","python3 data_uploader.py --set_gpu='false' --prev_addr='' --prev_port=30000 --next_addr='10.96.0.201' --next_port=30001"]
+        ports:
+        - containerPort: 30000
+        - containerPort: 30010
+        - containerPort: 30020
+        - containerPort: 30030
+        - containerPort: 30040
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: data-uploader-cluster-ip-service
+spec:
+  clusterIP: 10.96.0.200
+  ports:
+  - name: alexnet
+    port: 30000
+  - name: googlenet
+    port: 30010
+  - name: mobilenet
+    port: 30020
+  - name: vggnet
+    port: 30030
+  - name: vggfnet
+    port: 30040
+  selector:
+    app: data-uploader
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: alexnet-layer1
+  labels:
+    app: alexnet-layer1
+spec:
+  selector:
+    matchLabels:
+      app: alexnet-layer1
+  template:
+    metadata:
+      labels:
+        app: alexnet-layer1
+    spec:
+      nodeSelector:
+        kubernetes.io/hostname: wnlab-nano-001
+      containers:
+      - name: alexnet-layer1
+        image: yhjh5302/alexnet-layer1-nano:latest
+        #resources:
+        #  limits:
+        #    nvidia.com/gpu: 1
+        command: ["/bin/bash","-c","while true; do sleep 1000; done"]
+        #command: ["/bin/bash","-c","python3 AlexNetLayer1.py --set_gpu='false' --prev_addr='' --prev_port=30001 --next_addr='10.96.0.202' --next_port=30002"]
+        ports:
+        - containerPort: 30001
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: alexnet-layer1-cluster-ip-service
+spec:
+  clusterIP: 10.96.0.201
+  ports:
+  - port: 30001
+  selector:
+    app: alexnet-layer1
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: alexnet-layer2
+  labels:
+    app: alexnet-layer2
+spec:
+  selector:
+    matchLabels:
+      app: alexnet-layer2
+  template:
+    metadata:
+      labels:
+        app: alexnet-layer2
+    spec:
+      nodeSelector:
+        kubernetes.io/hostname: wnlab-nano-002
+      containers:
+      - name: alexnet-layer2
+        image: yhjh5302/alexnet-layer2-nano:latest
+        #resources:
+        #  limits:
+        #    nvidia.com/gpu: 1
+        command: ["/bin/bash","-c","while true; do sleep 1000; done"]
+        #command: ["/bin/bash","-c","python3 AlexNetLayer2.py --set_gpu='true' --prev_addr='' --prev_port=30002 --next_addr='10.96.0.203' --next_port=30003"]
+        ports:
+        - containerPort: 30002
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: alexnet-layer2-cluster-ip-service
+spec:
+  clusterIP: 10.96.0.202
+  ports:
+  - port: 30002
+  selector:
+    app: alexnet-layer2
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: alexnet-layer3
+  labels:
+    app: alexnet-layer3
+spec:
+  selector:
+    matchLabels:
+      app: alexnet-layer3
+  template:
+    metadata:
+      labels:
+        app: alexnet-layer3
+    spec:
+      nodeSelector:
+        kubernetes.io/hostname: jin-tfx255
+      containers:
+      - name: alexnet-layer3
+        image: yhjh5302/alexnet-layer3:latest
+        #resources:
+        #  limits:
+        #    nvidia.com/gpu: 1
+        command: ["/bin/bash","-c","while true; do sleep 1000; done"]
+        #command: ["/bin/bash","-c","python3 AlexNetLayer3.py --set_gpu='true' --prev_addr='' --prev_port=30003 --next_addr='10.96.0.200' --next_port=30000"]
+        ports:
+        - containerPort: 30003
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: alexnet-layer3-cluster-ip-service
+spec:
+  clusterIP: 10.96.0.203
+  ports:
+  - port: 30003
+  selector:
+    app: alexnet-layer3

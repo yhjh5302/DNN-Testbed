@@ -1,0 +1,201 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: data-generator-cluster-ip-service
+spec:
+  clusterIP: 10.96.0.200
+  ports:
+  - name: alexnet
+    port: 30000
+  - name: googlenet
+    port: 30010
+  - name: mobilenet
+    port: 30020
+  - name: vggnet
+    port: 30030
+  - name: vggfnet
+    port: 30040
+  selector:
+    app: data-generator
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: alexnet-layer1-cluster-ip-service
+spec:
+  clusterIP: 10.96.0.201
+  ports:
+  - port: 30001
+  selector:
+    app: alexnet-layer1
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: alexnet-layer2-cluster-ip-service
+spec:
+  clusterIP: 10.96.0.202
+  ports:
+  - port: 30002
+  selector:
+    app: alexnet-layer2
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: alexnet-layer3-cluster-ip-service
+spec:
+  clusterIP: 10.96.0.203
+  ports:
+  - port: 30003
+  selector:
+    app: alexnet-layer3
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: googlenet-layer1-cluster-ip-service
+spec:
+  clusterIP: 10.96.0.211
+  ports:
+  - port: 30011
+  selector:
+    app: googlenet-layer1
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: googlenet-layer2-cluster-ip-service
+spec:
+  clusterIP: 10.96.0.212
+  ports:
+  - port: 30012
+  selector:
+    app: googlenet-layer2
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: googlenet-layer3-cluster-ip-service
+spec:
+  clusterIP: 10.96.0.213
+  ports:
+  - port: 30013
+  selector:
+    app: googlenet-layer3
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: mobilenet-layer1-cluster-ip-service
+spec:
+  clusterIP: 10.96.0.221
+  ports:
+  - port: 30021
+  selector:
+    app: mobilenet-layer1
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: mobilenet-layer2-cluster-ip-service
+spec:
+  clusterIP: 10.96.0.222
+  ports:
+  - port: 30022
+  selector:
+    app: mobilenet-layer2
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: mobilenet-layer3-cluster-ip-service
+spec:
+  clusterIP: 10.96.0.223
+  ports:
+  - port: 30023
+  selector:
+    app: mobilenet-layer3
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: vggnet-layer1-cluster-ip-service
+spec:
+  clusterIP: 10.96.0.231
+  ports:
+  - port: 30031
+  selector:
+    app: vggnet-layer1
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: vggnet-layer2-cluster-ip-service
+spec:
+  clusterIP: 10.96.0.232
+  ports:
+  - port: 30032
+  selector:
+    app: vggnet-layer2
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: vggnet-layer3-cluster-ip-service
+spec:
+  clusterIP: 10.96.0.233
+  ports:
+  - port: 30033
+  selector:
+    app: vggnet-layer3
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: vggfnet-layer1-cluster-ip-service
+spec:
+  clusterIP: 10.96.0.241
+  ports:
+  - port: 30041
+  selector:
+    app: vggfnet-layer1
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: vggfnet-layer2-cluster-ip-service
+spec:
+  clusterIP: 10.96.0.242
+  ports:
+  - port: 30042
+  selector:
+    app: vggfnet-layer2

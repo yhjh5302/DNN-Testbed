@@ -1,0 +1,66 @@
+Docker는 설치되어있다고 가정.
+
+#### for nvidia repository
+curl -s -L https://nvidia.github.io/nvidia-docker/gpgkey | sudo apt-key add -
+distribution=$(. /etc/os-release;echo $ID$VERSION_ID)
+curl -s -L https://nvidia.github.io/nvidia-docker/$distribution/nvidia-docker.list | sudo tee /etc/apt/sources.list.d/nvidia-docker.list
+sudo apt-get update
+curl -s -L https://nvidia.github.io/nvidia-docker/gpgkey | sudo apt-key add -
+
+#### install
+sudo apt-get update
+sudo apt-get install -y apt-transport-https ca-certificates curl
+sudo curl -fsSLo /usr/share/keyrings/kubernetes-archive-keyring.gpg https://packages.cloud.google.com/apt/doc/apt-key.gpg
+echo "deb [signed-by=/usr/share/keyrings/kubernetes-archive-keyring.gpg] https://apt.kubernetes.io/ kubernetes-xenial main" | sudo tee /etc/apt/sources.list.d/kubernetes.list
+sudo apt-get update
+
+sudo apt-get install -y kubelet=1.22.1-00 kubeadm=1.22.1-00 kubectl=1.22.1-00 kubernetes-cni nvidia-container-runtime nvidia-docker2
+sudo apt-mark hold kubelet kubeadm kubectl kubernetes-cni
+
+# docker with systemd
+sudo systemctl edit docker.service
+'''
+[Service]
+ExecStart=
+ExecStart=/usr/bin/dockerd --host=fd:// --add-runtime=nvidia=/usr/bin/nvidia-container-runtime --exec-opt native.cgroupdriver=systemd
+'''
+sudo nano /etc/docker/daemon.json
+'''
+{
+    "default-runtime" : "nvidia",
+    "runtimes" : {
+        "nvidia" : {
+            "path" : "/usr/bin/nvidia-container-runtime",
+            "runtimeArgs" : []
+         }
+    }
+}
+'''
+sudo systemctl daemon-reload
+sudo systemctl restart docker
+
+#### run kubeadm
+sudo swapoff -a
+sudo sysctl -w net.bridge.bridge-nf-call-ip6tables=1
+sudo sysctl -w net.bridge.bridge-nf-call-iptables=1
+sudo kubeadm init --pod-network-cidr=10.244.0.0/16
+
+mkdir -p $HOME/.kube
+sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
+sudo chown $(id -u):$(id -g) $HOME/.kube/config
+
+#### network
+kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/master/Documentation/kube-flannel.yml
+
+#### GPU enable
+kubectl create -f https://raw.githubusercontent.com/NVIDIA/k8s-device-plugin/1.0.0-beta4/nvidia-device-plugin.yml
+
+#### master node untaint
+kubectl taint nodes jin-tfx255 node-role.kubernetes.io/master-
+
+#### pod deploy
+kubectl apply -f pipeline-deploy.yaml
+kubectl apply -f service.yaml
+kubectl delete -f pipeline-deploy.yaml
+kubectl delete -f service.yaml
+kubectl exec -it [POD_NAME] bash

@@ -1,0 +1,91 @@
+#### uninstall and remove remnants
+sudo apt purge kubelet kubeadm kubectl kubernetes-cni
+ls /opt (check for some remaining cni folder or config file and remove)
+
+#### install
+sudo snap install microk8s --classic
+sudo snap install microk8s --classic --channel=1.19/stable
+sudo usermod -a -G microk8s $USER
+sudo chown -f -R $USER ~/.kube
+
+#### for kubeflow (i don't think it is necessary)
+sudo add-apt-repository -yu ppa:juju/stable
+sudo apt install juju
+
+#### for your accommodation
+sudo swapoff -a
+sudo iptables -P FORWARD ACCEPT
+microk8s enable dns dashboard storage
+microk8s kubectl get all -A
+
+#### for slave
+autologin disable sleep mode
+sudo nano /etc/netplan/50-cloud-init.yaml
+sudo apt update
+sudo apt upgrade
+sudo snap install microk8s --classic --channel=1.19/stable
+microk8s reset
+microk8s stop and then reboot
+(if cert problem) sudo microk8s.refresh-certs -i
+or sudo nano /boot/firmware/cmdline.txt - cgroup_enable=cpuset cgroup_enable=memory cgroup_memory=1
+
+
+#### master setting (if no slave, then pass)
+sudo microk8s kubectl get node
+sudo microk8s add-node
+
+#### slave  setting
+sudo microk8s join 192.168.43.9:25000/d35c40644a9ad44c49c85732bd450c38
+sudo microk8s kubectl get node
+
+#### dashboard
+sudo microk8s enable dashboard
+sudo microk8s kubectl get svc/kubernetes-dashboard -n kube-system
+#### check cluster-ip of dashboard and go to "https://10.152.183.252/#/login"
+sudo microk8s kubectl -n kube-system describe secret $(kubectl -n kube-system get secret | grep default | awk '{print $1}')
+
+#### deploy apps
+sudo iptables -P FORWARD ACCEPT (/etc/sysctl.conf, 68 line "net.ipv4.ip_forward=1" delete annotation mark)
+sudo microk8s enable dns
+sudo microk8s kubectl apply -f pipeline-deploy.yaml
+sudo microk8s kubectl apply -f service.yaml
+
+sudo microk8s kubectl delete -f pipeline-deploy.yaml
+sudo microk8s kubectl delete -f service.yaml
+
+#### enable kubeflow
+sudo microk8s enable storage
+(Optional) sudo microk8s enable gpu	(to enable GPU support, available only for NVIDIA GPU hardware)
+KUBEFLOW_BUNDLE=lite KUBEFLOW_DEBUG=true KUBEFLOW_AUTH_PASSWORD="7130310" microk8s enable kubeflow (took longtime)
+(if permission error) sudo chown -R $USER /var/snap/microk8s/current/juju/share/juju/
+
+#### kubeflow compile
+dsl-compile --py capstone_2020/test/splited_AlexNet/pipeline.py --output d-kube-pipeline.tar.gz
+
+
+#### debug
+sudo microk8s ctr images ls (check images = docker images)
+sudo microk8s inspect
+
+KUBE_EDITOR="nano" microk8s kubectl -n kubeflow edit role pipeline-runner
+microk8s kubectl create rolebinding pipeline-runner-admin --clusterrole=admin --serviceaccount=kubeflow:pipeline-runner --namespace=kubeflow
+microk8s kubectl create clusterrolebinding pipeline-runner-cluster-admin --clusterrole=cluster-admin --serviceaccount=kubeflow:pipeline-runner
+
+#### end master node
+sudo microk8s remove-node ubuntu
+
+#### end slave node
+sudo microk8s leave
+
+#### both
+microk8s reset (took longtime)
+(if stuck on crd)
+microk8s kubectl get crd
+microk8s kubectl patch crd/profiles.kubeflow.org -p '{"metadata":{"finalizers":[]}}' --type=merge
+or just reboot
+(if ERROR controller "uk8s" already exists) microk8s juju destroy-controller uk8s --destroy-all-models --destroy-storage
+
+#### before system shutdown (NOT Necessary)
+sudo microk8s stop
+and then
+sudo microk8s start

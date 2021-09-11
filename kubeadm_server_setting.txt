@@ -1,0 +1,171 @@
+#### docker image build and push pull
+docker build -t yhjh5302/node-web-app-rasp .
+docker push yhjh5302/node-web-app-rasp
+docker pull yhjh5302/node-web-app-rasp
+
+#### kustomize install
+curl -s "https://raw.githubusercontent.com/kubernetes-sigs/kustomize/master/hack/install_kustomize.sh" | bash
+
+##############################
+#### for nvidia
+curl -s -L https://nvidia.github.io/nvidia-docker/gpgkey | sudo apt-key add -
+distribution=$(. /etc/os-release;echo $ID$VERSION_ID)
+curl -s -L https://nvidia.github.io/nvidia-docker/$distribution/nvidia-docker.list | sudo tee /etc/apt/sources.list.d/nvidia-docker.list
+sudo apt-get update
+curl -s -L https://nvidia.github.io/nvidia-docker/gpgkey | sudo apt-key add -
+
+# install
+sudo apt-get update
+sudo apt-get install -y apt-transport-https ca-certificates curl
+sudo curl -fsSLo /usr/share/keyrings/kubernetes-archive-keyring.gpg https://packages.cloud.google.com/apt/doc/apt-key.gpg
+echo "deb [signed-by=/usr/share/keyrings/kubernetes-archive-keyring.gpg] https://apt.kubernetes.io/ kubernetes-xenial main" | sudo tee /etc/apt/sources.list.d/kubernetes.list
+sudo apt-get update
+
+sudo apt-cache policy kubelet
+sudo apt-cache policy kubeadm
+sudo apt-cache policy kubectl
+
+sudo apt-get install -y kubelet=1.22.1-00 kubeadm=1.22.1-00 kubectl=1.22.1-00 kubernetes-cni nvidia-container-runtime nvidia-docker2
+sudo apt-mark hold kubelet kubeadm kubectl kubernetes-cni
+sudo systemctl enable --now kubelet
+
+# docker with systemd
+docker info | grep -i cgroup
+sudo systemctl edit docker.service
+'''
+[Service]
+ExecStart=
+ExecStart=/usr/bin/dockerd --host=fd:// --add-runtime=nvidia=/usr/bin/nvidia-container-runtime --exec-opt native.cgroupdriver=systemd
+'''
+sudo systemctl daemon-reload
+sudo systemctl restart docker
+docker info | grep -i cgroup
+'''
+sudo nano /etc/docker/daemon.json
+{
+    "insecure-registries" : ["localhost:32000"] 
+}
+{
+    "exec-opts" : ["native.cgroupdriver=systemd"]
+    "log-driver" : "json-file",
+    "log-opts" : {
+        "max-size": "100m"
+    },
+    "storage-driver" : "overlay2"
+}
+{
+    "data-root": "/mnt/docker-data",
+    "storage-driver": "overlay2"
+}
+{
+    "default-runtime" : "nvidia",
+    "runtimes" : {
+        "nvidia" : {
+            "path" : "/usr/bin/nvidia-container-runtime",
+            "runtimeArgs" : []
+         }
+    }
+}
+'''
+
+# uninstall
+sudo apt-mark unhold kubelet kubeadm kubectl kubernetes-cni
+sudo apt-get remove -y --purge kubelet kubeadm kubectl kubernetes-cni
+sudo apt-get autoremove -y
+
+# run kubeadm
+sudo swapoff -a
+sudo sysctl -w net.bridge.bridge-nf-call-ip6tables=1
+sudo sysctl -w net.bridge.bridge-nf-call-iptables=1
+sudo sysctl -w net.ipv4.ip_forward=1
+sudo kubeadm init --pod-network-cidr=10.244.0.0/16
+sudo kubeadm config images pull
+
+#### mkdir -p $HOME/.kube
+sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
+sudo chown $(id -u):$(id -g) $HOME/.kube/config
+
+#### network
+kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/master/Documentation/kube-flannel.yml
+kubectl get nodes
+
+#### GPU enable
+kubectl create -f https://raw.githubusercontent.com/NVIDIA/k8s-device-plugin/1.0.0-beta4/nvidia-device-plugin.yml
+
+#### master nodde untaint
+kubectl taint nodes jin-tfx255 node-role.kubernetes.io/master-
+
+#### 
+kubectl apply -f pipeline-deploy.yaml
+kubectl apply -f service.yaml
+kubectl delete -f pipeline-deploy.yaml
+kubectl delete -f service.yaml
+kubectl exec -it layer1-548fd6689c-69t6d bash
+
+####
+sudo kubeadm config images list
+sudo kubeadm config images pull
+sudo kubeadm config images pull --image-repository docker.io
+
+#### cluster role binding (WARNING: This allows any user with read access to secrets or the ability to create a pod to access super-user credentials.)
+kubectl create clusterrolebinding serviceaccounts-cluster-admin --clusterrole=cluster-admin --group=system:serviceaccounts
+
+#### dashboard
+kubectl apply -f https://raw.githubusercontent.com/kubernetes/dashboard/v2.2.0/aio/deploy/recommended.yaml
+
+#### getting dashboard key
+kubectl -n kubernetes-dashboard describe secret $(kubectl -n kubernetes-dashboard get secret | grep admin-user | awk '{print $1}')
+
+#### proxy
+kubectl proxy
+http://localhost:8001/api/v1/namespaces/kubernetes-dashboard/services/https:kubernetes-dashboard:/proxy/
+
+
+
+#### slave wifi setting
+sudo nano /etc/netplan/50-cloud-init.yaml
+nmtui
+hostname -I
+sudo iw event
+sudo iw wlan0 scan > scan_result
+sudo iw reg set US
+
+#### slave
+sudo swapoff -a
+sudo kubeadm join 192.168.0.11:6443 --token ffb2dv.1hkm9b8y7vqnwxls --discovery-token-ca-cert-hash sha256:f073c3eb91f54776cef89bf4ee7dc2650bae85d7d3dfc09feb4cbb3092e8dd3d
+
+#### (NOT Necessary) nginx run on master node
+kubectl apply -f capstone_2020/ingress-nginx-mandatory.yaml
+kubectl apply -f capstone_2020/create-ingress.yaml
+kubectl expose deploy nginx-ingress-controller --type=NodePort -n ingress-nginx
+kubectl get svc -n ingress-nginx
+
+kubectl delete deploy nginx-ingress-controller -n ingress-nginx
+
+
+
+#### run node-web-app
+kubectl create deployment node-web-app --image=yhjh5302/node-web-app-rasp
+
+#### expose node-web-app service
+kubectl expose deployment node-web-app --type=NodePort --name=my-service --port=8080
+or
+kubectl apply -f capstone_2020/service-expose.yaml
+
+#### pods check
+kubectl describe pods node-web-app
+
+#### debug
+kubectl exec -it --namespace prod node-web-app bash
+
+
+#### end
+kubectl get service
+kubectl get deployment
+kubectl get pod
+kubectl get node
+
+kubectl delete services my-service
+kubectl delete deployment node-web-app
+
+sudo kubeadm reset
