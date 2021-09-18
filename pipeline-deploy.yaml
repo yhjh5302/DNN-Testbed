@@ -14,13 +14,14 @@ spec:
         app: data-generator
     spec:
       nodeSelector:
-        kubernetes.io/hostname: jin-tfx255 # master-node-2
+        kubernetes.io/hostname: wnlab-labtop-2
       containers:
       - name: data-generator
-        image: yhjh5302/data-generator:latest
+        image: yhjh5302/data-uploader:latest
+        #image: yhjh5302/data-generator:latest
         command: ["/bin/bash","-c","while true; do sleep 1000; done"]
         #command: ["/bin/bash","-c","python3 data_uploader.py --set_gpu='false' --prev_addr='' --prev_port=30000 --next_addr='10.96.0.201' --next_port=30001"]
-        #command: ["/bin/bash","-c","python3 DataGenerator.py --alexnet_prev_addr='' --alexnet_next_addr='localhost' --googlenet_prev_addr='' --googlenet_prev_addr='localhost' --mobilenet_prev_addr='' --mobilenet_prev_addr='localhost' --vggnet_prev_addr='' --vggnet_prev_addr='localhost' --vggfnet_prev_addr='' --vggfnet_prev_addr='localhost'"]
+        #command: ["/bin/bash","-c","python3 DataGenerator.py --alexnet_prev_addr='' --alexnet_next_addr='10.96.0.201' --googlenet_prev_addr='' --googlenet_next_addr='10.96.0.211' --mobilenet_prev_addr='' --mobilenet_next_addr='10.96.0.221' --vggnet_prev_addr='' --vggnet_next_addr='10.96.0.231' --vggfnet_prev_addr='' --vggfnet_next_addr='10.96.0.241'"]
         ports:
         - containerPort: 30000
         - containerPort: 30010
@@ -75,7 +76,7 @@ spec:
         #resources:
         #  limits:
         #    nvidia.com/gpu: 1
-        command: ["/bin/bash","-c","python3 AlexNetLayer1.py --set_gpu='false' --prev_addr='' --prev_port=30001 --next_addr='10.96.0.202' --next_port=30002"]
+        command: ["/bin/bash","-c","python3 AlexNetLayer1.py --set_gpu='false' --prev_addr='' --prev_port=30001 --next_addr='10.96.0.202' --next_port=30002 --vram_limit=32 --debug=10000"]
         ports:
         - containerPort: 30001
 
@@ -117,7 +118,7 @@ spec:
         #resources:
         #  limits:
         #    nvidia.com/gpu: 1
-        command: ["/bin/bash","-c","python3 AlexNetLayer2.py --set_gpu='false' --prev_addr='' --prev_port=30002 --next_addr='10.96.0.203' --next_port=30003"]
+        command: ["/bin/bash","-c","python3 AlexNetLayer2.py --set_gpu='false' --prev_addr='' --prev_port=30002 --next_addr='10.96.0.203' --next_port=30003 --vram_limit=32 --debug=10000"]
         ports:
         - containerPort: 30002
 
@@ -159,7 +160,7 @@ spec:
         #resources:
         #  limits:
         #    nvidia.com/gpu: 1
-        command: ["/bin/bash","-c","python3 AlexNetLayer3.py --set_gpu='false' --prev_addr='' --prev_port=30003 --next_addr='10.96.0.200' --next_port=30000"]
+        command: ["/bin/bash","-c","python3 AlexNetLayer3.py --set_gpu='false' --prev_addr='' --prev_port=30003 --next_addr='10.96.0.200' --next_port=30000 --vram_limit=320 --debug=10000"]
         ports:
         - containerPort: 30003
 
@@ -201,7 +202,7 @@ spec:
         #resources:
         #  limits:
         #    nvidia.com/gpu: 1
-        command: ["/bin/bash","-c","python3 GoogLeNetLayer1.py --set_gpu='false' --prev_addr='' --prev_port=30011 --next_addr='10.96.0.212' --next_port=30012"]
+        command: ["/bin/bash","-c","python3 GoogLeNetLayer1.py --set_gpu='false' --prev_addr='' --prev_port=30011 --next_addr='10.96.0.212' --next_port=30012 --vram_limit=32 --debug=10000"]
         ports:
         - containerPort: 30011
 
@@ -243,7 +244,7 @@ spec:
         #resources:
         #  limits:
         #    nvidia.com/gpu: 1
-        command: ["/bin/bash","-c","python3 GoogLeNetLayer2.py --set_gpu='false' --prev_addr='' --prev_port=30012 --next_addr='10.96.0.213' --next_port=30013"]
+        command: ["/bin/bash","-c","python3 GoogLeNetLayer2.py --set_gpu='false' --prev_addr='' --prev_port=30012 --next_addr='10.96.0.213' --next_port=30013 --vram_limit=32 --debug=10000"]
         ports:
         - containerPort: 30012
 
@@ -285,7 +286,7 @@ spec:
         #resources:
         #  limits:
         #    nvidia.com/gpu: 1
-        command: ["/bin/bash","-c","python3 GoogLeNetLayer3.py --set_gpu='false' --prev_addr='' --prev_port=30013 --next_addr='10.96.0.200' --next_port=30010"]
+        command: ["/bin/bash","-c","python3 GoogLeNetLayer3.py --set_gpu='false' --prev_addr='' --prev_port=30013 --next_addr='10.96.0.200' --next_port=30010 --vram_limit=160 --debug=10000"]
         ports:
         - containerPort: 30013
 
@@ -327,7 +328,7 @@ spec:
         #resources:
         #  limits:
         #    nvidia.com/gpu: 1
-        command: ["/bin/bash","-c","python3 MobileNetLayer1.py --set_gpu='false' --prev_addr='' --prev_port=30021 --next_addr='10.96.0.222' --next_port=30022"]
+        command: ["/bin/bash","-c","python3 MobileNetLayer1.py --set_gpu='false' --prev_addr='' --prev_port=30021 --next_addr='10.96.0.222' --next_port=30022 --vram_limit=32 --debug=10000"]
         ports:
         - containerPort: 30021
 
@@ -369,7 +370,7 @@ spec:
         #resources:
         #  limits:
         #    nvidia.com/gpu: 1
-        command: ["/bin/bash","-c","python3 MobileNetLayer2.py --set_gpu='false' --prev_addr='' --prev_port=30022 --next_addr='10.96.0.223' --next_port=30023"]
+        command: ["/bin/bash","-c","python3 MobileNetLayer2.py --set_gpu='false' --prev_addr='' --prev_port=30022 --next_addr='10.96.0.223' --next_port=30023 --vram_limit=64 --debug=10000"]
         ports:
         - containerPort: 30022
 
@@ -411,7 +412,7 @@ spec:
         #resources:
         #  limits:
         #    nvidia.com/gpu: 1
-        command: ["/bin/bash","-c","python3 MobileNetLayer3.py --set_gpu='false' --prev_addr='' --prev_port=30023 --next_addr='10.96.0.200' --next_port=30020"]
+        command: ["/bin/bash","-c","python3 MobileNetLayer3.py --set_gpu='false' --prev_addr='' --prev_port=30023 --next_addr='10.96.0.200' --next_port=30020 --vram_limit=128 --debug=10000"]
         ports:
         - containerPort: 30023
 
@@ -453,7 +454,7 @@ spec:
         #resources:
         #  limits:
         #    nvidia.com/gpu: 1
-        command: ["/bin/bash","-c","python3 VGGNetLayer1.py --set_gpu='false' --prev_addr='' --prev_port=30031 --next_addr='10.96.0.232' --next_port=30032"]
+        command: ["/bin/bash","-c","python3 VGGNetLayer1.py --set_gpu='false' --prev_addr='' --prev_port=30031 --next_addr='10.96.0.232' --next_port=30032 --vram_limit=64 --debug=10000"]
         ports:
         - containerPort: 30031
 
@@ -495,7 +496,7 @@ spec:
         #resources:
         #  limits:
         #    nvidia.com/gpu: 1
-        command: ["/bin/bash","-c","python3 VGGNetLayer2.py --set_gpu='false' --prev_addr='' --prev_port=30032 --next_addr='10.96.0.233' --next_port=30033"]
+        command: ["/bin/bash","-c","python3 VGGNetLayer2.py --set_gpu='false' --prev_addr='' --prev_port=30032 --next_addr='10.96.0.233' --next_port=30033 --vram_limit=96 --debug=10000"]
         ports:
         - containerPort: 30032
 
@@ -537,7 +538,7 @@ spec:
         #resources:
         #  limits:
         #    nvidia.com/gpu: 1
-        command: ["/bin/bash","-c","python3 VGGNetLayer3.py --set_gpu='false' --prev_addr='' --prev_port=30033 --next_addr='10.96.0.200' --next_port=30030"]
+        command: ["/bin/bash","-c","python3 VGGNetLayer3.py --set_gpu='false' --prev_addr='' --prev_port=30033 --next_addr='10.96.0.200' --next_port=30030 --vram_limit=576 --debug=10000"]
         ports:
         - containerPort: 30033
 
@@ -579,7 +580,7 @@ spec:
         #resources:
         #  limits:
         #    nvidia.com/gpu: 1
-        command: ["/bin/bash","-c","python3 VGGFNetLayer1.py --set_gpu='false' --prev_addr='' --prev_port=30041 --next_addr='10.96.0.242' --next_port=30042"]
+        command: ["/bin/bash","-c","python3 VGGFNetLayer1.py --set_gpu='false' --prev_addr='' --prev_port=30041 --next_addr='10.96.0.242' --next_port=30042 --vram_limit=32 --debug=10000"]
         ports:
         - containerPort: 30041
 
@@ -621,7 +622,7 @@ spec:
         #resources:
         #  limits:
         #    nvidia.com/gpu: 1
-        command: ["/bin/bash","-c","python3 VGGFNetLayer2.py --set_gpu='false' --prev_addr='' --prev_port=30042 --next_addr='10.96.0.200' --next_port=30040"]
+        command: ["/bin/bash","-c","python3 VGGFNetLayer2.py --set_gpu='false' --prev_addr='' --prev_port=30042 --next_addr='10.96.0.200' --next_port=30040 --vram_limit=256 --debug=10000"]
         ports:
         - containerPort: 30042
 
