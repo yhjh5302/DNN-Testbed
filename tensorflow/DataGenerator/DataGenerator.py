@@ -6,31 +6,26 @@ import argparse
 def image_sender(next_socket, images, labels, data_list, lock, wait_time, arrival_rate, _stop_event):
     while True:
         # sleep before sending
-        time.sleep(wait_time)
+        time.sleep(1/arrival_rate)
 
         # reading queue
-        start = 0
-        end = int(arrival_rate * wait_time)
-        total = end - start
-        data = images[start:end]
-        answer = labels[start:end]
-        correct = np.zeros_like(answer)
+        idx = np.random.randint(10000)
+        data = images[idx:idx+1]
+        answer = labels[idx:idx+1]
+        correct = False
 
         # sending data
-        total_start = time.time()
+        start = time.time()
         send_data(next_socket, data)
 
         # make data receiving thread
         outputs = bring_data(data_list, lock, _stop_event)
-        for idx in range(total):
-            predicted = tf.argmax(outputs[idx:idx+1], 1)
-            correct[idx] += (int(predicted) == int(answer[idx])) + 1
+        predicted = tf.argmax(outputs, 1)
+        correct = (int(predicted) == int(answer[0]))
 
         # wait for response
-        print("time took: ", time.time() - total_start)
-        print("correct:", correct.sum() - total)
-        print("total:", total)
-        print('Accuracy of the network on the 10000 test images: %d %%' % (100 * (correct.sum() - total) / total))
+        print("time took: ", time.time() - start)
+        print("correct:", correct)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Tensorflow')
@@ -55,16 +50,16 @@ if __name__ == "__main__":
     parser.add_argument('--vggfnet_prev_port', default=30040, type=int, help='Previous node port')
     parser.add_argument('--vggfnet_next_addr', default='10.96.0.241', type=str, help='Next node address')
     parser.add_argument('--vggfnet_next_port', default=30041, type=int, help='Next node port')
-    parser.add_argument('--alexnet_wait_time', default=0.200, type=float, help='waiting time for making batch')
+    parser.add_argument('--alexnet_wait_time', default=0.500, type=float, help='waiting time for making batch')
     parser.add_argument('--googlenet_wait_time', default=0.500, type=float, help='waiting time for making batch')
-    parser.add_argument('--mobilenet_wait_time', default=0.100, type=float, help='waiting time for making batch')
+    parser.add_argument('--mobilenet_wait_time', default=0.500, type=float, help='waiting time for making batch')
     parser.add_argument('--vggnet_wait_time', default=0.500, type=float, help='waiting time for making batch')
-    parser.add_argument('--vggfnet_wait_time', default=0.100, type=float, help='waiting time for making batch')
+    parser.add_argument('--vggfnet_wait_time', default=0.500, type=float, help='waiting time for making batch')
     parser.add_argument('--alexnet_arrival_rate', default=30, type=int, help='arrival rate')
-    parser.add_argument('--googlenet_arrival_rate', default=20, type=int, help='arrival rate')
-    parser.add_argument('--mobilenet_arrival_rate', default=50, type=int, help='arrival rate')
+    parser.add_argument('--googlenet_arrival_rate', default=30, type=int, help='arrival rate')
+    parser.add_argument('--mobilenet_arrival_rate', default=30, type=int, help='arrival rate')
     parser.add_argument('--vggnet_arrival_rate', default=30, type=int, help='arrival rate')
-    parser.add_argument('--vggfnet_arrival_rate', default=40, type=int, help='arrival rate')
+    parser.add_argument('--vggfnet_arrival_rate', default=30, type=int, help='arrival rate')
     parser.add_argument('--vram_limit', default=64, type=int, help='Next node port')
     args = parser.parse_args()
 
@@ -93,6 +88,7 @@ if __name__ == "__main__":
     alexnet_port, alexnet_addr = alexnet_prev_sock.accept()
     print('AlexNet prev node is ready, Connected by', alexnet_addr)
 
+    '''
     googlenet_next_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     googlenet_next_sock.settimeout(600)
     googlenet_next_sock.connect((args.googlenet_next_addr, args.googlenet_next_port))
@@ -128,6 +124,7 @@ if __name__ == "__main__":
     vggnet_prev_sock.listen()
     vggnet_port, vggnet_addr = vggnet_prev_sock.accept()
     print('VGGNet prev node is ready, Connected by', vggnet_addr)
+    '''
 
     vggfnet_next_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     vggfnet_next_sock.settimeout(600)
@@ -146,26 +143,32 @@ if __name__ == "__main__":
     _stop_event = threading.Event()
 
     alexnet_data_list = []
+    '''
     googlenet_data_list = []
     mobilenet_data_list = []
     vggnet_data_list = []
+    '''
     vggfnet_data_list = []
 
     alexnet_lock = threading.Lock()
+    '''
     googlenet_lock = threading.Lock()
     mobilenet_lock = threading.Lock()
     vggnet_lock = threading.Lock()
+    '''
     vggfnet_lock = threading.Lock()
 
     procs = []
     procs.append(threading.Thread(target=recv_data, args=(alexnet_port, alexnet_data_list, alexnet_lock, _stop_event)))
     procs.append(threading.Thread(target=image_sender, args=(alexnet_next_sock, images, labels, alexnet_data_list, alexnet_lock, args.alexnet_wait_time, args.alexnet_arrival_rate, _stop_event)))
+    '''
     procs.append(threading.Thread(target=recv_data, args=(googlenet_port, googlenet_data_list, googlenet_lock, _stop_event)))
     procs.append(threading.Thread(target=image_sender, args=(googlenet_next_sock, images, labels, googlenet_data_list, googlenet_lock, args.googlenet_wait_time, args.googlenet_arrival_rate, _stop_event)))
     procs.append(threading.Thread(target=recv_data, args=(mobilenet_port, mobilenet_data_list, mobilenet_lock, _stop_event)))
     procs.append(threading.Thread(target=image_sender, args=(mobilenet_next_sock, images, labels, mobilenet_data_list, mobilenet_lock, args.mobilenet_wait_time, args.mobilenet_arrival_rate, _stop_event)))
     procs.append(threading.Thread(target=recv_data, args=(vggnet_port, vggnet_data_list, vggnet_lock, _stop_event)))
     procs.append(threading.Thread(target=image_sender, args=(vggnet_next_sock, images, labels, vggnet_data_list, vggnet_lock, args.vggnet_wait_time, args.vggnet_arrival_rate, _stop_event)))
+    '''
     procs.append(threading.Thread(target=recv_data, args=(vggfnet_port, vggfnet_data_list, vggfnet_lock, _stop_event)))
     procs.append(threading.Thread(target=image_sender, args=(vggfnet_next_sock, images, labels, vggfnet_data_list, vggfnet_lock, args.vggfnet_wait_time, args.vggfnet_arrival_rate, _stop_event)))
 
@@ -177,11 +180,13 @@ if __name__ == "__main__":
 
     alexnet_next_sock.close()
     alexnet_prev_sock.close()
+    '''
     googlenet_next_sock.close()
     googlenet_prev_sock.close()
     mobilenet_next_sock.close()
     mobilenet_prev_sock.close()
     vggnet_next_sock.close()
     vggnet_prev_sock.close()
+    '''
     vggfnet_next_sock.close()
     vggfnet_prev_sock.close()
