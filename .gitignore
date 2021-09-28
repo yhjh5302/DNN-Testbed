@@ -3,4 +3,5 @@
 *.pth
 */*/cifar10_data/
 *.tar
+*-logs.txt
 __pycache__

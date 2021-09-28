@@ -1,0 +1,8 @@
+python3 DataGenerator.py --set_gpu='false' --alexnet_prev_addr='' --alexnet_next_addr='10.96.0.201' --googlenet_prev_addr='' --googlenet_next_addr='10.96.0.211' --mobilenet_prev_addr='' --mobilenet_next_addr='10.96.0.221' --vggnet_prev_addr='' --vggnet_next_addr='10.96.0.231' --vggfnet_prev_addr='' --vggfnet_next_addr='10.96.0.241' --vram_limit=0
+kubectl apply -f test-deploy.yaml
+kubectl exec -it data-generator-878b856cd-shfsc -- bash
+kubectl logs alexnet-layer1-8679bb6f67-6gct4 > alexnet-layer1-logs.txt
+kubectl logs alexnet-layer2-685b48df95-d42lb > alexnet-layer2-logs.txt
+kubectl logs alexnet-layer3-7bfb9988c-g9494 > alexnet-layer3-logs.txt
+kubectl logs vggfnet-layer1-b75894dd8-zsp7d > vggfnet-layer1-logs.txt
+kubectl logs vggfnet-layer2-64bc9d9f4-zzldj > vggfnet-layer2-logs.txt

@@ -6,35 +6,30 @@ import argparse
 def image_sender(next_socket, images, labels, data_list, lock, wait_time, arrival_rate, _stop_event):
     while True:
         # sleep before sending
-        time.sleep(wait_time)
+        time.sleep(1/arrival_rate)
 
         # reading queue
-        start = 0
-        end = int(arrival_rate * wait_time)
-        total = end - start
-        data = images[start:end]
-        answer = labels[start:end]
-        correct = np.zeros_like(answer)
+        idx = np.random.randint(10000)
+        data = images[idx:idx+1]
+        answer = labels[idx:idx+1]
+        correct = False
 
         # sending data
-        total_start = time.time()
+        start = time.time()
         send_data(next_socket, data)
 
         # make data receiving thread
         outputs = bring_data(data_list, lock, _stop_event)
-        for idx in range(total):
-            predicted = tf.argmax(outputs[idx:idx+1], 1)
-            correct[idx] += (int(predicted) == int(answer[idx])) + 1
+        predicted = tf.argmax(outputs, 1)
+        correct = (int(predicted) == int(answer[0]))
 
         # wait for response
-        print("time took: ", time.time() - total_start)
-        print("correct:", correct.sum() - total)
-        print("total:", total)
-        print('Accuracy of the network on the 10000 test images: %d %%' % (100 * (correct.sum() - total) / total))
+        print("time took: ", time.time() - start)
+        print("correct:", correct)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Tensorflow')
-    parser.add_argument('--set_gpu', default=True, type=str2bool, help='If you want to use GPU, set "True"')
+    parser.add_argument('--set_gpu', default=False, type=str2bool, help='If you want to use GPU, set "True"')
     parser.add_argument('--alexnet_prev_addr', default='10.96.0.200', type=str, help='Previous node address')
     parser.add_argument('--alexnet_prev_port', default=30000, type=int, help='Previous node port')
     parser.add_argument('--alexnet_next_addr', default='10.96.0.201', type=str, help='Next node address')
@@ -55,17 +50,17 @@ if __name__ == "__main__":
     parser.add_argument('--vggfnet_prev_port', default=30040, type=int, help='Previous node port')
     parser.add_argument('--vggfnet_next_addr', default='10.96.0.241', type=str, help='Next node address')
     parser.add_argument('--vggfnet_next_port', default=30041, type=int, help='Next node port')
-    parser.add_argument('--alexnet_wait_time', default=0.200, type=float, help='waiting time for making batch')
+    parser.add_argument('--alexnet_wait_time', default=0.500, type=float, help='waiting time for making batch')
     parser.add_argument('--googlenet_wait_time', default=0.500, type=float, help='waiting time for making batch')
-    parser.add_argument('--mobilenet_wait_time', default=0.100, type=float, help='waiting time for making batch')
+    parser.add_argument('--mobilenet_wait_time', default=0.500, type=float, help='waiting time for making batch')
     parser.add_argument('--vggnet_wait_time', default=0.500, type=float, help='waiting time for making batch')
-    parser.add_argument('--vggfnet_wait_time', default=0.100, type=float, help='waiting time for making batch')
+    parser.add_argument('--vggfnet_wait_time', default=0.500, type=float, help='waiting time for making batch')
     parser.add_argument('--alexnet_arrival_rate', default=30, type=int, help='arrival rate')
-    parser.add_argument('--googlenet_arrival_rate', default=20, type=int, help='arrival rate')
-    parser.add_argument('--mobilenet_arrival_rate', default=50, type=int, help='arrival rate')
+    parser.add_argument('--googlenet_arrival_rate', default=30, type=int, help='arrival rate')
+    parser.add_argument('--mobilenet_arrival_rate', default=30, type=int, help='arrival rate')
     parser.add_argument('--vggnet_arrival_rate', default=30, type=int, help='arrival rate')
-    parser.add_argument('--vggfnet_arrival_rate', default=40, type=int, help='arrival rate')
-    parser.add_argument('--vram_limit', default=64, type=int, help='Next node port')
+    parser.add_argument('--vggfnet_arrival_rate', default=30, type=int, help='arrival rate')
+    parser.add_argument('--vram_limit', default=0, type=int, help='Next node port')
     args = parser.parse_args()
 
     if args.set_gpu:

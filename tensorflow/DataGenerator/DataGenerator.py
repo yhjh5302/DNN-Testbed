@@ -29,7 +29,7 @@ def image_sender(next_socket, images, labels, data_list, lock, wait_time, arriva
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Tensorflow')
-    parser.add_argument('--set_gpu', default=True, type=str2bool, help='If you want to use GPU, set "True"')
+    parser.add_argument('--set_gpu', default=False, type=str2bool, help='If you want to use GPU, set "True"')
     parser.add_argument('--alexnet_prev_addr', default='10.96.0.200', type=str, help='Previous node address')
     parser.add_argument('--alexnet_prev_port', default=30000, type=int, help='Previous node port')
     parser.add_argument('--alexnet_next_addr', default='10.96.0.201', type=str, help='Next node address')
@@ -60,7 +60,7 @@ if __name__ == "__main__":
     parser.add_argument('--mobilenet_arrival_rate', default=30, type=int, help='arrival rate')
     parser.add_argument('--vggnet_arrival_rate', default=30, type=int, help='arrival rate')
     parser.add_argument('--vggfnet_arrival_rate', default=30, type=int, help='arrival rate')
-    parser.add_argument('--vram_limit', default=64, type=int, help='Next node port')
+    parser.add_argument('--vram_limit', default=0, type=int, help='Next node port')
     args = parser.parse_args()
 
     if args.set_gpu:
@@ -88,7 +88,6 @@ if __name__ == "__main__":
     alexnet_port, alexnet_addr = alexnet_prev_sock.accept()
     print('AlexNet prev node is ready, Connected by', alexnet_addr)
 
-    '''
     googlenet_next_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     googlenet_next_sock.settimeout(600)
     googlenet_next_sock.connect((args.googlenet_next_addr, args.googlenet_next_port))
@@ -124,7 +123,6 @@ if __name__ == "__main__":
     vggnet_prev_sock.listen()
     vggnet_port, vggnet_addr = vggnet_prev_sock.accept()
     print('VGGNet prev node is ready, Connected by', vggnet_addr)
-    '''
 
     vggfnet_next_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     vggfnet_next_sock.settimeout(600)
@@ -143,32 +141,26 @@ if __name__ == "__main__":
     _stop_event = threading.Event()
 
     alexnet_data_list = []
-    '''
     googlenet_data_list = []
     mobilenet_data_list = []
     vggnet_data_list = []
-    '''
     vggfnet_data_list = []
 
     alexnet_lock = threading.Lock()
-    '''
     googlenet_lock = threading.Lock()
     mobilenet_lock = threading.Lock()
     vggnet_lock = threading.Lock()
-    '''
     vggfnet_lock = threading.Lock()
 
     procs = []
     procs.append(threading.Thread(target=recv_data, args=(alexnet_port, alexnet_data_list, alexnet_lock, _stop_event)))
     procs.append(threading.Thread(target=image_sender, args=(alexnet_next_sock, images, labels, alexnet_data_list, alexnet_lock, args.alexnet_wait_time, args.alexnet_arrival_rate, _stop_event)))
-    '''
     procs.append(threading.Thread(target=recv_data, args=(googlenet_port, googlenet_data_list, googlenet_lock, _stop_event)))
     procs.append(threading.Thread(target=image_sender, args=(googlenet_next_sock, images, labels, googlenet_data_list, googlenet_lock, args.googlenet_wait_time, args.googlenet_arrival_rate, _stop_event)))
     procs.append(threading.Thread(target=recv_data, args=(mobilenet_port, mobilenet_data_list, mobilenet_lock, _stop_event)))
     procs.append(threading.Thread(target=image_sender, args=(mobilenet_next_sock, images, labels, mobilenet_data_list, mobilenet_lock, args.mobilenet_wait_time, args.mobilenet_arrival_rate, _stop_event)))
     procs.append(threading.Thread(target=recv_data, args=(vggnet_port, vggnet_data_list, vggnet_lock, _stop_event)))
     procs.append(threading.Thread(target=image_sender, args=(vggnet_next_sock, images, labels, vggnet_data_list, vggnet_lock, args.vggnet_wait_time, args.vggnet_arrival_rate, _stop_event)))
-    '''
     procs.append(threading.Thread(target=recv_data, args=(vggfnet_port, vggfnet_data_list, vggfnet_lock, _stop_event)))
     procs.append(threading.Thread(target=image_sender, args=(vggfnet_next_sock, images, labels, vggfnet_data_list, vggfnet_lock, args.vggfnet_wait_time, args.vggfnet_arrival_rate, _stop_event)))
 
@@ -180,13 +172,11 @@ if __name__ == "__main__":
 
     alexnet_next_sock.close()
     alexnet_prev_sock.close()
-    '''
     googlenet_next_sock.close()
     googlenet_prev_sock.close()
     mobilenet_next_sock.close()
     mobilenet_prev_sock.close()
     vggnet_next_sock.close()
     vggnet_prev_sock.close()
-    '''
     vggfnet_next_sock.close()
     vggfnet_prev_sock.close()

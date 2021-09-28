@@ -14,14 +14,14 @@ spec:
         app: data-generator
     spec:
       nodeSelector:
-        kubernetes.io/hostname: wnlab-labtop-2
+        kubernetes.io/hostname: server-2
       containers:
       - name: data-generator
-        image: yhjh5302/data-uploader:latest
-        #image: yhjh5302/data-generator:latest
+        #image: yhjh5302/data-uploader:latest
+        image: yhjh5302/data-generator:latest
         command: ["/bin/bash","-c","while true; do sleep 1000; done"]
         #command: ["/bin/bash","-c","python3 data_uploader.py --set_gpu='false' --prev_addr='' --prev_port=30000 --next_addr='10.96.0.201' --next_port=30001"]
-        #command: ["/bin/bash","-c","python3 DataGenerator.py --alexnet_prev_addr='' --alexnet_next_addr='10.96.0.201' --googlenet_prev_addr='' --googlenet_next_addr='10.96.0.211' --mobilenet_prev_addr='' --mobilenet_next_addr='10.96.0.221' --vggnet_prev_addr='' --vggnet_next_addr='10.96.0.231' --vggfnet_prev_addr='' --vggfnet_next_addr='10.96.0.241'"]
+        #command: ["/bin/bash","-c","python3 DataGenerator.py --set_gpu='false' --alexnet_prev_addr='' --alexnet_next_addr='10.96.0.201' --googlenet_prev_addr='' --googlenet_next_addr='10.96.0.211' --mobilenet_prev_addr='' --mobilenet_next_addr='10.96.0.221' --vggnet_prev_addr='' --vggnet_next_addr='10.96.0.231' --vggfnet_prev_addr='' --vggfnet_next_addr='10.96.0.241' --vram_limit=0"]
         ports:
         - containerPort: 30000
         - containerPort: 30010
@@ -69,14 +69,14 @@ spec:
         app: alexnet-layer1
     spec:
       nodeSelector:
-        kubernetes.io/hostname: jin-tfx255 # slave-node-2-1
+        kubernetes.io/hostname: server-2
       containers:
       - name: alexnet-layer1
         image: yhjh5302/alexnet-layer1:latest
         #resources:
         #  limits:
         #    nvidia.com/gpu: 1
-        command: ["/bin/bash","-c","python3 AlexNetLayer1.py --set_gpu='false' --prev_addr='' --prev_port=30001 --next_addr='10.96.0.202' --next_port=30002 --vram_limit=32 --debug=10000"]
+        command: ["/bin/bash","-c","python3 AlexNetLayer1.py --set_gpu='true' --prev_addr='' --prev_port=30001 --next_addr='10.96.0.202' --next_port=30002 --vram_limit=32 --debug=1000"]
         ports:
         - containerPort: 30001
 
@@ -111,14 +111,14 @@ spec:
         app: alexnet-layer2
     spec:
       nodeSelector:
-        kubernetes.io/hostname: jin-tfx255 # slave-node-2-2
+        kubernetes.io/hostname: server-2
       containers:
       - name: alexnet-layer2
         image: yhjh5302/alexnet-layer2:latest
         #resources:
         #  limits:
         #    nvidia.com/gpu: 1
-        command: ["/bin/bash","-c","python3 AlexNetLayer2.py --set_gpu='false' --prev_addr='' --prev_port=30002 --next_addr='10.96.0.203' --next_port=30003 --vram_limit=32 --debug=10000"]
+        command: ["/bin/bash","-c","python3 AlexNetLayer2.py --set_gpu='true' --prev_addr='' --prev_port=30002 --next_addr='10.96.0.203' --next_port=30003 --vram_limit=32 --debug=1000"]
         ports:
         - containerPort: 30002
 
@@ -153,14 +153,14 @@ spec:
         app: alexnet-layer3
     spec:
       nodeSelector:
-        kubernetes.io/hostname: jin-tfx255 # slave-node-2-3
+        kubernetes.io/hostname: server-2
       containers:
       - name: alexnet-layer3
         image: yhjh5302/alexnet-layer3:latest
         #resources:
         #  limits:
         #    nvidia.com/gpu: 1
-        command: ["/bin/bash","-c","python3 AlexNetLayer3.py --set_gpu='false' --prev_addr='' --prev_port=30003 --next_addr='10.96.0.200' --next_port=30000 --vram_limit=320 --debug=10000"]
+        command: ["/bin/bash","-c","python3 AlexNetLayer3.py --set_gpu='true' --prev_addr='' --prev_port=30003 --next_addr='10.96.0.200' --next_port=30000 --vram_limit=320 --debug=1000"]
         ports:
         - containerPort: 30003
 
@@ -195,14 +195,14 @@ spec:
         app: googlenet-layer1
     spec:
       nodeSelector:
-        kubernetes.io/hostname: jin-tfx255 # slave-node-2-1
+        kubernetes.io/hostname: server-2
       containers:
       - name: googlenet-layer1
         image: yhjh5302/googlenet-layer1:latest
         #resources:
         #  limits:
         #    nvidia.com/gpu: 1
-        command: ["/bin/bash","-c","python3 GoogLeNetLayer1.py --set_gpu='false' --prev_addr='' --prev_port=30011 --next_addr='10.96.0.212' --next_port=30012 --vram_limit=32 --debug=10000"]
+        command: ["/bin/bash","-c","python3 GoogLeNetLayer1.py --set_gpu='true' --prev_addr='' --prev_port=30011 --next_addr='10.96.0.212' --next_port=30012 --vram_limit=32 --debug=1000"]
         ports:
         - containerPort: 30011
 
@@ -237,14 +237,14 @@ spec:
         app: googlenet-layer2
     spec:
       nodeSelector:
-        kubernetes.io/hostname: jin-tfx255 # slave-node-2-2
+        kubernetes.io/hostname: server-2
       containers:
       - name: googlenet-layer2
         image: yhjh5302/googlenet-layer2:latest
         #resources:
         #  limits:
         #    nvidia.com/gpu: 1
-        command: ["/bin/bash","-c","python3 GoogLeNetLayer2.py --set_gpu='false' --prev_addr='' --prev_port=30012 --next_addr='10.96.0.213' --next_port=30013 --vram_limit=32 --debug=10000"]
+        command: ["/bin/bash","-c","python3 GoogLeNetLayer2.py --set_gpu='true' --prev_addr='' --prev_port=30012 --next_addr='10.96.0.213' --next_port=30013 --vram_limit=32 --debug=1000"]
         ports:
         - containerPort: 30012
 
@@ -279,14 +279,14 @@ spec:
         app: googlenet-layer3
     spec:
       nodeSelector:
-        kubernetes.io/hostname: jin-tfx255 # slave-node-2-3
+        kubernetes.io/hostname: server-2
       containers:
       - name: googlenet-layer3
         image: yhjh5302/googlenet-layer3:latest
         #resources:
         #  limits:
         #    nvidia.com/gpu: 1
-        command: ["/bin/bash","-c","python3 GoogLeNetLayer3.py --set_gpu='false' --prev_addr='' --prev_port=30013 --next_addr='10.96.0.200' --next_port=30010 --vram_limit=160 --debug=10000"]
+        command: ["/bin/bash","-c","python3 GoogLeNetLayer3.py --set_gpu='true' --prev_addr='' --prev_port=30013 --next_addr='10.96.0.200' --next_port=30010 --vram_limit=320 --debug=1000"]
         ports:
         - containerPort: 30013
 
@@ -321,14 +321,14 @@ spec:
         app: mobilenet-layer1
     spec:
       nodeSelector:
-        kubernetes.io/hostname: jin-tfx255 # slave-node-2-1
+        kubernetes.io/hostname: server-2
       containers:
       - name: mobilenet-layer1
         image: yhjh5302/mobilenet-layer1:latest
         #resources:
         #  limits:
         #    nvidia.com/gpu: 1
-        command: ["/bin/bash","-c","python3 MobileNetLayer1.py --set_gpu='false' --prev_addr='' --prev_port=30021 --next_addr='10.96.0.222' --next_port=30022 --vram_limit=32 --debug=10000"]
+        command: ["/bin/bash","-c","python3 MobileNetLayer1.py --set_gpu='true' --prev_addr='' --prev_port=30021 --next_addr='10.96.0.222' --next_port=30022 --vram_limit=32 --debug=1000"]
         ports:
         - containerPort: 30021
 
@@ -363,14 +363,14 @@ spec:
         app: mobilenet-layer2
     spec:
       nodeSelector:
-        kubernetes.io/hostname: jin-tfx255 # slave-node-2-2
+        kubernetes.io/hostname: server-2
       containers:
       - name: mobilenet-layer2
         image: yhjh5302/mobilenet-layer2:latest
         #resources:
         #  limits:
         #    nvidia.com/gpu: 1
-        command: ["/bin/bash","-c","python3 MobileNetLayer2.py --set_gpu='false' --prev_addr='' --prev_port=30022 --next_addr='10.96.0.223' --next_port=30023 --vram_limit=64 --debug=10000"]
+        command: ["/bin/bash","-c","python3 MobileNetLayer2.py --set_gpu='true' --prev_addr='' --prev_port=30022 --next_addr='10.96.0.223' --next_port=30023 --vram_limit=64 --debug=1000"]
         ports:
         - containerPort: 30022
 
@@ -405,14 +405,14 @@ spec:
         app: mobilenet-layer3
     spec:
       nodeSelector:
-        kubernetes.io/hostname: jin-tfx255 # slave-node-2-3
+        kubernetes.io/hostname: server-2
       containers:
       - name: mobilenet-layer3
         image: yhjh5302/mobilenet-layer3:latest
         #resources:
         #  limits:
         #    nvidia.com/gpu: 1
-        command: ["/bin/bash","-c","python3 MobileNetLayer3.py --set_gpu='false' --prev_addr='' --prev_port=30023 --next_addr='10.96.0.200' --next_port=30020 --vram_limit=128 --debug=10000"]
+        command: ["/bin/bash","-c","python3 MobileNetLayer3.py --set_gpu='true' --prev_addr='' --prev_port=30023 --next_addr='10.96.0.200' --next_port=30020 --vram_limit=128 --debug=1000"]
         ports:
         - containerPort: 30023
 
@@ -447,14 +447,14 @@ spec:
         app: vggnet-layer1
     spec:
       nodeSelector:
-        kubernetes.io/hostname: jin-tfx255 # slave-node-2-1
+        kubernetes.io/hostname: server-2
       containers:
       - name: vggnet-layer1
         image: yhjh5302/vggnet-layer1:latest
         #resources:
         #  limits:
         #    nvidia.com/gpu: 1
-        command: ["/bin/bash","-c","python3 VGGNetLayer1.py --set_gpu='false' --prev_addr='' --prev_port=30031 --next_addr='10.96.0.232' --next_port=30032 --vram_limit=64 --debug=10000"]
+        command: ["/bin/bash","-c","python3 VGGNetLayer1.py --set_gpu='true' --prev_addr='' --prev_port=30031 --next_addr='10.96.0.232' --next_port=30032 --vram_limit=64 --debug=1000"]
         ports:
         - containerPort: 30031
 
@@ -489,14 +489,14 @@ spec:
         app: vggnet-layer2
     spec:
       nodeSelector:
-        kubernetes.io/hostname: jin-tfx255 # slave-node-2-2
+        kubernetes.io/hostname: server-2
       containers:
       - name: vggnet-layer2
         image: yhjh5302/vggnet-layer2:latest
         #resources:
         #  limits:
         #    nvidia.com/gpu: 1
-        command: ["/bin/bash","-c","python3 VGGNetLayer2.py --set_gpu='false' --prev_addr='' --prev_port=30032 --next_addr='10.96.0.233' --next_port=30033 --vram_limit=96 --debug=10000"]
+        command: ["/bin/bash","-c","python3 VGGNetLayer2.py --set_gpu='true' --prev_addr='' --prev_port=30032 --next_addr='10.96.0.233' --next_port=30033 --vram_limit=96 --debug=1000"]
         ports:
         - containerPort: 30032
 
@@ -531,14 +531,14 @@ spec:
         app: vggnet-layer3
     spec:
       nodeSelector:
-        kubernetes.io/hostname: jin-tfx255 # slave-node-2-3
+        kubernetes.io/hostname: server-2
       containers:
       - name: vggnet-layer3
         image: yhjh5302/vggnet-layer3:latest
         #resources:
         #  limits:
         #    nvidia.com/gpu: 1
-        command: ["/bin/bash","-c","python3 VGGNetLayer3.py --set_gpu='false' --prev_addr='' --prev_port=30033 --next_addr='10.96.0.200' --next_port=30030 --vram_limit=576 --debug=10000"]
+        command: ["/bin/bash","-c","python3 VGGNetLayer3.py --set_gpu='true' --prev_addr='' --prev_port=30033 --next_addr='10.96.0.200' --next_port=30030 --vram_limit=576 --debug=1000"]
         ports:
         - containerPort: 30033
 
@@ -573,14 +573,14 @@ spec:
         app: vggfnet-layer1
     spec:
       nodeSelector:
-        kubernetes.io/hostname: jin-tfx255 # slave-node-2-1
+        kubernetes.io/hostname: server-2
       containers:
       - name: vggfnet-layer1
         image: yhjh5302/vggfnet-layer1:latest
         #resources:
         #  limits:
         #    nvidia.com/gpu: 1
-        command: ["/bin/bash","-c","python3 VGGFNetLayer1.py --set_gpu='false' --prev_addr='' --prev_port=30041 --next_addr='10.96.0.242' --next_port=30042 --vram_limit=32 --debug=10000"]
+        command: ["/bin/bash","-c","python3 VGGFNetLayer1.py --set_gpu='true' --prev_addr='' --prev_port=30041 --next_addr='10.96.0.242' --next_port=30042 --vram_limit=32 --debug=1000"]
         ports:
         - containerPort: 30041
 
@@ -615,14 +615,14 @@ spec:
         app: vggfnet-layer2
     spec:
       nodeSelector:
-        kubernetes.io/hostname: jin-tfx255 # slave-node-2-2
+        kubernetes.io/hostname: server-2
       containers:
       - name: vggfnet-layer2
         image: yhjh5302/vggfnet-layer2:latest
         #resources:
         #  limits:
         #    nvidia.com/gpu: 1
-        command: ["/bin/bash","-c","python3 VGGFNetLayer2.py --set_gpu='false' --prev_addr='' --prev_port=30042 --next_addr='10.96.0.200' --next_port=30040 --vram_limit=256 --debug=10000"]
+        command: ["/bin/bash","-c","python3 VGGFNetLayer2.py --set_gpu='true' --prev_addr='' --prev_port=30042 --next_addr='10.96.0.200' --next_port=30040 --vram_limit=256 --debug=1000"]
         ports:
         - containerPort: 30042
 
