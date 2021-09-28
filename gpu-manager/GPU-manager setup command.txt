@@ -1,0 +1,26 @@
+GPU-admission https://github.com/tkestack/gpu-admission
+GPU-manager https://github.com/tkestack/gpu-manager
+make이나 build는 다 했다고 가정.
+
+#### GPU-admission setup
+bin/gpu-admission --address=127.0.0.1:3456 --v=4 --kubeconfig ~/.kube/config --logtostderr=true
+
+#### GPU-manager setup
+kubectl create sa gpu-manager -n kube-system
+kubectl create clusterrolebinding gpu-manager-role --clusterrole=cluster-admin --serviceaccount=kube-system:gpu-manager
+kubectl label node server-2 nvidia-device-enable=enable
+kubectl create -f gpu-manager.yaml
+
+#### GPU-manager file change point
+gpu-manager/gpu-manager.yaml: 5 lines
+
+#### kubernetes file change point
+/etc/kubernetes/kube-scheduler.yaml: 9 lines
+
+#### move scheduler json file to the directory
+/etc/kubernetes/scheduler-policy-config.json
+
+참고문서
+[1] "kube-scheduler config 적용", https://github.com/AliyunContainerService/gpushare-scheduler-extender/blob/master/docs/install.md
+[2] "kube-scheduler config 적용", https://github.com/AliyunContainerService/gpushare-scheduler-extender/blob/master/config/kube-scheduler.yaml
+[3] "systemd 환경으로 변경", https://github.com/tkestack/gpu-manager/blob/master/docs/faq.md
