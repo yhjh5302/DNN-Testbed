@@ -53,13 +53,15 @@ if __name__ == "__main__":
         if total == 0:
             break
 
-        correct = np.zeros(total)
-        answer = labels[:total]
+        batch_size = 32
+        total_images = total * batch_size
+        correct = np.zeros(total_images)
+        answer = labels[:total_images]
 
         # sending data
         total_start = time.time()
         for idx in range(total):
-            send_data(next_sock, images[idx:idx+1])
+            send_data(next_sock, images[batch_size*idx:batch_size*(idx+1)])
 
         print("data sending took: {:.5f} sec".format(time.time() - total_start))
 
@@ -67,12 +69,12 @@ if __name__ == "__main__":
         for idx in range(total):
             outputs = bring_data(data_list, lock, _stop_event)
             predicted = tf.argmax(outputs, 1)
-            correct[idx] += (int(predicted) == int(answer[idx])) + 1
+            correct[idx] += np.sum(predicted == answer[batch_size*idx:batch_size*(idx+1)].flatten())
  
         print("time took: {:.5f} sec".format(time.time() - total_start))
-        print("correct:", correct.sum() - total)
-        print("total:", total)
-        print('Accuracy of the network on the 10000 test images: %d %%' % (100 * (correct.sum() - total) / total))
+        print("correct:", correct.sum())
+        print("total:", total_images)
+        print('Accuracy of the network on the 10000 test images: %d %%' % (100 * correct.sum() / total_images))
 
     prev_sock.close()
     next_sock.close()
