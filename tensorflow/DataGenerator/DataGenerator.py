@@ -9,10 +9,10 @@ def image_sender(next_socket, images, labels, data_list, lock, wait_time, arriva
         time.sleep(1/arrival_rate)
 
         # reading queue
-        idx = np.random.randint(10000)
-        data = images[idx:idx+1]
-        answer = labels[idx:idx+1]
-        correct = False
+        batch_size = 32
+        idx = np.random.randint(10000-batch_size)
+        data = images[idx:idx+batch_size]
+        answer = labels.flatten()[idx:idx+batch_size]
 
         # sending data
         start = time.time()
@@ -21,7 +21,7 @@ def image_sender(next_socket, images, labels, data_list, lock, wait_time, arriva
         # make data receiving thread
         outputs = bring_data(data_list, lock, _stop_event)
         predicted = tf.argmax(outputs, 1)
-        correct = (int(predicted) == int(answer[0]))
+        correct = np.sum(predicted == answer)
 
         # wait for response
         print("time took: ", time.time() - start)
