@@ -55,3 +55,9 @@ def send_data(sock, data):
             print('No Done Ack')
     else:
         print('No Request Ack')
+
+def send_done(sock):
+    sock.send("Done".encode())
+
+def recv_schedule(sock):
+    return float(sock.recv(4096).decode())

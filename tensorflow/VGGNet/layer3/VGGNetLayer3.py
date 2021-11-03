@@ -13,7 +13,9 @@ if __name__ == "__main__":
     parser.add_argument('--prev_port', default=30033, type=int, help='Previous node port')
     parser.add_argument('--next_addr', default='10.96.0.200', type=str, help='Next node address')
     parser.add_argument('--next_port', default=30030, type=int, help='Next node port')
-    parser.add_argument('--vram_limit', default=640, type=int, help='Next node port')
+    parser.add_argument('--scheduler_addr', default='10.96.0.250', type=str, help='Scheduler address')
+    parser.add_argument('--scheduler_port', default=30050, type=int, help='Scheduler port')
+    parser.add_argument('--vram_limit', default=600, type=int, help='Vram limitation')
     parser.add_argument('--debug', default=100, type=int, help='How often to print debug statements')
     args = parser.parse_args()
 
@@ -45,9 +47,14 @@ if __name__ == "__main__":
     print('Previous node is ready, Connected by', addr)
 
     next_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    next_sock.settimeout(600) # 10 minutes
+    next_sock.settimeout(1000) # 1000 seconds
     next_sock.connect((args.next_addr, args.next_port))
     print('Next node is ready, Connected by', args.next_addr)
+
+    scheduler_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    scheduler_sock.settimeout(1000) # 1000 seconds
+    scheduler_sock.connect((args.scheduler_addr, args.scheduler_port))
+    print('Scheduler is ready, Connected by', args.scheduler_addr)
 
     # for time record
     total, took1, took2, took3 = 0, 0, 0, 0
@@ -58,15 +65,25 @@ if __name__ == "__main__":
     _stop_event = threading.Event()
     threading.Thread(target=recv_data, args=(p, data_list, lock, _stop_event)).start()
 
+    assigned_time = recv_schedule(scheduler_sock)
+
     try:
         while True:
             start = time.time()
             inputs = bring_data(data_list, lock, _stop_event)
             took1 += time.time() - start
+
+            if assigned_time <= 0:
+                send_done(scheduler_sock)
+                assigned_time = recv_schedule(scheduler_sock)
+            processing_time = time.time()
             outputs = processing(inputs, model)
+            assigned_time -= time.time() - processing_time
             took2 += time.time() - start
+
             send_data(next_sock, outputs)
             took3 += time.time() - start
+
             total += 1
             if total >= args.debug:
                 print("----------------------------------------")
@@ -80,3 +97,4 @@ if __name__ == "__main__":
 
     prev_sock.close()
     next_sock.close()
+    scheduler_sock.close()
