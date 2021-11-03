@@ -3,8 +3,7 @@ from tensorflow import keras
 
 class VGGFNet(keras.Model):
     def __init__(self, name=None):
-        super(VGGFNet, self).__init__(name=name)
-        self.resize = keras.layers.Resizing(height=224, width=224, interpolation='nearest', name='resize')
+        super(VGGFNet, self).__init__(name=name)
         self.features1 = keras.models.Sequential([
             keras.layers.Conv2D(filters=64, kernel_size=(11,11), strides=4, activation='relu'),
             keras.layers.AveragePooling2D(pool_size=(1, 1), strides=1),
@@ -41,7 +40,7 @@ class VGGFNet(keras.Model):
         ], name='classifier3')
 
     def call(self, inputs):
-        x = self.resize(inputs)
+        x = tf.image.resize(inputs, size=(224,224), method='nearest')
         x = self.features1(x)
         x = self.features2(x)
         x = self.features3(x)

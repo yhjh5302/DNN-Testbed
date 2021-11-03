@@ -5,8 +5,7 @@ import time
 
 class AlexNet_layer_1(keras.Model):
     def __init__(self, name=None):
-        super(AlexNet_layer_1, self).__init__(name=name)
-        self.resize = keras.layers.Resizing(height=224, width=224, interpolation='nearest', name='resize')
+        super(AlexNet_layer_1, self).__init__(name=name)
         self.features_1 = keras.models.Sequential([
             keras.layers.Conv2D(filters=64, kernel_size=(11,11), strides=4, activation='relu', padding='same', input_shape=(224,224,3)),
             keras.layers.BatchNormalization(),
@@ -19,7 +18,7 @@ class AlexNet_layer_1(keras.Model):
         ], name='features_2')
 
     def call(self, inputs):
-        x = self.resize(inputs)
+        x = tf.image.resize(inputs, size=(224,224), method='nearest')
         x = self.features_1(x)
         x = self.features_2(x)
         return x
@@ -70,6 +69,17 @@ class AlexNet_layer_3(keras.Model):
         return x
 
 if __name__ == '__main__':
+    set_gpu = True
+    vram_limit = 1024
+    if set_gpu:
+        gpu_devices = tf.config.list_physical_devices(device_type='GPU')
+        if not gpu_devices:
+            raise ValueError('Cannot detect physical GPU device in TF')
+        tf.config.set_logical_device_configuration(gpu_devices[0], [tf.config.LogicalDeviceConfiguration(memory_limit=vram_limit)])
+        tf.config.list_logical_devices()
+    else:
+        tf.config.set_visible_devices([], 'GPU')
+
     # load dataset
     _, (x_test, y_test) = keras.datasets.cifar10.load_data()
     x_test = x_test.reshape(10000, 32, 32, 3).astype('float32') / 255
@@ -91,12 +101,12 @@ if __name__ == '__main__':
     layer1(x_test[0:1])
 
     batch_size = 1
-    max = math.ceil(10000/batch_size)
+    max = math.ceil(1000/batch_size)
     correct, l1, l2, l3 = 0, 0, 0, 0
     for i in range(max):
         start = i * batch_size
         if i == max-1:
-            end = 10000
+            end = 1000
         else:
             end = (i+1) * batch_size
 
@@ -119,7 +129,7 @@ if __name__ == '__main__':
         answer = test.reshape(-1)
         correct += tf.reduce_sum(tf.cast(predict == answer, tf.float32))
 
-    print("accuracy: {:.2f}%".format(correct/100))
-    print("layer1 took {:.3f}ms".format(l1/10))
-    print("layer2 took {:.3f}ms".format(l2/10))
-    print("layer3 took {:.3f}ms".format(l3/10))
+    print("accuracy: {:.2f}%".format(correct/10))
+    print("layer1 took {:.3f} ms".format(l1))
+    print("layer2 took {:.3f} ms".format(l2))
+    print("layer3 took {:.3f} ms".format(l3))

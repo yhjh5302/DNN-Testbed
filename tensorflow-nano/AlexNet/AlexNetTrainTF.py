@@ -3,8 +3,7 @@ from tensorflow import keras
 
 class AlexNet(keras.Model):
     def __init__(self, name=None):
-        super(AlexNet, self).__init__(name=name)
-        self.resize = keras.layers.Resizing(height=224, width=224, interpolation='nearest', name='resize')
+        super(AlexNet, self).__init__(name=name)
         self.features_1 = keras.models.Sequential([
             keras.layers.Conv2D(filters=64, kernel_size=(11,11), strides=4, activation='relu', padding='same', input_shape=(224,224,3)),
             keras.layers.BatchNormalization(),
@@ -42,7 +41,7 @@ class AlexNet(keras.Model):
         ], name='classifier_3')
 
     def call(self, inputs):
-        x = self.resize(inputs)
+        x = tf.image.resize(inputs, size=(224,224), method='nearest')
         x = self.features_1(x)
         x = self.features_2(x)
         x = self.features_3(x)

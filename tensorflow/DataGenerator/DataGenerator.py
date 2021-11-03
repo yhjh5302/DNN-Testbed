@@ -9,7 +9,7 @@ def image_sender(next_socket, images, labels, data_list, lock, wait_time, arriva
         time.sleep(1/arrival_rate)
 
         # reading queue
-        batch_size = 32
+        batch_size = 1
         idx = np.random.randint(10000-batch_size)
         data = images[idx:idx+batch_size]
         answer = labels.flatten()[idx:idx+batch_size]

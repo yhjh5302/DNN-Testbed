@@ -3,8 +3,7 @@ from tensorflow import keras
 
 class GoogLeNet(keras.Model):
     def __init__(self, name=None):
-        super(GoogLeNet, self).__init__(name=name)
-        self.resize = keras.layers.Resizing(height=224, width=224, interpolation='nearest', name='resize')
+        super(GoogLeNet, self).__init__(name=name)
         self.conv1 = keras.models.Sequential([
             keras.layers.Conv2D(filters=64, kernel_size=(7,7), strides=2, activation='relu', padding='same'),
             keras.layers.BatchNormalization(),
@@ -227,7 +226,7 @@ class GoogLeNet(keras.Model):
         ], name='fully_connected')
 
     def call(self, inputs):
-        x = self.resize(inputs)
+        x = tf.image.resize(inputs, size=(224,224), method='nearest')
         # conv1 and max pool()
         x = self.conv1(x)
         x = self.conv1_maxpool(x)

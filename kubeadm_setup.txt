@@ -57,6 +57,7 @@ kubectl create -f https://raw.githubusercontent.com/NVIDIA/k8s-device-plugin/1.0
 
 #### master node untaint
 kubectl taint nodes jin-tfx255 node-role.kubernetes.io/master-
+kubectl taint nodes wnlab-labtop-2 node-role.kubernetes.io/master-
 
 #### pod deploy
 kubectl apply -f pipeline-deploy.yaml
