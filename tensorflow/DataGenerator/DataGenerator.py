@@ -3,7 +3,7 @@ from tensorflow import keras
 import argparse
 #import multiprocessing as mp
 
-def image_sender(next_socket, images, labels, data_list, lock, wait_time, arrival_rate, _stop_event):
+def image_sender(model_name, next_socket, images, labels, data_list, lock, wait_time, arrival_rate, _stop_event):
     while True:
         # sleep before sending
         time.sleep(1/arrival_rate)
@@ -24,8 +24,7 @@ def image_sender(next_socket, images, labels, data_list, lock, wait_time, arriva
         correct = np.sum(predicted == answer)
 
         # wait for response
-        print("time took: ", time.time() - start)
-        print("correct:", correct)
+        print(model_name, "time took: ", time.time() - start, "correct:", correct)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Tensorflow')
@@ -88,6 +87,7 @@ if __name__ == "__main__":
     alexnet_port, alexnet_addr = alexnet_prev_sock.accept()
     print('AlexNet prev node is ready, Connected by', alexnet_addr)
 
+    '''
     googlenet_next_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     googlenet_next_sock.settimeout(600)
     googlenet_next_sock.connect((args.googlenet_next_addr, args.googlenet_next_port))
@@ -135,34 +135,41 @@ if __name__ == "__main__":
     vggfnet_prev_sock.listen()
     vggfnet_port, vggfnet_addr = vggfnet_prev_sock.accept()
     print('VGGFNet prev node is ready, Connected by', vggfnet_addr)
+    '''
 
     input('Enter any key...')
 
     _stop_event = threading.Event()
 
     alexnet_data_list = []
+    '''
     googlenet_data_list = []
     mobilenet_data_list = []
     vggnet_data_list = []
     vggfnet_data_list = []
+    '''
 
     alexnet_lock = threading.Lock()
+    '''
     googlenet_lock = threading.Lock()
     mobilenet_lock = threading.Lock()
     vggnet_lock = threading.Lock()
     vggfnet_lock = threading.Lock()
+    '''
 
     procs = []
     procs.append(threading.Thread(target=recv_data, args=(alexnet_port, alexnet_data_list, alexnet_lock, _stop_event)))
-    procs.append(threading.Thread(target=image_sender, args=(alexnet_next_sock, images, labels, alexnet_data_list, alexnet_lock, args.alexnet_wait_time, args.alexnet_arrival_rate, _stop_event)))
+    procs.append(threading.Thread(target=image_sender, args=("AlexNet", alexnet_next_sock, images, labels, alexnet_data_list, alexnet_lock, args.alexnet_wait_time, args.alexnet_arrival_rate, _stop_event)))
+    '''
     procs.append(threading.Thread(target=recv_data, args=(googlenet_port, googlenet_data_list, googlenet_lock, _stop_event)))
-    procs.append(threading.Thread(target=image_sender, args=(googlenet_next_sock, images, labels, googlenet_data_list, googlenet_lock, args.googlenet_wait_time, args.googlenet_arrival_rate, _stop_event)))
+    procs.append(threading.Thread(target=image_sender, args=("GoogLeNet", googlenet_next_sock, images, labels, googlenet_data_list, googlenet_lock, args.googlenet_wait_time, args.googlenet_arrival_rate, _stop_event)))
     procs.append(threading.Thread(target=recv_data, args=(mobilenet_port, mobilenet_data_list, mobilenet_lock, _stop_event)))
-    procs.append(threading.Thread(target=image_sender, args=(mobilenet_next_sock, images, labels, mobilenet_data_list, mobilenet_lock, args.mobilenet_wait_time, args.mobilenet_arrival_rate, _stop_event)))
+    procs.append(threading.Thread(target=image_sender, args=("MobileNet", mobilenet_next_sock, images, labels, mobilenet_data_list, mobilenet_lock, args.mobilenet_wait_time, args.mobilenet_arrival_rate, _stop_event)))
     procs.append(threading.Thread(target=recv_data, args=(vggnet_port, vggnet_data_list, vggnet_lock, _stop_event)))
-    procs.append(threading.Thread(target=image_sender, args=(vggnet_next_sock, images, labels, vggnet_data_list, vggnet_lock, args.vggnet_wait_time, args.vggnet_arrival_rate, _stop_event)))
+    procs.append(threading.Thread(target=image_sender, args=("VGGNet", vggnet_next_sock, images, labels, vggnet_data_list, vggnet_lock, args.vggnet_wait_time, args.vggnet_arrival_rate, _stop_event)))
     procs.append(threading.Thread(target=recv_data, args=(vggfnet_port, vggfnet_data_list, vggfnet_lock, _stop_event)))
-    procs.append(threading.Thread(target=image_sender, args=(vggfnet_next_sock, images, labels, vggfnet_data_list, vggfnet_lock, args.vggfnet_wait_time, args.vggfnet_arrival_rate, _stop_event)))
+    procs.append(threading.Thread(target=image_sender, args=("VGGFNet", vggfnet_next_sock, images, labels, vggfnet_data_list, vggfnet_lock, args.vggfnet_wait_time, args.vggfnet_arrival_rate, _stop_event)))
+    '''
 
     for proc in procs:
         proc.start()
@@ -172,6 +179,7 @@ if __name__ == "__main__":
 
     alexnet_next_sock.close()
     alexnet_prev_sock.close()
+    '''
     googlenet_next_sock.close()
     googlenet_prev_sock.close()
     mobilenet_next_sock.close()
@@ -180,3 +188,4 @@ if __name__ == "__main__":
     vggnet_prev_sock.close()
     vggfnet_next_sock.close()
     vggfnet_prev_sock.close()
+    '''
