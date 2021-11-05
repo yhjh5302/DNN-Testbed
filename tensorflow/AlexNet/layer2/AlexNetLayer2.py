@@ -1,6 +1,5 @@
 from common import *
 from AlexNetModel import *
-import argparse
 
 def processing(inputs, model):
     outputs = model(inputs)
@@ -61,15 +60,20 @@ if __name__ == "__main__":
     recv_lock = threading.Lock()
     send_data_list = []
     send_lock = threading.Lock()
+    recv_time_list = []
+    recv_time_lock = threading.Lock()
     _stop_event = threading.Event()
-    threading.Thread(target=recv_data, args=(p, recv_data_list, recv_lock, _stop_event)).start()
-    threading.Thread(target=send_data, args=(p, send_data_list, send_lock, _stop_event)).start()
+    threading.Thread(target=recv_data, args=(p, recv_data_list, recv_time_list, recv_lock, recv_time_lock, _stop_event)).start()
+    threading.Thread(target=send_data, args=(next_sock, send_data_list, send_lock, _stop_event)).start()
 
     while True:
         inputs = bring_data(recv_data_list, recv_lock, _stop_event, scheduler_sock)
         outputs = processing(inputs, model)
+        send_done(scheduler_sock)
         with send_lock:
             send_data_list.append(outputs)
+        with recv_time_lock:
+            print("processing time", time.time() - recv_time_list.pop(0))
 
     prev_sock.close()
     next_sock.close()

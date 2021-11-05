@@ -1,6 +1,5 @@
 from common import *
 from VGGFNetModel import *
-import argparse
 
 def processing(inputs, model):
     outputs = model(inputs)
@@ -56,44 +55,25 @@ if __name__ == "__main__":
     scheduler_sock.connect((args.scheduler_addr, args.scheduler_port))
     print('Scheduler is ready, Connected by', args.scheduler_addr)
 
-    # for time record
-    total, took1, took2, took3 = 0, 0, 0, 0
-
     # for data multi-processing
-    data_list = []
-    lock = threading.Lock()
+    recv_data_list = []
+    recv_lock = threading.Lock()
+    send_data_list = []
+    send_lock = threading.Lock()
+    recv_time_list = []
+    recv_time_lock = threading.Lock()
     _stop_event = threading.Event()
-    threading.Thread(target=recv_data, args=(p, data_list, lock, _stop_event)).start()
+    threading.Thread(target=recv_data, args=(p, recv_data_list, recv_time_list, recv_lock, recv_time_lock, _stop_event)).start()
+    threading.Thread(target=send_data, args=(next_sock, send_data_list, send_lock, _stop_event)).start()
 
-    assigned_time = recv_schedule(scheduler_sock)
-
-    try:
-        while True:
-            start = time.time()
-            inputs = bring_data(data_list, lock, _stop_event)
-            took1 += time.time() - start
-
-            if assigned_time <= 0:
-                send_done(scheduler_sock)
-                assigned_time = recv_schedule(scheduler_sock)
-            processing_time = time.time()
-            outputs = processing(inputs, model)
-            assigned_time -= time.time() - processing_time
-            took2 += time.time() - start
-
-            send_data(next_sock, outputs)
-            took3 += time.time() - start
-
-            total += 1
-            if total >= args.debug:
-                print("----------------------------------------")
-                print("bring data time: {:.5f} sec".format(took1/total))
-                print("processing time: {:.5f} sec".format((took2-took1)/total))
-                print("communication time: {:.5f} sec".format((took3-took2)/total))
-                print("output shape:", outputs.shape)
-                total, took1, took2, took3 = 0, 0, 0, 0
-    except:
-        print("connection lost:", addr)
+    while True:
+        inputs = bring_data(recv_data_list, recv_lock, _stop_event, scheduler_sock)
+        outputs = processing(inputs, model)
+        send_done(scheduler_sock)
+        with send_lock:
+            send_data_list.append(outputs)
+        with recv_time_lock:
+            print("processing time", time.time() - recv_time_list.pop(0))
 
     prev_sock.close()
     next_sock.close()

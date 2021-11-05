@@ -1,4 +1,6 @@
 import socket
+import random
+import time
 import multiprocessing as mp
 import argparse
 
@@ -15,7 +17,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='GPU time-sharing resource allocation scheduler')
     parser.add_argument('--addr', default='', type=str, help='recving address')
     parser.add_argument('--port', default=30050, type=int, help='starting port')
-    parser.add_argument('--time', default=0.1, type=float, help='second')
+    parser.add_argument('--time', default=1.0, type=float, help='second')
     parser.add_argument('--p', default=[1.0], nargs='+', type=float, help='percentage of time to use, total sum must be 1')
     args = parser.parse_args()
 
@@ -24,16 +26,22 @@ if __name__ == "__main__":
         raise RuntimeError('The sum of percentage of time to use must be 1. But got {}'.format(sum(args.p)), args.p)
 
     sockets = []
-    print('Connecting %d nodes, please waiting...'%len(args.p))
-    working_queue = [idx for idx in range(len(args.p))]
+    num_sockets = len(args.p)
+    print('Connecting %d nodes, please waiting...' % num_sockets)
+    working_queue = [idx for idx in range(num_sockets)]
     with mp.Pool(processes=len(args.p)) as pool:
         sockets = list(pool.map(get_socket, working_queue))
 
     while True:
-        for idx, sock in enumerate(sockets):
-            sock.send(str(args.time * args.p[idx]).encode())
-            done = sock.recv(4096).decode()
-            print(idx, 'done!')
+        weights = args.p * args.time
+        while sum(weights) > 0:
+            idx = random.choices(population=range(num_sockets), weights=weights)
+            start = time.time()
+            sockets[idx].send('process'.encode())
+            done = sockets[idx].recv(4096).decode()
+            took = time.time() - start
+            weights[idx] = max(weights[idx] - took, 0)
+            print('{} done, took {:.5f}'.format(idx, took))
 
     for sock in sockets:
         sock.close()

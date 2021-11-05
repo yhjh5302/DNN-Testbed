@@ -3,8 +3,8 @@ from tensorflow import keras
 import argparse
 #import multiprocessing as mp
 
-def image_sender(model_name, next_socket, images, labels, data_list, lock, wait_time, arrival_rate, _stop_event):
-    while True:
+def image_sender(model_name, next_socket, images, labels, label_list, label_lock, time_list, time_lock, wait_time, arrival_rate, _stop_event):
+    for _ in range(1000):
         # sleep before sending
         time.sleep(1/arrival_rate)
 
@@ -12,17 +12,25 @@ def image_sender(model_name, next_socket, images, labels, data_list, lock, wait_
         batch_size = 1
         idx = np.random.randint(10000-batch_size)
         data = images[idx:idx+batch_size]
-        answer = labels.flatten()[idx:idx+batch_size]
+        with label_lock:
+            label_list.append(labels.flatten()[idx:idx+batch_size])
 
         # sending data
-        start = time.time()
-        send_data(next_socket, data)
+        with time_lock:
+            time_list.append(time.time())
+        send_input(next_socket, data, _stop_event)
 
+def image_recver(model_name, conn, label_list, label_lock, time_list, time_lock, _stop_event):
+    while True:
         # make data receiving thread
-        outputs = bring_data(data_list, lock, _stop_event)
+        outputs = recv_output(conn, _stop_event)
         predicted = tf.argmax(outputs, 1)
+        with label_lock:
+            answer = label_list.pop(0)
         correct = np.sum(predicted == answer)
 
+        with time_lock:
+            start = time_list.pop(0)
         # wait for response
         print(model_name, "time took: ", time.time() - start, "correct:", correct)
 
@@ -141,34 +149,44 @@ if __name__ == "__main__":
 
     _stop_event = threading.Event()
 
-    alexnet_data_list = []
+    alexnet_label_list = []
+    alexnet_time_list = []
     '''
-    googlenet_data_list = []
-    mobilenet_data_list = []
-    vggnet_data_list = []
-    vggfnet_data_list = []
+    googlenet_label_list = []
+    googlenet_time_list = []
+    mobilenet_label_list = []
+    mobilenet_time_list = []
+    vggnet_label_list = []
+    vggnet_time_list = []
+    vggfnet_label_list = []
+    vggfnet_time_list = []
     '''
 
-    alexnet_lock = threading.Lock()
+    alexnet_label_lock = threading.Lock()
+    alexnet_time_lock = threading.Lock()
     '''
-    googlenet_lock = threading.Lock()
-    mobilenet_lock = threading.Lock()
-    vggnet_lock = threading.Lock()
-    vggfnet_lock = threading.Lock()
+    googlenet_label_lock = threading.Lock()
+    googlenet_time_lock = threading.Lock()
+    mobilenet_label_lock = threading.Lock()
+    mobilenet_time_lock = threading.Lock()
+    vggnet_label_lock = threading.Lock()
+    vggnet_time_lock = threading.Lock()
+    vggfnet_label_lock = threading.Lock()
+    vggfnet_time_lock = threading.Lock()
     '''
 
     procs = []
-    procs.append(threading.Thread(target=recv_data, args=(alexnet_port, alexnet_data_list, alexnet_lock, _stop_event)))
-    procs.append(threading.Thread(target=image_sender, args=("AlexNet", alexnet_next_sock, images, labels, alexnet_data_list, alexnet_lock, args.alexnet_wait_time, args.alexnet_arrival_rate, _stop_event)))
+    procs.append(threading.Thread(target=image_sender, args=("alexnet", alexnet_next_sock, images, labels, alexnet_label_list, alexnet_label_lock, alexnet_time_list, alexnet_time_lock, args.alexnet_wait_time, args.alexnet_arrival_rate, _stop_event)))
+    procs.append(threading.Thread(target=image_recver, args=("alexnet", alexnet_port, alexnet_label_list, alexnet_label_lock, alexnet_time_list, alexnet_time_lock, _stop_event)))
     '''
-    procs.append(threading.Thread(target=recv_data, args=(googlenet_port, googlenet_data_list, googlenet_lock, _stop_event)))
-    procs.append(threading.Thread(target=image_sender, args=("GoogLeNet", googlenet_next_sock, images, labels, googlenet_data_list, googlenet_lock, args.googlenet_wait_time, args.googlenet_arrival_rate, _stop_event)))
-    procs.append(threading.Thread(target=recv_data, args=(mobilenet_port, mobilenet_data_list, mobilenet_lock, _stop_event)))
-    procs.append(threading.Thread(target=image_sender, args=("MobileNet", mobilenet_next_sock, images, labels, mobilenet_data_list, mobilenet_lock, args.mobilenet_wait_time, args.mobilenet_arrival_rate, _stop_event)))
-    procs.append(threading.Thread(target=recv_data, args=(vggnet_port, vggnet_data_list, vggnet_lock, _stop_event)))
-    procs.append(threading.Thread(target=image_sender, args=("VGGNet", vggnet_next_sock, images, labels, vggnet_data_list, vggnet_lock, args.vggnet_wait_time, args.vggnet_arrival_rate, _stop_event)))
-    procs.append(threading.Thread(target=recv_data, args=(vggfnet_port, vggfnet_data_list, vggfnet_lock, _stop_event)))
-    procs.append(threading.Thread(target=image_sender, args=("VGGFNet", vggfnet_next_sock, images, labels, vggfnet_data_list, vggfnet_lock, args.vggfnet_wait_time, args.vggfnet_arrival_rate, _stop_event)))
+    procs.append(threading.Thread(target=image_sender, args=("googlenet", googlenet_next_sock, images, labels, googlenet_label_list, googlenet_label_lock, googlenet_time_list, googlenet_time_lock, args.googlenet_wait_time, args.googlenet_arrival_rate, _stop_event)))
+    procs.append(threading.Thread(target=image_recver, args=("googlenet", googlenet_port, googlenet_label_list, googlenet_label_lock, googlenet_time_list, googlenet_time_lock, _stop_event)))
+    procs.append(threading.Thread(target=image_sender, args=("mobilenet", mobilenet_next_sock, images, labels, mobilenet_label_list, mobilenet_label_lock, mobilenet_time_list, mobilenet_time_lock, args.mobilenet_wait_time, args.mobilenet_arrival_rate, _stop_event)))
+    procs.append(threading.Thread(target=image_recver, args=("mobilenet", mobilenet_port, mobilenet_label_list, mobilenet_label_lock, mobilenet_time_list, mobilenet_time_lock, _stop_event)))
+    procs.append(threading.Thread(target=image_sender, args=("vggnet", vggnet_next_sock, images, labels, vggnet_label_list, vggnet_label_lock, vggnet_time_list, vggnet_time_lock, args.vggnet_wait_time, args.vggnet_arrival_rate, _stop_event)))
+    procs.append(threading.Thread(target=image_recver, args=("vggnet", vggnet_port, vggnet_label_list, vggnet_label_lock, vggnet_time_list, vggnet_time_lock, _stop_event)))
+    procs.append(threading.Thread(target=image_sender, args=("vggfnet", vggfnet_next_sock, images, labels, vggfnet_label_list, vggfnet_label_lock, vggfnet_time_list, vggfnet_time_lock, args.vggfnet_wait_time, args.vggfnet_arrival_rate, _stop_event)))
+    procs.append(threading.Thread(target=image_recver, args=("vggfnet", vggfnet_port, vggfnet_label_list, vggfnet_label_lock, vggfnet_time_list, vggfnet_time_lock, _stop_event)))
     '''
 
     for proc in procs:
