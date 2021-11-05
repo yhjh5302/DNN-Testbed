@@ -33,15 +33,15 @@ if __name__ == "__main__":
         sockets = list(pool.map(get_socket, working_queue))
 
     while True:
-        weights = args.p * args.time
+        weights = [p * args.time for p in args.p]
         while sum(weights) > 0:
-            idx = random.choices(population=range(num_sockets), weights=weights)
+            idx = random.choices(population=range(num_sockets), weights=weights)[0]
             start = time.time()
             sockets[idx].send('process'.encode())
             done = sockets[idx].recv(4096).decode()
             took = time.time() - start
             weights[idx] = max(weights[idx] - took, 0)
-            print('{} done, took {:.5f}'.format(idx, took))
+            print('{} done, took {:.5f} sec'.format(idx, took))
 
     for sock in sockets:
         sock.close()
