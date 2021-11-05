@@ -1,8 +1,6 @@
 FROM tensorflow/tensorflow:latest-gpu
 ENV PYTHONUNBUFFERED 1
+RUN apt update; apt install sshpass -y; apt install nano -y;
 RUN mkdir /code
 WORKDIR /code
 COPY . /code/
-RUN apt update
-RUN apt-get install nano
-RUN apt-get install sshpass -y
