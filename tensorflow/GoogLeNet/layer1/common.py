@@ -23,7 +23,7 @@ def bring_data(data_list, lock, _stop_event, scheduler_sock):
                 with lock:
                     return data_list.pop(0)
             else:
-                time.sleep(0.001) # wait for data download
+                time.sleep(0.003) # wait for data download
                 send_done(scheduler_sock)
         else:
             _stop_event.set()
