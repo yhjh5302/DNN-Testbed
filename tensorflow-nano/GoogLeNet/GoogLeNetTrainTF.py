@@ -3,7 +3,7 @@ from tensorflow import keras
 
 class GoogLeNet(keras.Model):
     def __init__(self, name=None):
-        super(GoogLeNet, self).__init__(name=name)
+        super(GoogLeNet, self).__init__(name=name)
         self.conv1 = keras.models.Sequential([
             keras.layers.Conv2D(filters=64, kernel_size=(7,7), strides=2, activation='relu', padding='same'),
             keras.layers.BatchNormalization(),

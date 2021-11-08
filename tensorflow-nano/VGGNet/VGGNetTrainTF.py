@@ -3,7 +3,7 @@ from tensorflow import keras
 
 class VGGNet(keras.Model):
     def __init__(self, name=None):
-        super(VGGNet, self).__init__(name=name)
+        super(VGGNet, self).__init__(name=name)
         self.features1 = keras.models.Sequential([
             keras.layers.Conv2D(filters=64, kernel_size=(3,3), activation='relu', padding='same'),
             keras.layers.Conv2D(filters=64, kernel_size=(3,3), activation='relu', padding='same'),

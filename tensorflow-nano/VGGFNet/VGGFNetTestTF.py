@@ -5,7 +5,7 @@ import time
 
 class VGGFNet_layer_1(keras.Model):
     def __init__(self, name=None):
-        super(VGGFNet_layer_1, self).__init__(name=name)
+        super(VGGFNet_layer_1, self).__init__(name=name)
         self.features1 = keras.models.Sequential([
             keras.layers.Conv2D(filters=64, kernel_size=(11,11), strides=4, activation='relu'),
             keras.layers.AveragePooling2D(pool_size=(1, 1), strides=1),

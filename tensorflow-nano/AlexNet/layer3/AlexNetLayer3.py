@@ -1,6 +1,5 @@
 from common import *
 from AlexNetModel import *
-import argparse
 
 def processing(inputs, model):
     outputs = model(inputs)
@@ -13,7 +12,9 @@ if __name__ == "__main__":
     parser.add_argument('--prev_port', default=30003, type=int, help='Previous node port')
     parser.add_argument('--next_addr', default='10.96.0.200', type=str, help='Next node address')
     parser.add_argument('--next_port', default=30000, type=int, help='Next node port')
-    parser.add_argument('--vram_limit', default=1024, type=int, help='Next node port')
+    parser.add_argument('--scheduler_addr', default='10.96.0.250', type=str, help='Scheduler address')
+    parser.add_argument('--scheduler_port', default=30050, type=int, help='Scheduler port')
+    parser.add_argument('--vram_limit', default=600, type=int, help='Vram limitation')
     parser.add_argument('--debug', default=100, type=int, help='How often to print debug statements')
     args = parser.parse_args()
 
@@ -45,38 +46,35 @@ if __name__ == "__main__":
     print('Previous node is ready, Connected by', addr)
 
     next_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    next_sock.settimeout(600) # 10 minutes
+    next_sock.settimeout(1000) # 1000 seconds
     next_sock.connect((args.next_addr, args.next_port))
     print('Next node is ready, Connected by', args.next_addr)
 
-    # for time record
-    total, took1, took2, took3 = 0, 0, 0, 0
+    scheduler_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    scheduler_sock.settimeout(1000) # 1000 seconds
+    scheduler_sock.connect((args.scheduler_addr, args.scheduler_port))
+    print('Scheduler is ready, Connected by', args.scheduler_addr)
 
     # for data multi-processing
-    data_list = []
-    lock = threading.Lock()
+    recv_data_list = []
+    recv_lock = threading.Lock()
+    send_data_list = []
+    send_lock = threading.Lock()
+    recv_time_list = []
+    recv_time_lock = threading.Lock()
     _stop_event = threading.Event()
-    threading.Thread(target=recv_data, args=(p, data_list, lock, _stop_event)).start()
+    threading.Thread(target=recv_data, args=(p, recv_data_list, recv_time_list, recv_lock, recv_time_lock, _stop_event)).start()
+    threading.Thread(target=send_data, args=(next_sock, send_data_list, send_lock, _stop_event)).start()
 
-    try:
-        while True:
-            start = time.time()
-            inputs = bring_data(data_list, lock, _stop_event)
-            took1 += time.time() - start
-            outputs = processing(inputs, model)
-            took2 += time.time() - start
-            send_data(next_sock, outputs)
-            took3 += time.time() - start
-            total += 1
-            if total >= args.debug:
-                print("----------------------------------------")
-                print("bring data time: {:.5f} sec".format(took1/total))
-                print("processing time: {:.5f} sec".format((took2-took1)/total))
-                print("communication time: {:.5f} sec".format((took3-took2)/total))
-                print("output shape:", outputs.shape)
-                total, took1, took2, took3 = 0, 0, 0, 0
-    except:
-        print("connection lost:", addr)
+    while True:
+        inputs = bring_data(recv_data_list, recv_lock, _stop_event, scheduler_sock)
+        outputs = processing(inputs, model)
+        send_done(scheduler_sock)
+        with send_lock:
+            send_data_list.append(outputs)
+        with recv_time_lock:
+            print("processing time", time.time() - recv_time_list.pop(0))
 
     prev_sock.close()
     next_sock.close()
+    scheduler_sock.close()

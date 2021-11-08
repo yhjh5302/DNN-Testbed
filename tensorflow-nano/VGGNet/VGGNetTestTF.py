@@ -5,7 +5,7 @@ import time
 
 class VGGNet_layer_1(keras.Model):
     def __init__(self, name=None):
-        super(VGGNet_layer_1, self).__init__(name=name)
+        super(VGGNet_layer_1, self).__init__(name=name)
         self.features1 = keras.models.Sequential([
             keras.layers.Conv2D(filters=64, kernel_size=(3,3), activation='relu', padding='same'),
             keras.layers.Conv2D(filters=64, kernel_size=(3,3), activation='relu', padding='same'),

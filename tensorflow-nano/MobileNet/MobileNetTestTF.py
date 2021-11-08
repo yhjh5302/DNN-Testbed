@@ -5,7 +5,7 @@ import time
 
 class MobileNet_layer_1(keras.Model):
     def __init__(self, name=None):
-        super(MobileNet_layer_1, self).__init__(name=name)
+        super(MobileNet_layer_1, self).__init__(name=name)
         self.conv1 = keras.models.Sequential([
             keras.layers.Conv2D(filters=32, kernel_size=(3,3), strides=2, activation='relu', padding='same'),
             keras.layers.BatchNormalization(),

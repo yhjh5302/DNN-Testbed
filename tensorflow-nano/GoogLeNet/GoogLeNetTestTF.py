@@ -4,7 +4,7 @@ import math
 import time
 class GoogLeNet_layer_1(keras.Model):
     def __init__(self, name=None):
-        super(GoogLeNet_layer_1, self).__init__(name=name)
+        super(GoogLeNet_layer_1, self).__init__(name=name)
         self.conv1 = keras.models.Sequential([
             keras.layers.Conv2D(filters=64, kernel_size=(7,7), strides=2, activation='relu', padding='same'),
             keras.layers.BatchNormalization(),

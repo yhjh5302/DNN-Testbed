@@ -3,7 +3,7 @@ from tensorflow import keras
 
 class VGGFNet(keras.Model):
     def __init__(self, name=None):
-        super(VGGFNet, self).__init__(name=name)
+        super(VGGFNet, self).__init__(name=name)
         self.features1 = keras.models.Sequential([
             keras.layers.Conv2D(filters=64, kernel_size=(11,11), strides=4, activation='relu'),
             keras.layers.AveragePooling2D(pool_size=(1, 1), strides=1),
