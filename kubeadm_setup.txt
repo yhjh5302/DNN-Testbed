@@ -1,4 +1,4 @@
-Docker는 설치되어있다고 가정.
+Recommended docker version: community edition v20.10+ (not docker.io v20.07) / check: sudo docker version
 
 #### for nvidia repository
 curl -s -L https://nvidia.github.io/nvidia-docker/gpgkey | sudo apt-key add -
@@ -14,7 +14,7 @@ sudo curl -fsSLo /usr/share/keyrings/kubernetes-archive-keyring.gpg https://pack
 echo "deb [signed-by=/usr/share/keyrings/kubernetes-archive-keyring.gpg] https://apt.kubernetes.io/ kubernetes-xenial main" | sudo tee /etc/apt/sources.list.d/kubernetes.list
 sudo apt-get update
 
-sudo apt-get install -y kubelet=1.22.1-00 kubeadm=1.22.1-00 kubectl=1.22.1-00 kubernetes-cni nvidia-container-runtime nvidia-docker2
+sudo apt-get install -y kubelet=1.22.3-00 kubeadm=1.22.3-00 kubectl=1.22.3-00 kubernetes-cni nvidia-container-runtime nvidia-docker2
 sudo apt-mark hold kubelet kubeadm kubectl kubernetes-cni
 
 # docker with systemd
@@ -48,6 +48,11 @@ sudo kubeadm init --pod-network-cidr=10.244.0.0/16
 mkdir -p $HOME/.kube
 sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
 sudo chown $(id -u):$(id -g) $HOME/.kube/config
+
+sudo kubeadm token create --print-join-command
+
+sudo swapoff -a
+sudo kubeadm join 192.168.1.13:6443 --token u5jtvj.09bzdhuidc5zwv8q --discovery-token-ca-cert-hash sha256:8c307750417357281939abe4b73abca9e340abc7c2c19613d6d8e1e1eada9fbb
 
 #### network
 kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/master/Documentation/kube-flannel.yml

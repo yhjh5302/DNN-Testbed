@@ -25,12 +25,12 @@ sudo apt-cache policy kubelet
 sudo apt-cache policy kubeadm
 sudo apt-cache policy kubectl
 
-sudo apt-get install -y kubelet=1.22.1-00 kubeadm=1.22.1-00 kubectl=1.22.1-00 kubernetes-cni nvidia-container-runtime nvidia-docker2
-sudo apt-mark hold kubelet kubeadm kubectl kubernetes-cni
+sudo apt-get install -y kubelet=1.22.3-00 kubeadm=1.22.3-00 kubectl=1.22.3-00 kubernetes-cni nvidia-container-runtime nvidia-docker2
+#sudo apt-mark hold kubelet kubeadm kubectl kubernetes-cni
 sudo systemctl enable --now kubelet
 
 # docker with systemd
-docker info | grep -i cgroup
+sudo docker info | grep -i cgroup
 sudo systemctl edit docker.service
 '''
 [Service]
@@ -39,7 +39,7 @@ ExecStart=/usr/bin/dockerd --host=fd:// --add-runtime=nvidia=/usr/bin/nvidia-con
 '''
 sudo systemctl daemon-reload
 sudo systemctl restart docker
-docker info | grep -i cgroup
+sudo docker info | grep -i cgroup
 '''
 sudo nano /etc/docker/daemon.json
 {
