@@ -58,10 +58,11 @@ if __name__ == "__main__":
     next_sock.connect((args.next_addr, args.next_port))
     print('Next node is ready, Connected by', args.next_addr)
 
-    scheduler_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    scheduler_sock.settimeout(1000) # 1000 seconds
-    scheduler_sock.connect((args.scheduler_addr, args.scheduler_port))
-    print('Scheduler is ready, Connected by', args.scheduler_addr)
+    if args.set_gpu:
+        scheduler_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        scheduler_sock.settimeout(1000) # 1000 seconds
+        scheduler_sock.connect((args.scheduler_addr, args.scheduler_port))
+        print('Scheduler is ready, Connected by', args.scheduler_addr)
 
     # for data multi-processing
     recv_data_list = []
@@ -75,9 +76,13 @@ if __name__ == "__main__":
     threading.Thread(target=send_data, args=(next_sock, send_data_list, send_lock, _stop_event)).start()
 
     while True:
-        inputs = bring_data(recv_data_list, recv_lock, _stop_event, scheduler_sock)
-        outputs = processing(inputs, model)
-        send_done(scheduler_sock)
+        if args.set_gpu:
+            inputs = bring_data(recv_data_list, recv_lock, _stop_event, scheduler_sock)
+            outputs = processing(inputs, model)
+            send_done(scheduler_sock)
+        else:
+            inputs = bring_data(recv_data_list, recv_lock, _stop_event)
+            outputs = processing(inputs, model)
         with send_lock:
             send_data_list.append(outputs)
         with recv_time_lock:
@@ -85,4 +90,5 @@ if __name__ == "__main__":
 
     prev_sock.close()
     next_sock.close()
-    scheduler_sock.close()
+    if args.set_gpu:
+        scheduler_sock.close()

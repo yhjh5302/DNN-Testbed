@@ -17,17 +17,25 @@ def str2bool(v):
         raise argparse.ArgumentTypeError('Boolean value expected.')
 
 def bring_data(data_list, lock, _stop_event, scheduler_sock):
-    while _stop_event.is_set() == False:
-        if recv_schedule(scheduler_sock): # wait for scheduler
+    if scheduler_sock:
+        while _stop_event.is_set() == False:
+            if recv_schedule(scheduler_sock): # wait for scheduler
+                if len(data_list) > 0:
+                    with lock:
+                        return data_list.pop(0)
+                else:
+                    time.sleep(0.001) # wait for data download
+                    send_done(scheduler_sock)
+            else:
+                _stop_event.set()
+                raise RuntimeError('ERROR: something wrong with scheduler', scheduler_sock, 'in bring_data!')
+    else:
+        while _stop_event.is_set() == False:
             if len(data_list) > 0:
                 with lock:
                     return data_list.pop(0)
             else:
                 time.sleep(0.001) # wait for data download
-                send_done(scheduler_sock)
-        else:
-            _stop_event.set()
-            raise RuntimeError('ERROR: something wrong with scheduler', scheduler_sock, 'in bring_data!')
 
 def recv_data(conn, data_list, time_list, data_lock, time_lock, _stop_event):
     try:
