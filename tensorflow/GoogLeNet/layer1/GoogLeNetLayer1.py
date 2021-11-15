@@ -79,11 +79,11 @@ if __name__ == "__main__":
 
     while True:
         if args.set_gpu:
-            inputs = bring_data(recv_data_list, recv_lock, _stop_event, scheduler_sock)
+            inputs = bring_data(recv_data_list, recv_data_lock, _stop_event, scheduler_sock)
             outputs = processing(inputs, model)
             send_done(scheduler_sock)
         else:
-            inputs = bring_data(recv_data_list, recv_lock, _stop_event)
+            inputs = bring_data(recv_data_list, recv_data_lock, _stop_event)
             outputs = processing(inputs, model)
         with send_data_lock:
             send_data_list.append(outputs)
