@@ -22,18 +22,17 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     # handle exception
-    if sum(args.p) != 1:
-        raise RuntimeError('The sum of percentage of time to use must be 1. But got {}'.format(sum(args.p)), args.p)
+    norm_p = [p / sum(args.p) for p in args.p]
 
     sockets = []
-    num_sockets = len(args.p)
+    num_sockets = len(norm_p)
     print('Connecting %d nodes, please waiting...' % num_sockets)
     working_queue = [idx for idx in range(num_sockets)]
-    with mp.Pool(processes=len(args.p)) as pool:
+    with mp.Pool(processes=len(norm_p)) as pool:
         sockets = list(pool.map(get_socket, working_queue))
 
     while True:
-        weights = [p * args.time for p in args.p]
+        weights = [p * args.time for p in norm_p]
         while sum(weights) > 0:
             idx = random.choices(population=range(num_sockets), weights=weights)[0]
             start = time.time()
