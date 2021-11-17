@@ -7,15 +7,14 @@ def processing(inputs, model):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Tensorflow')
-    parser.add_argument('--set_gpu', default=True, type=str2bool, help='If you want to use GPU, set "True"')
     parser.add_argument('--prev_addr', default='10.96.0.211', type=str, help='Previous node address')
     parser.add_argument('--prev_port', default=30011, type=int, help='Previous node port')
     parser.add_argument('--next_addr', default='10.96.0.212', type=str, help='Next node address')
     parser.add_argument('--next_port', default=30012, type=int, help='Next node port')
     parser.add_argument('--scheduler_addr', default='10.96.0.250', type=str, help='Scheduler address')
     parser.add_argument('--scheduler_port', default=30050, type=int, help='Scheduler port')
+    parser.add_argument('--set_gpu', default=True, type=str2bool, help='If you want to use GPU, set "True"')
     parser.add_argument('--vram_limit', default=100, type=int, help='Vram limitation')
-    parser.add_argument('--debug', default=100, type=int, help='How often to print debug statements')
     args = parser.parse_args()
 
     if args.set_gpu:

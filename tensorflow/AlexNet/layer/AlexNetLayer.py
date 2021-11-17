@@ -1,20 +1,22 @@
 from common import *
-from VGGNetModel import *
+from AlexNetModel import *
 
 def processing(inputs, model):
     outputs = model(inputs)
     return outputs
 
+# python3 AlexNetLayer.py --layer_list 'features_1' 'features_2' 'features_3' 'features_4' 'features_5' 'classifier_1' 'classifier_2' 'classifier_3' --prev_addr='' --prev_port='30001' --next_addr='localhost' --next_port='30000' --scheduler_addr='localhost' --scheduler_port='30050' --vram_limit=1024
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Tensorflow')
-    parser.add_argument('--prev_addr', default='10.96.0.233', type=str, help='Previous node address')
-    parser.add_argument('--prev_port', default=30033, type=int, help='Previous node port')
+    parser.add_argument('--layer_list', default=['features_1', 'features_2', 'features_3', 'features_4', 'features_5', 'classifier_1', 'classifier_2', 'classifier_3'], nargs='+', type=str, help='layer list for this application')
+    parser.add_argument('--prev_addr', default='10.96.0.201', type=str, help='Previous node address')
+    parser.add_argument('--prev_port', default=30001, type=int, help='Previous node port')
     parser.add_argument('--next_addr', default='10.96.0.200', type=str, help='Next node address')
-    parser.add_argument('--next_port', default=30030, type=int, help='Next node port')
+    parser.add_argument('--next_port', default=30000, type=int, help='Next node port')
     parser.add_argument('--scheduler_addr', default='10.96.0.250', type=str, help='Scheduler address')
     parser.add_argument('--scheduler_port', default=30050, type=int, help='Scheduler port')
     parser.add_argument('--set_gpu', default=True, type=str2bool, help='If you want to use GPU, set "True"')
-    parser.add_argument('--vram_limit', default=600, type=int, help='Vram limitation')
+    parser.add_argument('--vram_limit', default=1024, type=int, help='Vram limitation')
     args = parser.parse_args()
 
     if args.set_gpu:
@@ -27,13 +29,11 @@ if __name__ == "__main__":
         tf.config.set_visible_devices([], 'GPU')
 
     # model loading
-    model = VGGNet_layer_3(name='layer3')
-    model.classifier1.load_weights('./VGGNet_classifier1_weights')
-    model.classifier2.load_weights('./VGGNet_classifier2_weights')
-    model.classifier3.load_weights('./VGGNet_classifier3_weights')
+    print(args.layer_list)
+    model = AlexNet_layer(name='AlexNet', layer_list=args.layer_list)
 
     # for cuDNN loading
-    model(np.zeros((1,7*7*512)))
+    model(model.get_random_input())
 
     print('Pretrained model loading done!')
 

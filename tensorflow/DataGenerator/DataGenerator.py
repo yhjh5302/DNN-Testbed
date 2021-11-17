@@ -37,7 +37,6 @@ def image_recver(model_name, conn, label_list, label_lock, time_list, time_lock,
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Tensorflow')
-    parser.add_argument('--set_gpu', default=False, type=str2bool, help='If you want to use GPU, set "True"')
     parser.add_argument('--alexnet_prev_addr', default='10.96.0.200', type=str, help='Previous node address')
     parser.add_argument('--alexnet_prev_port', default=30000, type=int, help='Previous node port')
     parser.add_argument('--alexnet_next_addr', default='10.96.0.201', type=str, help='Next node address')
@@ -68,6 +67,7 @@ if __name__ == "__main__":
     parser.add_argument('--mobilenet_arrival_rate', default=1, type=int, help='arrival rate')
     parser.add_argument('--vggnet_arrival_rate', default=1, type=int, help='arrival rate')
     parser.add_argument('--vggfnet_arrival_rate', default=1, type=int, help='arrival rate')
+    parser.add_argument('--set_gpu', default=False, type=str2bool, help='If you want to use GPU, set "True"')
     parser.add_argument('--vram_limit', default=0, type=int, help='Next node port')
     args = parser.parse_args()
 
