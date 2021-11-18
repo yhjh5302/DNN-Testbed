@@ -16,7 +16,7 @@ def str2bool(v):
     else:
         raise argparse.ArgumentTypeError('Boolean value expected.')
 
-def bring_data(data_list, lock, _stop_event, scheduler_sock):
+def bring_data(data_list, lock, _stop_event, scheduler_sock=None):
     if scheduler_sock:
         while _stop_event.is_set() == False:
             if recv_schedule(scheduler_sock): # wait for scheduler
@@ -37,19 +37,22 @@ def bring_data(data_list, lock, _stop_event, scheduler_sock):
             else:
                 time.sleep(0.001) # wait for data download
 
-def recv_data(conn, data_list, time_list, data_lock, time_lock, _stop_event):
+def recv_data(conn, recv_data_list, recv_data_lock, recv_time_list, recv_time_lock, proc_time_list, proc_time_lock, _stop_event):
     try:
         while True:
             length = int(conn.recv(4096).decode())
+            start = time.time()
             conn.send('Ack'.encode())
             data = bytearray()
             while len(data) < length:
                 data.extend(conn.recv(4096))
             conn.send('Done'.encode())
-            with data_lock:
-                data_list.append(np.load(io.BytesIO(data), allow_pickle=True))
-            with time_lock:
-                time_list.append(time.time())
+            with recv_data_lock:
+                recv_data_list.append(np.load(io.BytesIO(data), allow_pickle=True))
+            with recv_time_lock:
+                recv_time_list.append(time.time() - start)
+            with proc_time_lock:
+                proc_time_list.append(time.time())
     except:
         _stop_event.set()
         raise RuntimeError('ERROR: something wrong with previous node', conn, 'in recv_data!')

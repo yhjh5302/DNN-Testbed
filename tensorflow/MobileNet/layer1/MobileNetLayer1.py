@@ -7,15 +7,14 @@ def processing(inputs, model):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Tensorflow')
-    parser.add_argument('--set_gpu', default=True, type=str2bool, help='If you want to use GPU, set "True"')
     parser.add_argument('--prev_addr', default='10.96.0.221', type=str, help='Previous node address')
     parser.add_argument('--prev_port', default=30021, type=int, help='Previous node port')
     parser.add_argument('--next_addr', default='10.96.0.222', type=str, help='Next node address')
     parser.add_argument('--next_port', default=30022, type=int, help='Next node port')
     parser.add_argument('--scheduler_addr', default='10.96.0.250', type=str, help='Scheduler address')
     parser.add_argument('--scheduler_port', default=30050, type=int, help='Scheduler port')
+    parser.add_argument('--set_gpu', default=True, type=str2bool, help='If you want to use GPU, set "True"')
     parser.add_argument('--vram_limit', default=100, type=int, help='Vram limitation')
-    parser.add_argument('--debug', default=100, type=int, help='How often to print debug statements')
     args = parser.parse_args()
 
     if args.set_gpu:
@@ -60,27 +59,35 @@ if __name__ == "__main__":
 
     # for data multi-processing
     recv_data_list = []
-    recv_lock = threading.Lock()
+    recv_data_lock = threading.Lock()
     send_data_list = []
-    send_lock = threading.Lock()
+    send_data_lock = threading.Lock()
     recv_time_list = []
     recv_time_lock = threading.Lock()
+    proc_time_list = []
+    proc_time_lock = threading.Lock()
     _stop_event = threading.Event()
-    threading.Thread(target=recv_data, args=(p, recv_data_list, recv_time_list, recv_lock, recv_time_lock, _stop_event)).start()
-    threading.Thread(target=send_data, args=(next_sock, send_data_list, send_lock, _stop_event)).start()
+    threading.Thread(target=recv_data, args=(p, recv_data_list, recv_data_lock, recv_time_list, recv_time_lock, proc_time_list, proc_time_lock, _stop_event)).start()
+    threading.Thread(target=send_data, args=(next_sock, send_data_list, send_data_lock, _stop_event)).start()
 
     while True:
         if args.set_gpu:
-            inputs = bring_data(recv_data_list, recv_lock, _stop_event, scheduler_sock)
+            inputs = bring_data(recv_data_list, recv_data_lock, _stop_event, scheduler_sock)
             outputs = processing(inputs, model)
             send_done(scheduler_sock)
         else:
-            inputs = bring_data(recv_data_list, recv_lock, _stop_event)
+            inputs = bring_data(recv_data_list, recv_data_lock, _stop_event)
             outputs = processing(inputs, model)
-        with send_lock:
+        with send_data_lock:
             send_data_list.append(outputs)
+
+        proc_end = time.time()
         with recv_time_lock:
-            print("processing time", time.time() - recv_time_list.pop(0))
+            T_tr = recv_time_list.pop(0)
+        with proc_time_lock:
+            T_cp = proc_time_list.pop(0)
+        print("T_tr\t{}".format(T_tr))
+        print("T_cp\t{}".format(proc_end - T_cp))
 
     prev_sock.close()
     next_sock.close()
