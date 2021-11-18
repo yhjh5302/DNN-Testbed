@@ -5,7 +5,7 @@ def processing(inputs, model):
     outputs = model(inputs)
     return outputs
 
-# python3 VGGFNetLayer.py --layer_list 'features1' 'features2' 'features3' 'features4' 'features5' 'classifier1' 'classifier2' 'classifier3' --prev_addr='' --prev_port='30041' --next_addr='localhost' --next_port='30040' --scheduler_addr='localhost' --scheduler_port='30050' --vram_limit=1024
+# python3 VGGFNetLayer.py --layer_list 'features1' 'features2' 'features3' 'features4' 'features5' 'classifier1' 'classifier2' 'classifier3' --prev_addr='' --prev_port='30041' --next_addr='localhost' --next_port='30040' --scheduler_addr='localhost' --scheduler_port='30050' --set_gpu='true' --vram_limit=1024
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Tensorflow')
     parser.add_argument('--layer_list', default=['features1', 'features2', 'features3', 'features4', 'features5', 'classifier1', 'classifier2', 'classifier3'], nargs='+', type=str, help='layer list for this application')

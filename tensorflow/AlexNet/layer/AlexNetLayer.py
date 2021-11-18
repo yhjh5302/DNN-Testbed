@@ -5,7 +5,7 @@ def processing(inputs, model):
     outputs = model(inputs)
     return outputs
 
-# python3 AlexNetLayer.py --layer_list 'features_1' 'features_2' 'features_3' 'features_4' 'features_5' 'classifier_1' 'classifier_2' 'classifier_3' --prev_addr='' --prev_port='30001' --next_addr='localhost' --next_port='30000' --scheduler_addr='localhost' --scheduler_port='30050' --vram_limit=1024
+# python3 AlexNetLayer.py --layer_list 'features_1' 'features_2' 'features_3' 'features_4' 'features_5' 'classifier_1' 'classifier_2' 'classifier_3' --prev_addr='' --prev_port='30001' --next_addr='localhost' --next_port='30000' --scheduler_addr='localhost' --scheduler_port='30050' --set_gpu='true' --vram_limit=1024
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Tensorflow')
     parser.add_argument('--layer_list', default=['features_1', 'features_2', 'features_3', 'features_4', 'features_5', 'classifier_1', 'classifier_2', 'classifier_3'], nargs='+', type=str, help='layer list for this application')

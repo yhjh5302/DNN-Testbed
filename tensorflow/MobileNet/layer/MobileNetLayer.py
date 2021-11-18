@@ -5,7 +5,7 @@ def processing(inputs, model):
     outputs = model(inputs)
     return outputs
 
-# python3 MobileNetLayer.py --layer_list 'conv1' 'separable_conv2' 'separable_conv3' 'separable_conv4' 'separable_conv5' 'separable_conv6' 'separable_conv7' 'separable_conv8' 'separable_conv9' 'separable_conv10' 'separable_conv11' 'separable_conv12' 'separable_conv13' 'separable_conv14' 'fully_connected' --prev_addr='' --prev_port='30021' --next_addr='localhost' --next_port='30020' --scheduler_addr='localhost' --scheduler_port='30050' --vram_limit=1024
+# python3 MobileNetLayer.py --layer_list 'conv1' 'separable_conv2' 'separable_conv3' 'separable_conv4' 'separable_conv5' 'separable_conv6' 'separable_conv7' 'separable_conv8' 'separable_conv9' 'separable_conv10' 'separable_conv11' 'separable_conv12' 'separable_conv13' 'separable_conv14' 'fully_connected' --prev_addr='' --prev_port='30021' --next_addr='localhost' --next_port='30020' --scheduler_addr='localhost' --scheduler_port='30050' --set_gpu='true' --vram_limit=1024
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Tensorflow')
     parser.add_argument('--layer_list', default=['conv1', 'separable_conv2', 'separable_conv3', 'separable_conv4', 'separable_conv5', 'separable_conv6', 'separable_conv7', 'separable_conv8', 'separable_conv9', 'separable_conv10', 'separable_conv11', 'separable_conv12', 'separable_conv13', 'separable_conv14', 'fully_connected'], nargs='+', type=str, help='layer list for this application')

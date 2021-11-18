@@ -5,7 +5,7 @@ def processing(inputs, model):
     outputs = model(inputs)
     return outputs
 
-# python3 GoogLeNetLayer.py --layer_list 'conv1' 'conv2' 'conv3' 'inception3a' 'inception3b' 'inception4a' 'inception4b' 'inception4c' 'inception4d' 'inception4e' 'inception5a' 'inception5b' 'fully_connected' --prev_addr='' --prev_port='30011' --next_addr='localhost' --next_port='30010' --scheduler_addr='localhost' --scheduler_port='30050' --vram_limit=1024
+# python3 GoogLeNetLayer.py --layer_list 'conv1' 'conv2' 'conv3' 'inception3a' 'inception3b' 'inception4a' 'inception4b' 'inception4c' 'inception4d' 'inception4e' 'inception5a' 'inception5b' 'fully_connected' --prev_addr='' --prev_port='30011' --next_addr='localhost' --next_port='30010' --scheduler_addr='localhost' --scheduler_port='30050' --set_gpu='true' --vram_limit=1024
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Tensorflow')
     parser.add_argument('--layer_list', default=['conv1', 'conv2', 'conv3', 'inception3a', 'inception3b', 'inception4a', 'inception4b', 'inception4c', 'inception4d', 'inception4e', 'inception5a', 'inception5b', 'fully_connected'], nargs='+', type=str, help='layer list for this application')
