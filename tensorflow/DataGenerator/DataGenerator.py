@@ -6,7 +6,7 @@ import argparse
 def image_sender(model_name, next_socket, images, labels, label_list, label_lock, time_list, time_lock, arrival_rate, _stop_event):
     for _ in range(1000):
         # sleep before sending
-        time.sleep(1/arrival_rate)
+        #time.sleep(1/arrival_rate)
 
         # reading queue
         batch_size = 1
@@ -22,9 +22,12 @@ def image_sender(model_name, next_socket, images, labels, label_list, label_lock
     #_stop_event.set()
 
 def image_recver(model_name, conn, label_list, label_lock, time_list, time_lock, _stop_event):
+    init = False
     while _stop_event.is_set() == False:
         # make data receiving thread
         outputs = recv_output(conn, _stop_event)
+        if init == False:
+            init = time.time()
         predicted = tf.argmax(outputs, 1)
         with label_lock:
             answer = label_list.pop(0)
@@ -33,7 +36,7 @@ def image_recver(model_name, conn, label_list, label_lock, time_list, time_lock,
         with time_lock:
             start = time_list.pop(0)
         # wait for response
-        print(model_name, "time took: ", time.time() - start, "correct:", correct)
+        print(model_name, "\t", time.time() - start, "\t", time.time() - init)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Tensorflow')
