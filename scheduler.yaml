@@ -1,0 +1,129 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: scheduler-tfx255
+  labels:
+    app: scheduler-tfx255
+spec:
+  selector:
+    matchLabels:
+      app: scheduler-tfx255
+  template:
+    metadata:
+      labels:
+        app: scheduler-tfx255
+    spec:
+      nodeSelector:
+        kubernetes.io/hostname: jin-tfx255
+      containers:
+      - name: scheduler-tfx255
+        image: yhjh5302/scheduler:latest
+        env:
+        - name: RATIO
+          value: "0.333 0.333 0.333"
+        command: ["/bin/bash","-c","python3 scheduler.py --p $(RATIO)"]
+        
+        ports:
+        - containerPort: 30050
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: scheduler-tfx255-ip-service
+spec:
+  clusterIP: 10.96.0.250
+  ports:
+  - name: scheduler-tfx255
+    port: 30050
+  selector:
+    app: scheduler-tfx255
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: scheduler-w65
+  labels:
+    app: scheduler-w65
+spec:
+  selector:
+    matchLabels:
+      app: scheduler-w65
+  template:
+    metadata:
+      labels:
+        app: scheduler-w65
+    spec:
+      nodeSelector:
+        kubernetes.io/hostname: jin-w65-67sf
+      containers:
+      - name: scheduler-w65
+        image: yhjh5302/scheduler:latest
+        env:
+        - name: RATIO
+          value: "0.333 0.333 0.333"
+        command: ["/bin/bash","-c","python3 scheduler.py --p $(RATIO)"]
+        
+        ports:
+        - containerPort: 30050
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: scheduler-w65-ip-service
+spec:
+  clusterIP: 10.96.0.251
+  ports:
+  - name: scheduler-w65
+    port: 30050
+  selector:
+    app: scheduler-w65
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: scheduler-server
+  labels:
+    app: scheduler-server
+spec:
+  selector:
+    matchLabels:
+      app: scheduler-server
+  template:
+    metadata:
+      labels:
+        app: scheduler-server
+    spec:
+      nodeSelector:
+        kubernetes.io/hostname: server-2
+      containers:
+      - name: scheduler-server
+        image: yhjh5302/scheduler:latest
+        env:
+        - name: RATIO
+          value: "0.333 0.333 0.333"
+        command: ["/bin/bash","-c","python3 scheduler.py --p $(RATIO)"]
+        
+        ports:
+        - containerPort: 30050
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: scheduler-server-ip-service
+spec:
+  clusterIP: 10.96.0.252
+  ports:
+  - name: scheduler-server
+    port: 30050
+  selector:
+    app: scheduler-server

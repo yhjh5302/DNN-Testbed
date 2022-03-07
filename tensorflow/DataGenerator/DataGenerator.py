@@ -4,12 +4,14 @@ import argparse
 #import multiprocessing as mp
 
 def image_sender(model_name, next_socket, images, labels, label_list, label_lock, time_list, time_lock, arrival_rate, _stop_event):
-    for _ in range(1000):
+    for _ in range(100):
         # sleep before sending
         #time.sleep(1/arrival_rate)
+        time.sleep(1) # per 1 seconds
 
         # reading queue
-        batch_size = 1
+        # batch_size = 1
+        batch_size = int(arrival_rate)
         idx = np.random.randint(10000-batch_size)
         data = images[idx:idx+batch_size]
         with label_lock:
