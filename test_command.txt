@@ -1,4 +1,5 @@
-python3 DataGenerator.py --set_gpu='false' --alexnet_prev_addr='' --alexnet_next_addr='10.96.0.201' --googlenet_prev_addr='' --googlenet_next_addr='10.96.0.211' --mobilenet_prev_addr='' --mobilenet_next_addr='10.96.0.221' --vggnet_prev_addr='' --vggnet_next_addr='10.96.0.231' --vggfnet_prev_addr='' --vggfnet_next_addr='10.96.0.241' --vram_limit=0
+python3 DataGenerator.py --set_gpu='false' --alexnet_prev_addr='' --alexnet_next_addr='10.96.0.201' --googlenet_prev_addr='' --googlenet_next_addr='10.96.0.211' --mobilenet_prev_addr='' --mobilenet_next_addr='10.96.0.221' --vggnet_prev_addr='' --vggnet_next_addr='10.96.0.231' --vggfnet_prev_addr='' --vggfnet_next_addr='10.96.0.241' --vram_limit=0 --alexnet_arrival_rate=10 --googlenet_arrival_rate=10 --mobilenet_arrival_rate=10 --vggnet_arrival_rate=10 --vggfnet_arrival_rate=10 | tee total.txt
+sshpass -p wnlab7752! scp -o StrictHostKeyChecking=no total*.txt wnlab@192.168.1.13:./
 kubectl apply -f test-deploy.yaml
 kubectl exec -it data-generator-878b856cd-shfsc -- bash
 kubectl logs alexnet-layer1-8679bb6f67-6gct4 > alexnet-layer1-logs.txt

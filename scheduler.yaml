@@ -24,7 +24,9 @@ spec:
         command: ["/bin/bash","-c","python3 scheduler.py --p $(RATIO)"]
         
         ports:
-        - containerPort: 30050
+        - containerPort: 30050  # todo different port number
+        - containerPort: 30051
+        - containerPort: 30052
 
 ---
 
@@ -35,8 +37,12 @@ metadata:
 spec:
   clusterIP: 10.96.0.250
   ports:
-  - name: scheduler-tfx255
+  - name: alexnet-layer1
     port: 30050
+  - name: alexnet-layer2
+    port: 30051
+  - name: alexnet-layer3
+    port: 30052
   selector:
     app: scheduler-tfx255
 
@@ -64,11 +70,12 @@ spec:
         image: yhjh5302/scheduler:latest
         env:
         - name: RATIO
-          value: "0.333 0.333 0.333"
+          value: "0.5 0.5"
         command: ["/bin/bash","-c","python3 scheduler.py --p $(RATIO)"]
         
         ports:
         - containerPort: 30050
+        - containerPort: 30051
 
 ---
 
@@ -79,8 +86,10 @@ metadata:
 spec:
   clusterIP: 10.96.0.251
   ports:
-  - name: scheduler-w65
+  - name: vggfnet-layer1
     port: 30050
+  - name: vggfnet-layer2
+    port: 30051
   selector:
     app: scheduler-w65
 
@@ -108,11 +117,19 @@ spec:
         image: yhjh5302/scheduler:latest
         env:
         - name: RATIO
-          value: "0.333 0.333 0.333"
+          value: "0.1111 0.1111 0.1111 0.1111 0.1111 0.1111 0.1111 0.1111 0.1111"
         command: ["/bin/bash","-c","python3 scheduler.py --p $(RATIO)"]
         
         ports:
         - containerPort: 30050
+        - containerPort: 30051
+        - containerPort: 30052
+        - containerPort: 30053
+        - containerPort: 30054
+        - containerPort: 30055
+        - containerPort: 30056
+        - containerPort: 30057
+        - containerPort: 30058
 
 ---
 
@@ -123,7 +140,23 @@ metadata:
 spec:
   clusterIP: 10.96.0.252
   ports:
-  - name: scheduler-server
+  - name: googlenet-layer1
     port: 30050
+  - name: googlenet-layer2
+    port: 30051
+  - name: googlenet-layer3
+    port: 30052
+  - name: mobilenet-layer1
+    port: 30053
+  - name: mobilenet-layer2
+    port: 30054
+  - name: mobilenet-layer3
+    port: 30055
+  - name: vggnet-layer1
+    port: 30056
+  - name: vggnet-layer2
+    port: 30057
+  - name: vggnet-layer3
+    port: 30058
   selector:
     app: scheduler-server

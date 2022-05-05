@@ -10,17 +10,18 @@ def image_sender(model_name, next_socket, images, labels, label_list, label_lock
         time.sleep(1) # per 1 seconds
 
         # reading queue
-        # batch_size = 1
-        batch_size = int(arrival_rate)
-        idx = np.random.randint(10000-batch_size)
-        data = images[idx:idx+batch_size]
-        with label_lock:
-            label_list.append(labels.flatten()[idx:idx+batch_size])
+        batch_size = 1
+        for i in range(arrival_rate):            
+            idx = np.random.randint(10000-batch_size)
+            data = images[idx:idx+batch_size]
+            
+            with label_lock:
+                label_list.append(labels.flatten()[idx:idx+batch_size])
 
-        # sending data
-        with time_lock:
-            time_list.append(time.time())
-        send_input(next_socket, data, _stop_event)
+            # sending data
+            with time_lock:
+                time_list.append(time.time())
+            send_input(next_socket, data, _stop_event)
     #_stop_event.set()
 
 def image_recver(model_name, conn, label_list, label_lock, time_list, time_lock, _stop_event):

@@ -14,7 +14,7 @@ spec:
         app: data-generator
     spec:
       nodeSelector:
-        kubernetes.io/hostname: server-2
+        kubernetes.io/hostname: wnlab-laptop-1
       containers:
       - name: data-generator
         #image: yhjh5302/data-uploader:latest
@@ -82,10 +82,14 @@ spec:
           value: wnlab@192.168.1.13
         - name: SCP_PATH
           value: ./
+        - name: SCHEDULER_ADDR
+          value: 10.96.0.250
+        - name: SCHEDULER_PORT
+          value: "30050"
         #resources:
         #  limits:
         #    nvidia.com/gpu: 1
-        command: ["/bin/bash","-c","python3 $(LAYERNAME).py --set_gpu='true' --prev_addr='' --prev_port=30001 --next_addr='10.96.0.202' --next_port=30002 --vram_limit=128 1> $(LAYERNAME).txt 2> $(LAYERNAME)_err.txt; sshpass -p $(SSH_PASSWARD) scp -o StrictHostKeyChecking=no $(LAYERNAME)*.txt $(SCP_ADDRESS):$(SCP_PATH);"]
+        command: ["/bin/bash","-c","python3 $(LAYERNAME).py --set_gpu='true' --prev_addr='' --prev_port=30001 --next_addr='10.96.0.202' --next_port=30002 --vram_limit=128 --scheduler_addr=$(SCHEDULER_ADDR) --scheduler_port=$(SCHEDULER_PORT) 1> $(LAYERNAME).txt 2> $(LAYERNAME)_err.txt; sshpass -p $(SSH_PASSWARD) scp -o StrictHostKeyChecking=no $(LAYERNAME)*.txt $(SCP_ADDRESS):$(SCP_PATH);"]
         ports:
         - containerPort: 30001
 
@@ -133,7 +137,11 @@ spec:
           value: wnlab@192.168.1.13
         - name: SCP_PATH
           value: ./
-        command: ["/bin/bash","-c","python3 $(LAYERNAME).py --set_gpu='true' --prev_addr='' --prev_port=30002 --next_addr='10.96.0.203' --next_port=30003 --vram_limit=128 1> $(LAYERNAME).txt 2> $(LAYERNAME)_err.txt; sshpass -p $(SSH_PASSWARD) scp -o StrictHostKeyChecking=no $(LAYERNAME)*.txt $(SCP_ADDRESS):$(SCP_PATH);"]
+        - name: SCHEDULER_ADDR
+          value: 10.96.0.250
+        - name: SCHEDULER_PORT
+          value: "30051"
+        command: ["/bin/bash","-c","python3 $(LAYERNAME).py --set_gpu='true' --prev_addr='' --prev_port=30002 --next_addr='10.96.0.203' --next_port=30003 --vram_limit=128 --scheduler_addr=$(SCHEDULER_ADDR) --scheduler_port=$(SCHEDULER_PORT) 1> $(LAYERNAME).txt 2> $(LAYERNAME)_err.txt; sshpass -p $(SSH_PASSWARD) scp -o StrictHostKeyChecking=no $(LAYERNAME)*.txt $(SCP_ADDRESS):$(SCP_PATH);"]
         #resources:
         #  limits:
         #    nvidia.com/gpu: 1
@@ -185,7 +193,11 @@ spec:
           value: wnlab@192.168.1.13
         - name: SCP_PATH
           value: ./
-        command: ["/bin/bash","-c","python3 $(LAYERNAME).py --set_gpu='true' --prev_addr='' --prev_port=30003 --next_addr='10.96.0.200' --next_port=30000 --vram_limit=512 1> $(LAYERNAME).txt 2> $(LAYERNAME)_err.txt; sshpass -p $(SSH_PASSWARD) scp -o StrictHostKeyChecking=no $(LAYERNAME)*.txt $(SCP_ADDRESS):$(SCP_PATH);"]
+        - name: SCHEDULER_ADDR
+          value: 10.96.0.250
+        - name: SCHEDULER_PORT
+          value: "30052"
+        command: ["/bin/bash","-c","python3 $(LAYERNAME).py --set_gpu='true' --prev_addr='' --prev_port=30003 --next_addr='10.96.0.200' --next_port=30000 --vram_limit=512 --scheduler_addr=$(SCHEDULER_ADDR) --scheduler_port=$(SCHEDULER_PORT) 1> $(LAYERNAME).txt 2> $(LAYERNAME)_err.txt; sshpass -p $(SSH_PASSWARD) scp -o StrictHostKeyChecking=no $(LAYERNAME)*.txt $(SCP_ADDRESS):$(SCP_PATH);"]
         # command: ["/bin/bash","-c","python3 AlexNetLayer3.py --set_gpu='true' --prev_addr='' --prev_port=30003 --next_addr='10.96.0.200' --next_port=30000 --vram_limit=512"]
         ports:
         - containerPort: 30003
@@ -234,7 +246,11 @@ spec:
           value: wnlab@192.168.1.13
         - name: SCP_PATH
           value: ./
-        command: ["/bin/bash","-c","python3 $(LAYERNAME).py --set_gpu='true' --prev_addr='' --prev_port=30011 --next_addr='10.96.0.212' --next_port=30012 --vram_limit=128 1> $(LAYERNAME).txt 2> $(LAYERNAME)_err.txt; sshpass -p $(SSH_PASSWARD) scp -o StrictHostKeyChecking=no $(LAYERNAME)*.txt $(SCP_ADDRESS):$(SCP_PATH);"]
+        - name: SCHEDULER_ADDR
+          value: 10.96.0.252
+        - name: SCHEDULER_PORT
+          value: "30050"
+        command: ["/bin/bash","-c","python3 $(LAYERNAME).py --set_gpu='true' --prev_addr='' --prev_port=30011 --next_addr='10.96.0.212' --next_port=30012 --vram_limit=128 --scheduler_addr=$(SCHEDULER_ADDR) --scheduler_port=$(SCHEDULER_PORT) 1> $(LAYERNAME).txt 2> $(LAYERNAME)_err.txt; sshpass -p $(SSH_PASSWARD) scp -o StrictHostKeyChecking=no $(LAYERNAME)*.txt $(SCP_ADDRESS):$(SCP_PATH);"]
         #resources:
         #  limits:
         #    nvidia.com/gpu: 1
@@ -286,7 +302,11 @@ spec:
           value: wnlab@192.168.1.13
         - name: SCP_PATH
           value: ./
-        command: ["/bin/bash","-c","python3 $(LAYERNAME).py --set_gpu='true' --prev_addr='' --prev_port=30012 --next_addr='10.96.0.213' --next_port=30013 --vram_limit=128 1> $(LAYERNAME).txt 2> $(LAYERNAME)_err.txt; sshpass -p $(SSH_PASSWARD) scp -o StrictHostKeyChecking=no $(LAYERNAME)*.txt $(SCP_ADDRESS):$(SCP_PATH);"]
+        - name: SCHEDULER_ADDR
+          value: 10.96.0.252
+        - name: SCHEDULER_PORT
+          value: "30051"
+        command: ["/bin/bash","-c","python3 $(LAYERNAME).py --set_gpu='true' --prev_addr='' --prev_port=30012 --next_addr='10.96.0.213' --next_port=30013 --vram_limit=128 --scheduler_addr=$(SCHEDULER_ADDR) --scheduler_port=$(SCHEDULER_PORT) 1> $(LAYERNAME).txt 2> $(LAYERNAME)_err.txt; sshpass -p $(SSH_PASSWARD) scp -o StrictHostKeyChecking=no $(LAYERNAME)*.txt $(SCP_ADDRESS):$(SCP_PATH);"]
         #resources:
         #  limits:
         #    nvidia.com/gpu: 1
@@ -338,7 +358,11 @@ spec:
           value: wnlab@192.168.1.13
         - name: SCP_PATH
           value: ./
-        command: ["/bin/bash","-c","python3 $(LAYERNAME).py --set_gpu='true' --prev_addr='' --prev_port=30013 --next_addr='10.96.0.200' --next_port=30010 --vram_limit=512 1> $(LAYERNAME).txt 2> $(LAYERNAME)_err.txt; sshpass -p $(SSH_PASSWARD) scp -o StrictHostKeyChecking=no $(LAYERNAME)*.txt $(SCP_ADDRESS):$(SCP_PATH);"]
+        - name: SCHEDULER_ADDR
+          value: 10.96.0.252
+        - name: SCHEDULER_PORT
+          value: "30052"
+        command: ["/bin/bash","-c","python3 $(LAYERNAME).py --set_gpu='true' --prev_addr='' --prev_port=30013 --next_addr='10.96.0.200' --next_port=30010 --vram_limit=512 --scheduler_addr=$(SCHEDULER_ADDR) --scheduler_port=$(SCHEDULER_PORT) 1> $(LAYERNAME).txt 2> $(LAYERNAME)_err.txt; sshpass -p $(SSH_PASSWARD) scp -o StrictHostKeyChecking=no $(LAYERNAME)*.txt $(SCP_ADDRESS):$(SCP_PATH);"]
         #resources:
         #  limits:
         #    nvidia.com/gpu: 1
@@ -390,7 +414,11 @@ spec:
           value: wnlab@192.168.1.13
         - name: SCP_PATH
           value: ./
-        command: ["/bin/bash","-c","python3 $(LAYERNAME).py --set_gpu='true' --prev_addr='' --prev_port=30021 --next_addr='10.96.0.222' --next_port=30022 --vram_limit=128 1> $(LAYERNAME).txt 2> $(LAYERNAME)_err.txt; sshpass -p $(SSH_PASSWARD) scp -o StrictHostKeyChecking=no $(LAYERNAME)*.txt $(SCP_ADDRESS):$(SCP_PATH);"]
+        - name: SCHEDULER_ADDR
+          value: 10.96.0.252
+        - name: SCHEDULER_PORT
+          value: "30053"
+        command: ["/bin/bash","-c","python3 $(LAYERNAME).py --set_gpu='true' --prev_addr='' --prev_port=30021 --next_addr='10.96.0.222' --next_port=30022 --vram_limit=128 --scheduler_addr=$(SCHEDULER_ADDR) --scheduler_port=$(SCHEDULER_PORT) 1> $(LAYERNAME).txt 2> $(LAYERNAME)_err.txt; sshpass -p $(SSH_PASSWARD) scp -o StrictHostKeyChecking=no $(LAYERNAME)*.txt $(SCP_ADDRESS):$(SCP_PATH);"]
         #resources:
         #  limits:
         #    nvidia.com/gpu: 1
@@ -442,7 +470,11 @@ spec:
           value: wnlab@192.168.1.13
         - name: SCP_PATH
           value: ./
-        command: ["/bin/bash","-c","python3 $(LAYERNAME).py --set_gpu='true' --prev_addr='' --prev_port=30022 --next_addr='10.96.0.223' --next_port=30023 --vram_limit=128 1> $(LAYERNAME).txt 2> $(LAYERNAME)_err.txt; sshpass -p $(SSH_PASSWARD) scp -o StrictHostKeyChecking=no $(LAYERNAME)*.txt $(SCP_ADDRESS):$(SCP_PATH);"]
+        - name: SCHEDULER_ADDR
+          value: 10.96.0.252
+        - name: SCHEDULER_PORT
+          value: "30054"
+        command: ["/bin/bash","-c","python3 $(LAYERNAME).py --set_gpu='true' --prev_addr='' --prev_port=30022 --next_addr='10.96.0.223' --next_port=30023 --vram_limit=128 --scheduler_addr=$(SCHEDULER_ADDR) --scheduler_port=$(SCHEDULER_PORT) 1> $(LAYERNAME).txt 2> $(LAYERNAME)_err.txt; sshpass -p $(SSH_PASSWARD) scp -o StrictHostKeyChecking=no $(LAYERNAME)*.txt $(SCP_ADDRESS):$(SCP_PATH);"]
         #resources:
         #  limits:
         #    nvidia.com/gpu: 1
@@ -494,7 +526,11 @@ spec:
           value: wnlab@192.168.1.13
         - name: SCP_PATH
           value: ./
-        command: ["/bin/bash","-c","python3 $(LAYERNAME).py --set_gpu='true' --prev_addr='' --prev_port=30023 --next_addr='10.96.0.200' --next_port=30020 --vram_limit=512 1> $(LAYERNAME).txt 2> $(LAYERNAME)_err.txt; sshpass -p $(SSH_PASSWARD) scp -o StrictHostKeyChecking=no $(LAYERNAME)*.txt $(SCP_ADDRESS):$(SCP_PATH);"]
+        - name: SCHEDULER_ADDR
+          value: 10.96.0.252
+        - name: SCHEDULER_PORT
+          value: "30055"
+        command: ["/bin/bash","-c","python3 $(LAYERNAME).py --set_gpu='true' --prev_addr='' --prev_port=30023 --next_addr='10.96.0.200' --next_port=30020 --vram_limit=512 --scheduler_addr=$(SCHEDULER_ADDR) --scheduler_port=$(SCHEDULER_PORT) 1> $(LAYERNAME).txt 2> $(LAYERNAME)_err.txt; sshpass -p $(SSH_PASSWARD) scp -o StrictHostKeyChecking=no $(LAYERNAME)*.txt $(SCP_ADDRESS):$(SCP_PATH);"]
         #resources:
         #  limits:
         #    nvidia.com/gpu: 1
@@ -546,7 +582,11 @@ spec:
           value: wnlab@192.168.1.13
         - name: SCP_PATH
           value: ./
-        command: ["/bin/bash","-c","python3 $(LAYERNAME).py --set_gpu='true' --prev_addr='' --prev_port=30031 --next_addr='10.96.0.232' --next_port=30032 --vram_limit=128 1> $(LAYERNAME).txt 2> $(LAYERNAME)_err.txt; sshpass -p $(SSH_PASSWARD) scp -o StrictHostKeyChecking=no $(LAYERNAME)*.txt $(SCP_ADDRESS):$(SCP_PATH);"]
+        - name: SCHEDULER_ADDR
+          value: 10.96.0.252
+        - name: SCHEDULER_PORT
+          value: "30056"
+        command: ["/bin/bash","-c","python3 $(LAYERNAME).py --set_gpu='true' --prev_addr='' --prev_port=30031 --next_addr='10.96.0.232' --next_port=30032 --vram_limit=128 --scheduler_addr=$(SCHEDULER_ADDR) --scheduler_port=$(SCHEDULER_PORT) 1> $(LAYERNAME).txt 2> $(LAYERNAME)_err.txt; sshpass -p $(SSH_PASSWARD) scp -o StrictHostKeyChecking=no $(LAYERNAME)*.txt $(SCP_ADDRESS):$(SCP_PATH);"]
         #resources:
         #  limits:
         #    nvidia.com/gpu: 1
@@ -598,7 +638,11 @@ spec:
           value: wnlab@192.168.1.13
         - name: SCP_PATH
           value: ./
-        command: ["/bin/bash","-c","python3 $(LAYERNAME).py --set_gpu='true' --prev_addr='' --prev_port=30032 --next_addr='10.96.0.233' --next_port=30033 --vram_limit=128 1> $(LAYERNAME).txt 2> $(LAYERNAME)_err.txt; sshpass -p $(SSH_PASSWARD) scp -o StrictHostKeyChecking=no $(LAYERNAME)*.txt $(SCP_ADDRESS):$(SCP_PATH);"]
+        - name: SCHEDULER_ADDR
+          value: 10.96.0.252
+        - name: SCHEDULER_PORT
+          value: "30057"
+        command: ["/bin/bash","-c","python3 $(LAYERNAME).py --set_gpu='true' --prev_addr='' --prev_port=30032 --next_addr='10.96.0.233' --next_port=30033 --vram_limit=128 --scheduler_addr=$(SCHEDULER_ADDR) --scheduler_port=$(SCHEDULER_PORT) 1> $(LAYERNAME).txt 2> $(LAYERNAME)_err.txt; sshpass -p $(SSH_PASSWARD) scp -o StrictHostKeyChecking=no $(LAYERNAME)*.txt $(SCP_ADDRESS):$(SCP_PATH);"]
         #resources:
         #  limits:
         #    nvidia.com/gpu: 1
@@ -650,7 +694,11 @@ spec:
           value: wnlab@192.168.1.13
         - name: SCP_PATH
           value: ./
-        command: ["/bin/bash","-c","python3 $(LAYERNAME).py --set_gpu='true' --prev_addr='' --prev_port=30033 --next_addr='10.96.0.200' --next_port=30030 --vram_limit=608 1> $(LAYERNAME).txt 2> $(LAYERNAME)_err.txt; sshpass -p $(SSH_PASSWARD) scp -o StrictHostKeyChecking=no $(LAYERNAME)*.txt $(SCP_ADDRESS):$(SCP_PATH);"]
+        - name: SCHEDULER_ADDR
+          value: 10.96.0.252
+        - name: SCHEDULER_PORT
+          value: "30058"
+        command: ["/bin/bash","-c","python3 $(LAYERNAME).py --set_gpu='true' --prev_addr='' --prev_port=30033 --next_addr='10.96.0.200' --next_port=30030 --vram_limit=608 --scheduler_addr=$(SCHEDULER_ADDR) --scheduler_port=$(SCHEDULER_PORT) 1> $(LAYERNAME).txt 2> $(LAYERNAME)_err.txt; sshpass -p $(SSH_PASSWARD) scp -o StrictHostKeyChecking=no $(LAYERNAME)*.txt $(SCP_ADDRESS):$(SCP_PATH);"]
         #resources:
         #  limits:
         #    nvidia.com/gpu: 1
@@ -702,7 +750,11 @@ spec:
           value: wnlab@192.168.1.13
         - name: SCP_PATH
           value: ./
-        command: ["/bin/bash","-c","python3 $(LAYERNAME).py --set_gpu='true' --prev_addr='' --prev_port=30041 --next_addr='10.96.0.242' --next_port=30042 --vram_limit=128 1> $(LAYERNAME).txt 2> $(LAYERNAME)_err.txt; sshpass -p $(SSH_PASSWARD) scp -o StrictHostKeyChecking=no $(LAYERNAME)*.txt $(SCP_ADDRESS):$(SCP_PATH);"]
+        - name: SCHEDULER_ADDR
+          value: 10.96.0.251
+        - name: SCHEDULER_PORT
+          value: "30050"
+        command: ["/bin/bash","-c","python3 $(LAYERNAME).py --set_gpu='true' --prev_addr='' --prev_port=30041 --next_addr='10.96.0.242' --next_port=30042 --vram_limit=128 --scheduler_addr=$(SCHEDULER_ADDR) --scheduler_port=$(SCHEDULER_PORT) 1> $(LAYERNAME).txt 2> $(LAYERNAME)_err.txt; sshpass -p $(SSH_PASSWARD) scp -o StrictHostKeyChecking=no $(LAYERNAME)*.txt $(SCP_ADDRESS):$(SCP_PATH);"]
         #resources:
         #  limits:
         #    nvidia.com/gpu: 1
@@ -754,7 +806,11 @@ spec:
           value: wnlab@192.168.1.13
         - name: SCP_PATH
           value: ./
-        command: ["/bin/bash","-c","python3 $(LAYERNAME).py --set_gpu='true' --prev_addr='' --prev_port=30042 --next_addr='10.96.0.200' --next_port=30040 --vram_limit=512 1> $(LAYERNAME).txt 2> $(LAYERNAME)_err.txt; sshpass -p $(SSH_PASSWARD) scp -o StrictHostKeyChecking=no $(LAYERNAME)*.txt $(SCP_ADDRESS):$(SCP_PATH);"]
+        - name: SCHEDULER_ADDR
+          value: 10.96.0.251
+        - name: SCHEDULER_PORT
+          value: "30051"
+        command: ["/bin/bash","-c","python3 $(LAYERNAME).py --set_gpu='true' --prev_addr='' --prev_port=30042 --next_addr='10.96.0.200' --next_port=30040 --vram_limit=512 --scheduler_addr=$(SCHEDULER_ADDR) --scheduler_port=$(SCHEDULER_PORT) 1> $(LAYERNAME).txt 2> $(LAYERNAME)_err.txt; sshpass -p $(SSH_PASSWARD) scp -o StrictHostKeyChecking=no $(LAYERNAME)*.txt $(SCP_ADDRESS):$(SCP_PATH);"]
         #resources:
         #  limits:
         #    nvidia.com/gpu: 1
