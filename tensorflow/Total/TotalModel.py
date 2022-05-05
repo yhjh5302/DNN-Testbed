@@ -1,5 +1,6 @@
 from common import *
 from VGGNetModel import *
+from AlexNetModel import *
 
 def processing(inputs, model):
     outputs = model(inputs)
@@ -12,8 +13,9 @@ PARTITION_INFOS={
         ('classifier1', 'classifier2', 'classifier3')  # partition 3
     ),
     "AlexNet":(
-        (),
-
+        ('features_1', 'features_2'),
+        ('features_3', 'features_4', 'features_5'),
+        ('classifier_1', 'classifier_2', 'classifier_3')
     ),
     "NiN": (
         (),
@@ -29,7 +31,7 @@ PARTITION_INFOS={
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Tensorflow')
     # parser.add_argument('--layer_list', default=['features1', 'features2', 'features3', 'features4', 'features5', 'classifier1', 'classifier2', 'classifier3'], nargs='+', type=str, help='layer list for this application')
-    parser.add_argument('--deployed_lst', default=[['VGG', 0, 1, 2], ['AlexNet', 0, 1, 2], ['NiN', 0, 1, 2], ['ResNet', 0, 1, 2]], nargs='+', type=str, help='layer list for this application')
+    parser.add_argument('--deployed_lst', default=[['VGG', "0", "1", "2"], ['AlexNet', "0", "1", "2"], ['NiN', "0", "1", "2"], ['ResNet', "0", "1", "2"]], nargs='+', type=str, help='layer list for this application')
     parser.add_argument('--prev_addr', default='10.96.0.231', type=str, help='Previous node address')
     parser.add_argument('--prev_port', default=30031, type=int, help='Previous node port')
     parser.add_argument('--next_addr', default='10.96.0.230', type=str, help='Next node address')
@@ -50,12 +52,24 @@ if __name__ == "__main__":
         tf.config.set_visible_devices([], 'GPU')
 
     # model loading
-    model = VGGNet_layer(name='VGG-16', layer_list=args.layer_list)
+    # model = VGGNet_layer(name='VGG-16', layer_list=args.layer_list)
+    model_lst = list()
+    for deployed_info in args.deployed_lst:
+        layer_list = list()
+        for part_idx in deployed_info[1:]:
+            layer_list.append(PARTITION_INFOS[int(part_idx)])
+        if deployed_info[0] == "VGG":
+            model = VGGNet_layer(name='VGG-16', layer_list=layer_list)
+        
+        elif deployed_info[0] == "AlexNet":
+            model = AlexNet_layer(name='AlexNet', layer_list=layer_list)
 
-    # for cuDNN loading
-    model(model.get_random_input())
 
-    print('Pretrained model loading done!')
+        # for cuDNN loading
+        model(model.get_random_input())
+
+        print('Pretrained model loading done!')
+        model_lst.append(model)
 
     prev_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     prev_sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
