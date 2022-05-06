@@ -187,6 +187,7 @@ if __name__ == '__main__':
 
     # for cudnn load
     alex_layer1(x_test[0:1])
+    vgg_layer1(x_test[0:1])
 
     batch_size = 1
     max = math.ceil(1000/batch_size)
@@ -222,11 +223,6 @@ if __name__ == '__main__':
     print("alex_layer2 took {:.3f} ms".format(l2))
     print("alex_layer3 took {:.3f} ms".format(l3))
 
-    # for cudnn load
-    vgg_layer1(x_test[0:1])
-
-    batch_size = 1
-    max = math.ceil(1000/batch_size)
     correct, l1, l2, l3 = 0, 0, 0, 0
     for i in range(max):
         start = i * batch_size
