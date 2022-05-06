@@ -1,5 +1,6 @@
 import tensorflow as tf
 import numpy as np
+import pickle
 import socket
 import io
 import time
@@ -63,7 +64,8 @@ def send_data(sock, data_list, lock, _stop_event):
             with lock:
                 data = data_list.pop(0)
             f = io.BytesIO()
-            np.save(f, data, allow_pickle=True)
+            # np.save(f, data, allow_pickle=True)
+            pickle.dump(data, f, pickle.HIGHEST_PROTOCOL)
             f.seek(0)
             out = f.read()
             sock.send(str(len(out)).encode())
@@ -85,7 +87,8 @@ def recv_schedule(sock):
 
 def send_input(sock, data, _stop_event):
     f = io.BytesIO()
-    np.save(f, data, allow_pickle=True)
+    # np.save(f, data, allow_pickle=True)
+    pickle.dump(data, f, pickle.HIGHEST_PROTOCOL)
     f.seek(0)
     out = f.read()
     sock.send(str(len(out)).encode())
@@ -104,4 +107,5 @@ def recv_output(conn, _stop_event):
     while len(data) < length:
         data.extend(conn.recv(4096))
     conn.send('Done'.encode())
-    return np.load(io.BytesIO(data), allow_pickle=True)
+    # return np.load(io.BytesIO(data), allow_pickle=True)
+    return pickle.load(io.BytesIO(data))
