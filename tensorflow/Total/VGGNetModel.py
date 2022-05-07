@@ -13,14 +13,14 @@ class VGGNet_layer(keras.Model):
                 keras.layers.Conv2D(filters=64, kernel_size=(3,3), activation='relu', padding='same'),
                 keras.layers.MaxPool2D(pool_size=(2,2), strides=2),
             ], name='features1')
-            self.features1.load_weights('./VGGNet_features1_weights')
+            # self.features1.load_weights('./VGGNet_features1_weights')
         if 'features2' in self.layer_list:
             self.features2 = keras.models.Sequential([
                 keras.layers.Conv2D(filters=128, kernel_size=(3,3), activation='relu', padding='same'),
                 keras.layers.Conv2D(filters=128, kernel_size=(3,3), activation='relu', padding='same'),
                 keras.layers.MaxPool2D(pool_size=(2,2), strides=2),
             ], name='features2')
-            self.features2.load_weights('./VGGNet_features2_weights')
+            # self.features2.load_weights('./VGGNet_features2_weights')
         if 'features3' in self.layer_list:
             self.features3 = keras.models.Sequential([
                 keras.layers.Conv2D(filters=256, kernel_size=(3,3), activation='relu', padding='same'),
@@ -28,7 +28,7 @@ class VGGNet_layer(keras.Model):
                 keras.layers.Conv2D(filters=256, kernel_size=(3,3), activation='relu', padding='same'),
                 keras.layers.MaxPool2D(pool_size=(2,2), strides=2),
             ], name='features3')
-            self.features3.load_weights('./VGGNet_features3_weights')
+            # self.features3.load_weights('./VGGNet_features3_weights')
         if 'features4' in self.layer_list:
             self.features4 = keras.models.Sequential([
                 keras.layers.Conv2D(filters=512, kernel_size=(3,3), activation='relu', padding='same'),
@@ -36,7 +36,7 @@ class VGGNet_layer(keras.Model):
                 keras.layers.Conv2D(filters=512, kernel_size=(3,3), activation='relu', padding='same'),
                 keras.layers.MaxPool2D(pool_size=(2,2), strides=2),
             ], name='features4')
-            self.features4.load_weights('./VGGNet_features4_weights')
+            # self.features4.load_weights('./VGGNet_features4_weights')
         if 'features5' in self.layer_list:
             self.features5 = keras.models.Sequential([
                 keras.layers.Conv2D(filters=512, kernel_size=(3,3), activation='relu', padding='same'),
@@ -44,25 +44,25 @@ class VGGNet_layer(keras.Model):
                 keras.layers.Conv2D(filters=512, kernel_size=(3,3), activation='relu', padding='same'),
                 keras.layers.MaxPool2D(pool_size=(2,2), strides=2),
             ], name='features5')
-            self.features5.load_weights('./VGGNet_features5_weights')
+            # self.features5.load_weights('./VGGNet_features5_weights')
         if 'classifier1' in self.layer_list:
             self.flatten = keras.layers.Flatten()
             self.classifier1 = keras.models.Sequential([
                 keras.layers.Dense(4096, activation='relu'),
                 keras.layers.Dropout(0.5),
             ], name='classifier1')
-            self.classifier1.load_weights('./VGGNet_classifier1_weights')
+            # self.classifier1.load_weights('./VGGNet_classifier1_weights')
         if 'classifier2' in self.layer_list:
             self.classifier2 = keras.models.Sequential([
                 keras.layers.Dense(4096, activation='relu'),
                 keras.layers.Dropout(0.5),
             ], name='classifier2')
-            self.classifier2.load_weights('./VGGNet_classifier2_weights')
+            # self.classifier2.load_weights('./VGGNet_classifier2_weights')
         if 'classifier3' in self.layer_list:
             self.classifier3 = keras.models.Sequential([
                 keras.layers.Dense(1000),
             ], name='classifier3')
-            self.classifier3.load_weights('./VGGNet_classifier3_weights')
+            # self.classifier3.load_weights('./VGGNet_classifier3_weights')
 
     def get_random_input(self):
         if 'features1' in self.layer_list:

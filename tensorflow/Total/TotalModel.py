@@ -82,7 +82,7 @@ if __name__ == "__main__":
     parser.add_argument('--prev_addr', default='10.96.0.231', type=str, help='Previous node address')
     parser.add_argument('--prev_port', default=30031, type=int, help='Previous node port')
     parser.add_argument('--next_addr_lst', default=[0,0,0,1,1,0,1,0], nargs='+', type=int, help='Next node address')
-    parser.add_argument('--next_port_lst', default=30030 , nargs='+',  type=int, help='Next node port')
+    parser.add_argument('--next_port', default=30030,  type=int, help='Next node port')
     parser.add_argument('--scheduler_addr', default='10.96.0.250', type=str, help='Scheduler address')
     parser.add_argument('--scheduler_port', default=30050, type=int, help='Scheduler port')
     parser.add_argument('--set_gpu', default=True, type=str2bool, help='If you want to use GPU, set "True"')
