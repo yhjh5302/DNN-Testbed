@@ -1,0 +1,81 @@
+import socket
+import argparse
+import json
+import io
+import pickle
+import numpy as np
+import time
+
+
+if __name__=="__main__":
+    parser = argparse.ArgumentParser(description='socket test')
+    parser.add_argument('--server', action="store_true", help='act as server')
+    parser.add_argument('--server_ip', type=str, default="localhost", help='act as server')
+    parser.add_argument('--port', type=int, default=1234, help='act as server')
+
+    args = parser.parse_args()
+
+    if args.server:
+        server_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        server_sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        server_sock.bind(("", args.port))
+        server_sock.listen()
+        conn, addr = server_sock.accept()
+        print('server is ready, Connected by', addr)
+
+        while 1:
+            length_data =conn.recv(4096)
+            print("receive length data, ", length_data)
+            length_data = length_data.decode()
+            length = int(length_data)
+            start = time.time()
+            conn.send('Ack'.encode())
+            data = bytearray()
+            while len(data) < length:
+                data.extend(conn.recv(4096))
+            conn.send('Done'.encode())
+            recv_data = pickle.load(io.BytesIO(data))
+            print("receive data", recv_data)
+            print("id:{} ,from: {}, array: {}".format(recv_data[0], recv_data[1], recv_data[2]))
+
+
+    else:
+        client_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        client_sock.settimeout(1000) # 1000 seconds
+        client_sock.connect((args.server_ip, args.port))
+        print('client is ready, Connected by', args.server_ip)
+        id = -1
+        start = 0
+        while 1:
+            data_str = input("input arrays: ")
+            data = json.loads(data_str)
+            arr = np.array(data)
+            id += 1
+            send_data = (id, start, data)
+            print("send data:", send_data)
+            f = io.BytesIO()
+            # np.save(f, data, allow_pickle=True)
+            pickle.dump(send_data, f, pickle.HIGHEST_PROTOCOL)
+            f.seek(0)
+            out = f.read()
+            print("data size: {}".format(len(out)))
+            
+            client_sock.send(str(len(out)).encode())
+            Ack = client_sock.recv(4096).decode()
+            if Ack == 'Ack':
+                client_sock.sendall(out)
+            
+            Ack = client_sock.recv(4096).decode()
+            if Ack != 'Done':
+                print('No Done')
+                client_sock.close()
+                break
+
+        
+
+
+
+
+
+
+

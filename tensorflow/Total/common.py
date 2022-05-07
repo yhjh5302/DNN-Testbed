@@ -38,7 +38,7 @@ def bring_data(data_list, lock, _stop_event, scheduler_sock=None):
             else:
                 time.sleep(0.001) # wait for data download
 
-def recv_data(conn, recv_data_list, recv_data_lock, recv_time_list, recv_time_lock, proc_time_list, proc_time_lock, _stop_event):
+def recv_data(conn, recv_data_list, recv_data_lock, recv_time_list, recv_time_lock, proc_time_list, proc_time_lock, _stop_event, dag_man:DAGManager):
     try:
         while True:
             length = int(conn.recv(4096).decode())
@@ -49,7 +49,10 @@ def recv_data(conn, recv_data_list, recv_data_lock, recv_time_list, recv_time_lo
                 data.extend(conn.recv(4096))
             conn.send('Done'.encode())
             with recv_data_lock:
-                recv_data_list.append(np.load(io.BytesIO(data), allow_pickle=True))
+                inputs = pickle.load(io.BytesIO(data))
+                result = dag_man.recv_data(inputs)
+                if result is not None:
+                    recv_data_list.append(result)
             with recv_time_lock:
                 recv_time_list.append(time.time() - start)
             with proc_time_lock:

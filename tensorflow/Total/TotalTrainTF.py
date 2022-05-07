@@ -6,12 +6,12 @@ class AlexNet(keras.Model):
         super(AlexNet, self).__init__(name=name)
         self.resize = keras.layers.Resizing(height=224, width=224, interpolation='nearest', name='resize')
         self.features_1 = keras.models.Sequential([
-            keras.layers.Conv2D(filters=64, kernel_size=(11,11), strides=4, activation='relu', padding='same', input_shape=(224,224,3)),
+            keras.layers.Conv2D(filters=96, kernel_size=(11,11), strides=4, activation='relu', padding='same', input_shape=(224,224,3)),
             keras.layers.BatchNormalization(),
             keras.layers.MaxPool2D(pool_size=(3,3), strides=2),
         ], name='features_1')
         self.features_2 = keras.models.Sequential([
-            keras.layers.Conv2D(filters=192, kernel_size=(5,5), strides=1, activation='relu', padding='same', input_shape=(27,27,64)),
+            keras.layers.Conv2D(filters=192, kernel_size=(5,5), strides=1, activation='relu', padding='same', input_shape=(27,27,96)),
             keras.layers.BatchNormalization(),
             keras.layers.MaxPool2D(pool_size=(3,3), strides=2),
         ], name='features_2')
