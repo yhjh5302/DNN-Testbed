@@ -15,7 +15,7 @@ class AlexNet_layer(keras.Model):
                 keras.layers.BatchNormalization(),
                 keras.layers.MaxPool2D(pool_size=(3,3), strides=2),
             ], name='features_1_1')
-            self.features_1_1.load_weights('./alexnet_features_1_1_weights')
+            # self.features_1_1.load_weights('./alexnet_features_1_1_weights')
         
         if 'features_1_2' in self.layer_list:            
             self.features_1_2 = keras.models.Sequential([
@@ -23,7 +23,7 @@ class AlexNet_layer(keras.Model):
                 keras.layers.BatchNormalization(),
                 keras.layers.MaxPool2D(pool_size=(3,3), strides=2),
             ], name='features_1_2')
-            self.features_1_2.load_weights('./alexnet_features_1_2_weights')
+            # self.features_1_2.load_weights('./alexnet_features_1_2_weights')
 
         if 'features_2_1' in self.layer_list:
             self.features_2_1 = keras.models.Sequential([
@@ -31,7 +31,7 @@ class AlexNet_layer(keras.Model):
                 keras.layers.BatchNormalization(),
                 keras.layers.MaxPool2D(pool_size=(3,3), strides=2),
             ], name='features_2_1')
-            self.features_2_1.load_weights('./alexnet_features_2_1_weights')
+            # self.features_2_1.load_weights('./alexnet_features_2_1_weights')
 
         if 'features_2_2' in self.layer_list:
             self.features_2_2 = keras.models.Sequential([
@@ -39,35 +39,35 @@ class AlexNet_layer(keras.Model):
                 keras.layers.BatchNormalization(),
                 keras.layers.MaxPool2D(pool_size=(3,3), strides=2),
             ], name='features_2_2')
-            self.features_2_2.load_weights('./alexnet_features_2_2_weights')
+            # self.features_2_2.load_weights('./alexnet_features_2_2_weights')
         
         if 'features_3_1' in self.layer_list:
             self.features_3_1 = keras.models.Sequential([
                 keras.layers.Conv2D(filters=192, kernel_size=(3,3), strides=1, activation='relu', padding='same', input_shape=(13,13,128)),
                 keras.layers.BatchNormalization(),
             ], name='features_3_1')
-            self.features_3_1.load_weights('./alexnet_features_3_1_weights')
+            # self.features_3_1.load_weights('./alexnet_features_3_1_weights')
 
         if 'features_3_2' in self.layer_list:
             self.features_3_2 = keras.models.Sequential([
                 keras.layers.Conv2D(filters=192, kernel_size=(3,3), strides=1, activation='relu', padding='same', input_shape=(13,13,128)),
                 keras.layers.BatchNormalization(),
             ], name='features_3_2')
-            self.features_3_2.load_weights('./alexnet_features_3_2_weights')
+            # self.features_3_2.load_weights('./alexnet_features_3_2_weights')
 
         if 'features_4_1' in self.layer_list:
             self.features_4_1 = keras.models.Sequential([
                 keras.layers.Conv2D(filters=128, kernel_size=(3,3), strides=1, activation='relu', padding='same', input_shape=(13,13,192)),
                 keras.layers.BatchNormalization(),
             ], name='features_4_1')
-            self.features_4_1.load_weights('./alexnet_features_4_1_weights')
+            # self.features_4_1.load_weights('./alexnet_features_4_1_weights')
         
         if 'features_4_2' in self.layer_list:
             self.features_4_2 = keras.models.Sequential([
                 keras.layers.Conv2D(filters=128, kernel_size=(3,3), strides=1, activation='relu', padding='same', input_shape=(13,13,192)),
                 keras.layers.BatchNormalization(),
             ], name='features_4_2')
-            self.features_4_2.load_weights('./alexnet_features_4_2_weights')
+            # self.features_4_2.load_weights('./alexnet_features_4_2_weights')
 
         if 'features_5_1' in self.layer_list:
             self.features_5_1 = keras.models.Sequential([
@@ -75,7 +75,7 @@ class AlexNet_layer(keras.Model):
                 keras.layers.BatchNormalization(),
                 keras.layers.MaxPool2D(pool_size=(3,3), strides=2),
             ], name='features_5_1')
-            self.features_5_1.load_weights('./alexnet_features_5_1_weights')
+            # self.features_5_1.load_weights('./alexnet_features_5_1_weights')
         
         if 'features_5_2' in self.layer_list:
             self.features_5_2 = keras.models.Sequential([
@@ -83,7 +83,7 @@ class AlexNet_layer(keras.Model):
                 keras.layers.BatchNormalization(),
                 keras.layers.MaxPool2D(pool_size=(3,3), strides=2),
             ], name='features_5_2')
-            self.features_5_2.load_weights('./alexnet_features_5_2_weights')
+            # self.features_5_2.load_weights('./alexnet_features_5_2_weights')
 
         if 'classifier_1_1' in self.layer_list:
             self.classifier_1_1 = keras.models.Sequential([
@@ -91,7 +91,7 @@ class AlexNet_layer(keras.Model):
                 keras.layers.Dense(2048, activation='relu', input_shape=(128*6*6,)),
                 keras.layers.Dropout(0.5),
             ], name='classifier_1_1')
-            self.classifier_1_1.load_weights('./alexnet_classifier_1_1_weights')
+            # self.classifier_1_1.load_weights('./alexnet_classifier_1_1_weights')
         
         if 'classifier_1_2' in self.layer_list:
             self.classifier_1_2 = keras.models.Sequential([
@@ -99,33 +99,33 @@ class AlexNet_layer(keras.Model):
                 keras.layers.Dense(2048, activation='relu', input_shape=(128*6*6,)),
                 keras.layers.Dropout(0.5),
             ], name='classifier_1_2')
-            self.classifier_1_2.load_weights('./alexnet_classifier_1_2_weights')
+            # self.classifier_1_2.load_weights('./alexnet_classifier_1_2_weights')
 
         if 'classifier_2_1' in self.layer_list:
             self.classifier_2_1 = keras.models.Sequential([
                 keras.layers.Dense(2048, activation='relu', input_shape=(2048,)),
                 keras.layers.Dropout(0.5),
             ], name='classifier_2_1')
-            self.classifier_2_1.load_weights('./alexnet_classifier_2_1_weights')
+            # self.classifier_2_1.load_weights('./alexnet_classifier_2_1_weights')
 
         if 'classifier_2_2' in self.layer_list:
             self.classifier_2_2 = keras.models.Sequential([
                 keras.layers.Dense(2048, activation='relu', input_shape=(2048,)),
                 keras.layers.Dropout(0.5),
             ], name='classifier_2_2')
-            self.classifier_2_2.load_weights('./alexnet_classifier_2_2_weights')
+            # self.classifier_2_2.load_weights('./alexnet_classifier_2_2_weights')
 
         if 'classifier_3_1' in self.layer_list:
             self.classifier_3_1 = keras.models.Sequential([
                 keras.layers.Dense(5, activation='softmax', input_shape=(2048,)),
             ], name='classifier_3_1')
-            self.classifier_3_1.load_weights('./alexnet_classifier_3_1_weights')
+            # self.classifier_3_1.load_weights('./alexnet_classifier_3_1_weights')
         
         if 'classifier_3_2' in self.layer_list:
             self.classifier_3_2 = keras.models.Sequential([
                 keras.layers.Dense(5, activation='softmax', input_shape=(2048,)),
             ], name='classifier_3_2')
-            self.classifier_3_2.load_weights('./alexnet_classifier_3_2_weights')
+            # self.classifier_3_2.load_weights('./alexnet_classifier_3_2_weights')
 
     def get_random_input(self):
         if 'features_1_1' in self.layer_list:

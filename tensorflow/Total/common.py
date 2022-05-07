@@ -38,9 +38,9 @@ def bring_data(data_list, lock, _stop_event, scheduler_sock=None):
             else:
                 time.sleep(0.001) # wait for data download
 
-def recv_data(conn, recv_data_list, recv_data_lock, recv_time_list, recv_time_lock, proc_time_list, proc_time_lock, _stop_event, dag_man:DAGManager):
+def recv_data(conn, recv_data_list, recv_data_lock, recv_time_list, recv_time_lock, proc_time_list, proc_time_lock, _stop_event, dag_man):
     try:
-        while True:
+        while True:            
             length = int(conn.recv(4096).decode())
             start = time.time()
             conn.send('Ack'.encode())

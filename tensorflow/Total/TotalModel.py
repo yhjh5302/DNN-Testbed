@@ -6,7 +6,6 @@ import numpy as np
 
 def processing(inputs, model):
     request_id = inputs[0]
-    partition_name = name
     outputs = model(inputs[-1])
     return request_id, outputs
 
@@ -19,8 +18,9 @@ PARTITION_INFOS={
     # "AlexNet-1": ('features_1', 'features_2'),
     # "AlexNet-2": ('features_3', 'features_4', 'features_5'),
     # "AlexNet-3": ('classifier_1', 'classifier_2', 'classifier_3'),
-    "AlexNet-1": ('feature_1_1', 'feature_2_1', 'feature_3_1', 'feature_4_1', 'feature_5_1', 'classifier_1_1', 'classifier_2_1', 'classifier_3_1')
-    "AlexNet-2": ('feature_1_2', 'feature_2_2', 'feature_3_2', 'feature_4_2', 'feature_5_2', 'classifier_1_2', 'classifier_2_2', 'classifier_3_2')
+    "AlexNet-in": ('input'),
+    "AlexNet-1": ('feature_1_1', 'feature_2_1', 'feature_3_1', 'feature_4_1', 'feature_5_1', 'classifier_1_1', 'classifier_2_1', 'classifier_3_1'),
+    "AlexNet-2": ('feature_1_2', 'feature_2_2', 'feature_3_2', 'feature_4_2', 'feature_5_2', 'classifier_1_2', 'classifier_2_2', 'classifier_3_2'),
     "AlexNet-out": ('output',)
     
     # "NiN": (
@@ -39,9 +39,15 @@ PARTITION_IDX_MAP={
     "VGG-2": 1,
     "VGG-3": 2,
     
+    "AlexNet-in": 2,
     "AlexNet-1": 3,
     "AlexNet-2": 4,
-    "AlexNet-3": 5,
+    "AlexNet-out": 5,
+}
+succ={
+    PARTITION_IDX_MAP['AlexNet-in']:(3,4),
+    3:(5,),
+    4:(5,),
 }
 
 
@@ -49,38 +55,39 @@ class DAGManager:
     def __init__(self):
         self.dag_infos = dict()
         self.partition_input_sample = dict()
-        self.input_num_infos = dict(
-            PARTITION_IDX_MAP['AlexNet-3']={
+        self.dag_input_indices = {
+            PARTITION_IDX_MAP['AlexNet-out']:{
                 PARTITION_IDX_MAP['AlexNet-1']:(0,2048),
                 PARTITION_IDX_MAP['AlexNet-2']:(2048,4096)
             }
-        )
-        self.recv_data = dict()
-        self.dag_input_indices = {
+        }
+        self.recv_data_dict = dict()
+        self.input_num_infos = {
+            PARTITION_IDX_MAP['AlexNet-in']: 1,
             PARTITION_IDX_MAP['AlexNet-1']: 1,
             PARTITION_IDX_MAP['AlexNet-2']: 1,
-            PARTITION_IDX_MAP['AlexNet-3']: 2
+            PARTITION_IDX_MAP['AlexNet-out']: 2
         }
 
     def recv_data(self, inputs):
         req_id = inputs[0]
-        source_partion = input[1]
+        source_partion = inputs[1]
         target_partition = inputs[2]
         data = inputs[3]
-
         if self.input_num_infos[target_partition] == 1:
             return inputs
         else:
-            if req_id not in recv_data:
-                recv_data[req_id] = [1, np.zeros_like(self.partition_input_sample[target_partition])]
+            if req_id not in self.recv_data_dict:
+                self.recv_data_dict[req_id] = [1, np.zeros_like(self.partition_input_sample[target_partition])]
                 
             else:
-                recv_data[req_id]['num'] += 1
-            recv_data[req_id][1][:,:,:,self.dag_input_indices[target_partition][source_partion][0]:self.dag_input_indices[target_partition][source_partion][1]] = data[:]  #chk demesion
+                self.recv_data_dict[req_id]['num'] += 1
+            self.recv_data_dict[req_id][1][:,:,:,self.dag_input_indices[target_partition][source_partion][0]:self.dag_input_indices[target_partition][source_partion][1]] = data[:]  #chk demesion
           
-            if recv_data[req_id]['num'] == self.input_num_infos[target_partition]:
-                result = (req_id, source_partion, target_partition, recv_data[req_id][1])
-                del recv_data[req_id]
+            if self.recv_data_dict[req_id]['num'] == self.input_num_infos[target_partition]:
+                result = (req_id, source_partion, target_partition, self.recv_data_dict[req_id][1])
+                del self.recv_data_dict[req_id]
+                print("working!!!")
                 return result
             else:
                 return None
@@ -94,6 +101,7 @@ if __name__ == "__main__":
     parser.add_argument('--device_addr_lst', default=['10.96.0.231', '10.96.0.232','10.96.0.233','10.96.0.234','10.96.0.235','10.96.0.236'], nargs='+', type=str, help='address list of kubernetes cluster')
     parser.add_argument('--prev_addr', default='10.96.0.231', type=str, help='Previous node address')
     parser.add_argument('--prev_port', default=30031, type=int, help='Previous node port')
+    parser.add_argument('--next_addr', default="localhost", type=str, help='Next node address')
     parser.add_argument('--next_addr_lst', default=[0,0,0,1,1,0,1,0], nargs='+', type=int, help='Next node address')
     parser.add_argument('--next_port', default=30030,  type=int, help='Next node port')
     parser.add_argument('--scheduler_addr', default='10.96.0.250', type=str, help='Scheduler address')
@@ -142,11 +150,11 @@ if __name__ == "__main__":
     next_sock.connect((args.next_addr, args.next_port))
     print('Next node is ready, Connected by', args.next_addr)
 
-    if args.set_gpu:
-        scheduler_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        scheduler_sock.settimeout(1000) # 1000 seconds
-        scheduler_sock.connect((args.scheduler_addr, args.scheduler_port))
-        print('Scheduler is ready, Connected by', args.scheduler_addr)
+    # if args.set_gpu:
+    #     scheduler_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    #     scheduler_sock.settimeout(1000) # 1000 seconds
+    #     scheduler_sock.connect((args.scheduler_addr, args.scheduler_port))
+    #     print('Scheduler is ready, Connected by', args.scheduler_addr)
 
     # threading.Thread(target=start_partition_sorket, args=(p, next_sock))
     
@@ -158,28 +166,26 @@ if __name__ == "__main__":
     proc_time_list = []
     proc_time_lock = threading.Lock()
 
-    for partition_name in args.deployed_lst:
-        recv_data_dict[PARTITION_IDX_MAP[partition_name]] = 
-
-
     recv_data_lock = threading.Lock()
     send_data_lock = threading.Lock()
     
     _stop_event = threading.Event()
-    threading.Thread(target=recv_data, args=(p, recv_data_dict, recv_data_lock, recv_time_list, recv_time_lock, proc_time_list, proc_time_lock, _stop_event, dag_man)).start()
-    threading.Thread(target=send_data, args=(next_sock, send_data_list, send_data_lock, _stop_event)).start()
+    threading.Thread(target=recv_data, args=(p, recv_data_list, recv_data_lock, recv_time_list, recv_time_lock, proc_time_list, proc_time_lock, _stop_event, dag_man)).start()
+    threading.Thread(target=send_data, args=(next_sock, send_data_list, send_data_lock, _stop_event)).start()  # todo change send datas
 
     while True:
-        if args.set_gpu:
-            inputs = bring_data(recv_data_list, recv_data_lock, _stop_event, scheduler_sock)
-            request_id, outputs = processing(inputs, model)
-            send_done(scheduler_sock)
-        else:
-            inputs = bring_data(recv_data_list, recv_data_lock, _stop_event)
-            request_id, outputs = processing(inputs, model)
+        # if args.set_gpu:
+        #     inputs = bring_data(recv_data_list, recv_data_lock, _stop_event, scheduler_sock)
+        #     request_id, outputs = processing(inputs, model)
+        #     send_done(scheduler_sock)
+        # else:
+        #     inputs = bring_data(recv_data_list, recv_data_lock, _stop_event)
+        #     request_id, outputs = processing(inputs, model)
+        inputs = bring_data(recv_data_list, recv_data_lock, _stop_event)
+        request_id, outputs = processing(inputs, model)
         with send_data_lock:
-            for succ in succ[inputs[2]]:
-                next_inputs = (request_id, inputs[2], succ, outputs)  # request id, source partition id, target partition id, output
+            for succ_partition in succ[inputs[2]]:
+                next_inputs = (request_id, inputs[2], succ_partition, outputs)  # request id, source partition id, target partition id, output
                 send_data_list.append(next_inputs)
 
         proc_end = time.time()
