@@ -7,8 +7,8 @@ class AlexNet_layer(keras.Model):
     def __init__(self, name=None, layer_list=None):
         super(AlexNet_layer, self).__init__(name=name)
         self.layer_list = layer_list
-        if 'input' in self.layer_list:
-            self.resize = keras.layers.Resizing(height=224, width=224, interpolation='nearest', name='resize')
+        # if 'input' in self.layer_list:
+        #     self.resize = keras.layers.Resizing(height=224, width=224, interpolation='nearest', name='resize')
 
         if 'features_1_1' in self.layer_list:            
             self.features_1_1 = keras.models.Sequential([
@@ -170,7 +170,7 @@ class AlexNet_layer(keras.Model):
         if type(x) in (tuple, list):
             x = np.concatenate(x, axis=-1)
         if 'input' in self.layer_list:
-            x = self.resize(x)
+            x = tf.image.resize(x, size=(224,224), method='nearest')
         if 'features_1_1' in self.layer_list:            
             x_1 = self.features_1_1(x)
         if 'features_2_1' in self.layer_list:
