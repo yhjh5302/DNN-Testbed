@@ -5,6 +5,7 @@ from ResNetModel import *
 from NiNModel import *
 import numpy as np
 from time import sleep
+from copy import deepcopy
 
 from dag_config import *
 
@@ -152,18 +153,23 @@ if __name__ == "__main__":
         T_tr = inputs[1]
         inputs = inputs[0]
         idx = inputs[2]
-        request_id, outputs = processing(inputs, model_dict[idx]) 
-        proc_end = time.time()
-        took = proc_end - start                   
+        if type(inputs[-1]) in (list, tuple) and idx >= 6:
+            print(inputs[-1])
+        request_id, outputs = processing(inputs, model_dict[idx])
+        if type(outputs) in (list, tuple):
+            outputs = outputs[0]  # remove short cut
 
-        weights[idx] = max(weights[idx] - took, 0)           # change index
+        proc_end = time.time()
+        T_cp = proc_end - start                   
+
+        weights[idx] = max(weights[idx] - T_cp, 0)           # change index
         
         if inputs[2] in DAG_SUCCESSORS:
             for succ_partition in DAG_SUCCESSORS[inputs[2]]:
                 if len(DAG_SUCCESSORS[inputs[2]]) == 1:
                     next_inputs = (request_id, inputs[2], succ_partition, outputs)
                 else:
-                    next_inputs = (request_id, inputs[2], succ_partition, np.copy(outputs))
+                    next_inputs = (request_id, inputs[2], succ_partition, deepcopy(outputs))
                 deployment_idx = partition_location[succ_partition] # todo find idx
                 print("deployment_idx", deployment_idx)
                 if deployment_idx > -1:
@@ -184,7 +190,6 @@ if __name__ == "__main__":
             # todo transmission time
             # with recv_time_lock:
             #     T_tr = recv_time_list.pop(0)
-            T_cp = took
         else:
             with dev_send_lock_list[args.generator_idx]: # send return
                 result_packet = (request_id, inputs[2], -1, outputs)

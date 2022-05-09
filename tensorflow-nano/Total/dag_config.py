@@ -16,23 +16,23 @@ PARTITION_INFOS={
     "VGG": ('features1', 'features2', 'features3', 'features4', 'features5', 'classifier1', 'classifier2', 'classifier3'),
     "NiN": ("features_1", 'features_2', 'features_3'),
     "ResNet-in": ('input',),
-    "ResNet-CNN_1_2": ('CNN_1_2',), 
-    "ResNet-CNN_2_1": ('CNN_2_1',), 
-    "ResNet-CNN_3_2": ('CNN_3_2',), 
-    "ResNet-CNN_4_1": ('CNN_4_1',), 
-    "ResNet-CNN_5_2": ('CNN_5_2',), 
-    "ResNet-CNN_6_1": ('CNN_6_1',), 
-    "ResNet-CNN_7_2": ( 'CNN_7_2',),
-    "ResNet-CNN_8_1": ('CNN_8_1',), 
-    "ResNet-CNN_9_2": ('CNN_9_2',),
-    "ResNet-CNN_10_1": ('CNN_10_1',), 
-    "ResNet-CNN_11_2": ('CNN_11_2',),
-    "ResNet-CNN_12_1": ('CNN_12_1',), 
-    "ResNet-CNN_13_2": ('CNN_13_2',),
-    "ResNet-CNN_14_1": ('CNN_14_1',), 
-    "ResNet-CNN_15_2": ('CNN_15_2',), 
-    "ResNet-CNN_16_1": ('CNN_16_1',), 
-    "ResNet-CNN_17": ('CNN_17',),
+    "ResNet-CNN_1_2": ('cnn_1_2',), 
+    "ResNet-CNN_2_1": ('cnn_2_1',), 
+    "ResNet-CNN_3_2": ('cnn_3_2',), 
+    "ResNet-CNN_4_1": ('cnn_4_1',), 
+    "ResNet-CNN_5_2": ('cnn_5_2',), 
+    "ResNet-CNN_6_1": ('cnn_6_1',), 
+    "ResNet-CNN_7_2": ('cnn_7_2',),
+    "ResNet-CNN_8_1": ('cnn_8_1',), 
+    "ResNet-CNN_9_2": ('cnn_9_2',),
+    "ResNet-CNN_10_1": ('cnn_10_1',), 
+    "ResNet-CNN_11_2": ('cnn_11_2',),
+    "ResNet-CNN_12_1": ('cnn_12_1',), 
+    "ResNet-CNN_13_2": ('cnn_13_2',),
+    "ResNet-CNN_14_1": ('cnn_14_1',), 
+    "ResNet-CNN_15_2": ('cnn_15_2',), 
+    "ResNet-CNN_16_1": ('cnn_16_1',), 
+    "ResNet-CNN_17": ('cnn_17',),
 }
 
 
@@ -126,21 +126,21 @@ DAG_SUCCESSORS = {
 
 MODEL_IDX = {
     'alexnet':0,
-    'vgg':1,
+    'vggnet':1,
     'nin':2,
     'resnet':3
 }
 
 MODEL_START_PARTITION = {
     'alexnet':0,
-    'vgg':4,
+    'vggnet':4,
     'nin':5,
     'resnet':6
 }
 
 MODEL_END_PARTITION = {
     'alexnet':3,
-    'vgg':4,
+    'vggnet':4,
     'nin':5,
     'resnet':23
 }
@@ -206,6 +206,8 @@ class DAGManager:
                 #         self.recv_data_dict[req_id][1][self.dag_input_indices[target_partition][source_partion][0]:self.dag_input_indices[target_partition][source_partion][1],:] = data[:]  #chk demesion
                 #     else:
                 #         self.recv_data_dict[req_id][1][self.dag_input_indices[target_partition][source_partion][0]:self.dag_input_indices[target_partition][source_partion][1],:,:,:] = data[:]  #chk demesion
+            if type(data) in (list, tuple):
+                print("wrong type")
             self.recv_data_dict[req_id][1][self.dag_input_order[target_partition][source_partion]] = data
           
             if self.recv_data_dict[req_id][0] == self.input_num_infos[target_partition]:

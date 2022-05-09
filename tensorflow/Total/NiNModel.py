@@ -43,7 +43,7 @@ class NiN_layer(keras.Model):
 
     def get_random_input(self):
         if 'features_1' in self.layer_list:
-            return np.zeros((1,26,26,96))
+            return np.zeros((1,224,224,3))
         elif 'features_2' in self.layer_list:
             return np.zeros((1, 12, 12, 256))
         elif 'features_3' in self.layer_list:
