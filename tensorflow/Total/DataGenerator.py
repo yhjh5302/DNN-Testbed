@@ -57,11 +57,15 @@ if __name__ == "__main__":
     parser.add_argument('--resv_port_list', default=[30030, 30030], nargs='+', type=int, help='receive port')
     parser.add_argument('--send_port_list', default=[30031, 30031], nargs='+', type=int, help='send port')
     parser.add_argument('--device_index', default=0, type=int, help='device index for device')
-    parser.add_argument('--partition_location', default=[1,1,1,1,1,1,1,1], nargs='+', type=int, help='deployed device number')
+    parser.add_argument('--partition_location', default=[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1], nargs='+', type=int, help='deployed device number')
     parser.add_argument('--alexnet_block', action='store_true', help='block?')
-    parser.add_argument('--vggnet_block', action='store_false', help='block?')
+    parser.add_argument('--vggnet_block', action='store_true', help='block?')
+    parser.add_argument('--nin_block', action='store_true', help='block?')
+    parser.add_argument('--resnet_block', action='store_true', help='block?')
     parser.add_argument('--alexnet_arrival_rate', default=1, type=int, help='arrival rate')
     parser.add_argument('--vggnet_arrival_rate', default=1, type=int, help='arrival rate')
+    parser.add_argument('--nin_arrival_rate', default=1, type=int, help='arrival rate')
+    parser.add_argument('--resnet_arrival_rate', default=1, type=int, help='arrival rate')
     parser.add_argument('--vram_limit', default=0, type=int, help='Next node port')
     args = parser.parse_args()
 
@@ -128,6 +132,27 @@ if __name__ == "__main__":
         procs.append(threading.Thread(target=image_sender, args=("vggnet", dev_send_sock_list[dev_id], dev_send_lock_list[dev_id], images, labels, vggnet_label_list, vggnet_label_lock, vggnet_time_dict, vggnet_time_lock, args.vggnet_arrival_rate, _stop_event)))
         dev_id = args.partition_location[MODEL_END_PARTITION['vggnet']]
         procs.append(threading.Thread(target=image_recver, args=("vggnet", dev_resv_sock_list[dev_id], vggnet_label_list, vggnet_label_lock, vggnet_time_dict, vggnet_time_lock, _stop_event)))
+
+    if args.nin_block == False:
+        nin_label_list = []
+        nin_time_dict = dict()
+        nin_label_lock = threading.Lock()
+        nin_time_lock = threading.Lock()
+        dev_id = args.partition_location[MODEL_START_PARTITION['nin']]
+        procs.append(threading.Thread(target=image_sender, args=("nin", dev_send_sock_list[dev_id], dev_send_lock_list[dev_id], images, labels, nin_label_list, nin_label_lock, nin_time_dict, nin_time_lock, args.nin_arrival_rate, _stop_event)))
+        dev_id = args.partition_location[MODEL_END_PARTITION['nin']]
+        procs.append(threading.Thread(target=image_recver, args=("nin", dev_resv_sock_list[dev_id], nin_label_list, nin_label_lock, nin_time_dict, nin_time_lock, _stop_event)))
+
+    if args.resnet_block == False:
+        resnet_label_list = []
+        resnet_time_dict = dict()
+        resnet_label_lock = threading.Lock()
+        resnet_time_lock = threading.Lock()
+        dev_id = args.partition_location[MODEL_START_PARTITION['resnet']]
+        procs.append(threading.Thread(target=image_sender, args=("resnet", dev_send_sock_list[dev_id], dev_send_lock_list[dev_id], images, labels, resnet_label_list, resnet_label_lock, resnet_time_dict, resnet_time_lock, args.resnet_arrival_rate, _stop_event)))
+        dev_id = args.partition_location[MODEL_END_PARTITION['resnet']]
+        procs.append(threading.Thread(target=image_recver, args=("resnet", dev_resv_sock_list[dev_id], resnet_label_list, resnet_label_lock, resnet_time_dict, resnet_time_lock, _stop_event)))
+    
 
     for proc in procs:
         proc.start()

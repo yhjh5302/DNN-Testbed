@@ -1,6 +1,8 @@
 from common import *
 from VGGNetModel import *
 from AlexNetModel import *
+from ResNetModel import *
+from NiNModel import *
 import numpy as np
 from time import sleep
 
@@ -20,16 +22,27 @@ def processing(inputs, model):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Tensorflow')
     # parser.add_argument('--layer_list', default=['features1', 'features2', 'features3', 'features4', 'features5', 'classifier1', 'classifier2', 'classifier3'], nargs='+', type=str, help='layer list for this application')
-    parser.add_argument('--deployed_list', default=["AlexNet-in", "AlexNet-1", "AlexNet-2", "AlexNet-out"], nargs='+', type=str, help='layer list for this application')
+    parser.add_argument('--deployed_list', default=[
+        "AlexNet-in", "AlexNet-1", "AlexNet-2", "AlexNet-out", 
+        "VGG", "NiN", 
+        "ResNet-in", "ResNet-CNN_1_2", "ResNet-CNN_2_1", "ResNet-CNN_3_2", 
+        "ResNet-CNN_4_1", "ResNet-CNN_5_2", "ResNet-CNN_6_1", "ResNet-CNN_7_2", 
+        "ResNet-CNN_8_1", "ResNet-CNN_9_2", "ResNet-CNN_10_1", "ResNet-CNN_11_2", 
+        "ResNet-CNN_12_1", "ResNet-CNN_13_2", "ResNet-CNN_14_1", "ResNet-CNN_15_2", 
+        "ResNet-CNN_16_1", "ResNet-CNN_17"], nargs='+', type=str, help='layer list for this application')
     parser.add_argument('--device_index', default=1, type=int, help='device index for device')
     parser.add_argument('--device_addr_list', default=['localhost', 'localhost'], nargs='+', type=str, help='address list of kubernetes cluster')
     parser.add_argument('--resv_port_list', default=[30031, 30031], nargs='+', type=int, help='receive port')
     parser.add_argument('--send_port_list', default=[30030, 30031], nargs='+', type=int, help='send port')
-    parser.add_argument('--partition_location', default=[1,1,1,1,1,1,1,1], nargs='+', type=int, help='deployed device number')
+    parser.add_argument('--partition_location', default=[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1], nargs='+', type=int, help='deployed device number')
     parser.add_argument('--generator_idx', default=0, type=int, help='generator container idx')
     parser.add_argument('--set_gpu', default=True, type=str2bool, help='If you want to use GPU, set "True"')
     parser.add_argument('--vram_limit', default=1024*5, type=int, help='Vram limitation')
-    parser.add_argument('--p', default=[0.25, 0.25, 0.25, 0.25], nargs='+', type=float, help='percentage of time to use, total sum must be 1')
+    parser.add_argument('--p', default=[
+        0.02481079, 0.02233019, 0.02436261, 0.02627764, 0.0274137, 0.02624875, 
+        0.02336616, 0.02264515, 0.02113937, 0.02546869, 0.02113972, 0.0260701,
+        0.02474534, 0.02531103, 0.02335365, 0.02519561, 0.02310146, 0.02305768, 
+        0.02115483, 0.07413184, 0.07294686, 0.02995578, 0.17000617, 0.17070863], nargs='+', type=float, help='percentage of time to use, total sum must be 1')
     parser.add_argument('--time', default=1.0, type=float, help='second')
     args = parser.parse_args()
 
@@ -51,6 +64,12 @@ if __name__ == "__main__":
         
         elif partition_name.find("AlexNet") > -1:
             model = AlexNet_layer(name=partition_name, layer_list=PARTITION_INFOS[partition_name])
+
+        elif partition_name.find("ResNet") > -1:
+            model = ResNet_layer(name=partition_name, layer_list=PARTITION_INFOS[partition_name])
+
+        elif partition_name.find("NiN") > -1:
+            model = NiN_layer(name=partition_name, layer_list=PARTITION_INFOS[partition_name])
 
         # for cuDNN loading
         model(model.get_random_input())
