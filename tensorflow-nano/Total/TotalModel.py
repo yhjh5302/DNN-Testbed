@@ -86,11 +86,14 @@ if __name__ == "__main__":
         'partitions':list()
     }
 
+    deployed_idx_dict = dict()
+
     for partition in args.deployed_list:
         partition_idx = PARTITION_IDX_MAP[partition]
         recv_data_dict[partition_idx] = list()
         recv_data_dict['proc'][partition_idx] = None
         recv_data_dict['partitions'].append(partition_idx)
+        deployed_idx_dict[partition_idx] = len(recv_data_dict['partitions']) - 1
     
     recv_data_lock = threading.Lock()
     
@@ -158,9 +161,11 @@ if __name__ == "__main__":
             outputs = outputs[0]  # remove short cut
 
         proc_end = time.time()
-        T_cp = proc_end - start                   
+        T_cp = proc_end - start
 
-        weights[idx] = max(weights[idx] - T_cp, 0)           # change index
+        deployed_idx = deployed_idx_dict[idx]
+
+        weights[deployed_idx] = max(weights[deployed_idx] - T_cp, 0)           # change index
         
         if inputs[2] in DAG_SUCCESSORS:
             for succ_partition in DAG_SUCCESSORS[inputs[2]]:
@@ -168,8 +173,8 @@ if __name__ == "__main__":
                     next_inputs = (request_id, inputs[2], succ_partition, outputs)
                 else:
                     next_inputs = (request_id, inputs[2], succ_partition, deepcopy(outputs))
-                deployment_idx = partition_location[succ_partition] # todo find idx
-                print("deployment_idx", deployment_idx)
+                deployment_idx = partition_location[succ_partition]
+                # print("deployment_idx", deployment_idx)
                 if deployment_idx > -1:
                     with dev_send_lock_list[deployment_idx]:
                         # request id, source partition id, target partition id, output
