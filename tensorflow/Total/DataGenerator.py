@@ -103,25 +103,15 @@ if __name__ == "__main__":
             dev_id = None
 
             if i > args.device_index:
-                while True:
-                    resv_conn, resv_addr = open_resv_sock("", args.resv_port_list[i])
-                    client_addr = resv_addr[0]
-                    if client_addr not in args.device_addr_list:
-                        print("wrong connections with {}".format(client_addr))
-                        resv_conn.close()
-                        send_sock.close()
-                    else:
-                        dev_id = args.device_addr_list.index(client_addr)
-                        break
-                send_sock, send_addr = open_send_sock(args.device_addr_list[dev_id], args.send_port_list[dev_id])
+                resv_conn, resv_addr = open_resv_sock("", args.resv_port_list[i])
+                send_sock, send_addr = open_send_sock(args.device_addr_list[i], args.send_port_list[i])
             else:
-                dev_id = i
-                send_sock, send_addr = open_send_sock(args.device_addr_list[dev_id], args.resv_port_list[dev_id])
-                resv_conn, resv_addr = open_resv_sock("", args.send_port_list[dev_id])
+                send_sock, send_addr = open_send_sock(args.device_addr_list[i], args.resv_port_list[i])
+                resv_conn, resv_addr = open_resv_sock("", args.send_port_list[i])
 
 
-            print("connection with {} established".format(args.device_addr_list[dev_id]))
-            dev_dict[dev_id] = {
+            print("connection with {} established".format(args.device_addr_list[i]))
+            dev_dict[i] = {
                 'send_sock': send_sock,
                 'send_data_lock': send_data_lock,
                 'resv_conn': resv_conn,

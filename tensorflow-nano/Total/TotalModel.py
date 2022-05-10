@@ -128,28 +128,18 @@ if __name__ == "__main__":
     
     for i in range(len(args.device_addr_list)):
         if i != args.device_index:
-            dev_id = None
             if i > args.device_index:
-                while True:
-                    resv_conn, resv_addr = open_resv_sock("", args.resv_port_list[i])
-                    client_addr = resv_addr[0]
-                    if client_addr not in args.device_addr_list:
-                        print("wrong connections with {}".format(client_addr))
-                        resv_conn.close()
-                        send_sock.close()
-                    else:
-                        dev_id = args.device_addr_list.index(client_addr)
-                        break
-                send_sock, send_addr = open_send_sock(args.device_addr_list[dev_id], args.send_port_list[dev_id])
+                resv_conn, resv_addr = open_resv_sock("", args.resv_port_list[i])
+                client_addr = resv_addr[0]
+                send_sock, send_addr = open_send_sock(args.device_addr_list[i], args.send_port_list[i])
             else:
-                dev_id = i
-                send_sock, send_addr = open_send_sock(args.device_addr_list[dev_id], args.resv_port_list[dev_id])
-                resv_conn, resv_addr = open_resv_sock("", args.send_port_list[dev_id])
+                send_sock, send_addr = open_send_sock(args.device_addr_list[i], args.resv_port_list[i])
+                resv_conn, resv_addr = open_resv_sock("", args.send_port_list[i])
 
-            print("connection with {} established".format(args.device_addr_list[dev_id]))
+            print("connection with {} established".format(args.device_addr_list[i]))
 
             threading.Thread(target=recv_data, args=(resv_conn, recv_data_dict, recv_data_lock, _stop_event, dag_man)).start()
-            threading.Thread(target=send_data, args=(send_sock, dev_send_data_list[dev_id], dev_send_lock_list[dev_id], _stop_event)).start()
+            threading.Thread(target=send_data, args=(send_sock, dev_send_data_list[i], dev_send_lock_list[i], _stop_event)).start()
     
     
     print("all connection is established")

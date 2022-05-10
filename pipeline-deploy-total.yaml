@@ -23,9 +23,9 @@ spec:
         - name: DEVICE_ADDR
           value: "10.96.0.200 10.96.0.201 10.96.0.202 10.96.0.203 10.96.0.204 10.96.0.205"
         - name: SEND_PORT
-          value: "30000 30000 30000 30000 30000 30000"
+          value: "30000 30001 30002 30003 30004 30005"
         - name: RESV_PORT
-          value: "30001 30001 30001 30001 30001 30001"
+          value: "30010 30011 30012 30013 30014 30015"
         - name: PART_LOCATION
           value: "3 3 3 3 3 3 3 3 1 1 1 1 1 4 4 4 2 2 2 5 2 4 5 5"
         command: ["/bin/bash","-c","while true; do sleep 1000; done"]
@@ -33,7 +33,7 @@ spec:
         #command: ["/bin/bash","-c","python3 DataGenerator.py --set_gpu='false' --alexnet_prev_addr='' --alexnet_next_addr='10.96.0.201' --googlenet_prev_addr='' --googlenet_next_addr='10.96.0.211' --mobilenet_prev_addr='' --mobilenet_next_addr='10.96.0.221' --vggnet_prev_addr='' --vggnet_next_addr='10.96.0.231' --vggfnet_prev_addr='' --vggfnet_next_addr='10.96.0.241' --vram_limit=0"]
         ports:
         - containerPort: 30000   # send image
-        - containerPort: 30001   # resv image
+        - containerPort: 30010   # resv image
 ---
 
 apiVersion: v1
@@ -46,7 +46,7 @@ spec:
   - name: send-port
     port: 30000
   - name: resv-port
-    port: 30001
+    port: 30010
   selector:
     app: data-generator
 
@@ -78,9 +78,9 @@ spec:
         - name: DEVICE_ADDR
           value: "10.96.0.200 10.96.0.201 10.96.0.202 10.96.0.203 10.96.0.204 10.96.0.205"
         - name: SEND_PORT
-          value: "30000 30000 30000 30000 30000 30000"
+          value: "30000 30001 30002 30003 30004 30005"
         - name: RESV_PORT
-          value: "30001 30001 30001 30001 30001 30001"
+          value: "30010 30011 30012 30013 30014 30015"
         - name: PART_LOCATION
           value: "3 3 3 3 3 3 3 3 1 1 1 1 1 4 4 4 2 2 2 5 2 4 5 5"
         - name: RESOURCE
@@ -102,8 +102,8 @@ spec:
         #command: ["/bin/bash","-c","python3 TotalModel.py --set_gpu='true' --prev_addr='' --prev_port=30001 --next_addr='10.96.0.202' --next_port=30002 --vram_limit=128 --scheduler_addr=$(SCHEDULER_ADDR) --scheduler_port=$(SCHEDULER_PORT) 1> $(LAYERNAME).txt 2> $(LAYERNAME)_err.txt; sshpass -p $(SSH_PASSWARD) scp -o StrictHostKeyChecking=no $(LAYERNAME)*.txt $(SCP_ADDRESS):$(SCP_PATH);"]
         command: ["/bin/bash","-c","python3 TotalModel.py --set_gpu='true' --deployed_list $(DEPLOYMENT) --device_index=$(DEVICE_IDX) --device_addr_list $(DEVICE_ADDR) --resv_port_list $(RESV_PORT) --send_port_list $(SEND_PORT) --partition_location $(PART_LOCATION) --p $(RESOURCE) 1> $(WORKER_NAME)-1.txt 2> $(WORKER_NAME)-1_err.txt; sshpass -p $(SSH_PASSWARD) scp -o StrictHostKeyChecking=no $(WORKER_NAME)*.txt $(SCP_ADDRESS):$(SCP_PATH);"]
         ports:
-        - containerPort: 30000
         - containerPort: 30001
+        - containerPort: 30011
 
 ---
 
@@ -115,9 +115,9 @@ spec:
   clusterIP: 10.96.0.201
   ports:
   - name: send-port
-    port: 30000
-  - name: resv-port
     port: 30001
+  - name: resv-port
+    port: 30011
   selector:
     app: worker-laptop-1
 
@@ -149,9 +149,9 @@ spec:
         - name: DEVICE_ADDR
           value: "10.96.0.200 10.96.0.201 10.96.0.202 10.96.0.203 10.96.0.204 10.96.0.205"
         - name: SEND_PORT
-          value: "30000 30000 30000 30000 30000 30000"
+          value: "30000 30001 30002 30003 30004 30005"
         - name: RESV_PORT
-          value: "30001 30001 30001 30001 30001 30001"
+          value: "30010 30011 30012 30013 30014 30015"
         - name: PART_LOCATION
           value: "3 3 3 3 3 3 3 3 1 1 1 1 1 4 4 4 2 2 2 5 2 4 5 5"
         - name: RESOURCE
@@ -173,8 +173,8 @@ spec:
         #command: ["/bin/bash","-c","python3 TotalModel.py --set_gpu='true' --prev_addr='' --prev_port=30001 --next_addr='10.96.0.202' --next_port=30002 --vram_limit=128 --scheduler_addr=$(SCHEDULER_ADDR) --scheduler_port=$(SCHEDULER_PORT) 1> $(LAYERNAME).txt 2> $(LAYERNAME)_err.txt; sshpass -p $(SSH_PASSWARD) scp -o StrictHostKeyChecking=no $(LAYERNAME)*.txt $(SCP_ADDRESS):$(SCP_PATH);"]
         command: ["/bin/bash","-c","python3 TotalModel.py --set_gpu='true' --deployed_list $(DEPLOYMENT) --device_index=$(DEVICE_IDX) --device_addr_list $(DEVICE_ADDR) --resv_port_list $(RESV_PORT) --send_port_list $(SEND_PORT) --partition_location $(PART_LOCATION) --p $(RESOURCE) 1> $(WORKER_NAME).txt 2> $(WORKER_NAME)_err.txt; sshpass -p $(SSH_PASSWARD) scp -o StrictHostKeyChecking=no $(WORKER_NAME)*.txt $(SCP_ADDRESS):$(SCP_PATH);"]
         ports:
-        - containerPort: 30000
-        - containerPort: 30001
+        - containerPort: 30002
+        - containerPort: 30012
 
 ---
 
@@ -186,9 +186,9 @@ spec:
   clusterIP: 10.96.0.202
   ports:
   - name: send-port
-    port: 30000
+    port: 30002
   - name: resv-port
-    port: 30001
+    port: 30012
   selector:
     app: worker-laptop-2
 
@@ -220,9 +220,9 @@ spec:
         - name: DEVICE_ADDR
           value: "10.96.0.200 10.96.0.201 10.96.0.202 10.96.0.203 10.96.0.204 10.96.0.205"
         - name: SEND_PORT
-          value: "30000 30000 30000 30000 30000 30000"
+          value: "30000 30001 30002 30003 30004 30005"
         - name: RESV_PORT
-          value: "30001 30001 30001 30001 30001 30001"
+          value: "30010 30011 30012 30013 30014 30015"
         - name: PART_LOCATION
           value: "3 3 3 3 3 3 3 3 1 1 1 1 1 4 4 4 2 2 2 5 2 4 5 5"
         - name: RESOURCE
@@ -244,8 +244,8 @@ spec:
         #command: ["/bin/bash","-c","python3 TotalModel.py --set_gpu='true' --prev_addr='' --prev_port=30001 --next_addr='10.96.0.202' --next_port=30002 --vram_limit=128 --scheduler_addr=$(SCHEDULER_ADDR) --scheduler_port=$(SCHEDULER_PORT) 1> $(LAYERNAME).txt 2> $(LAYERNAME)_err.txt; sshpass -p $(SSH_PASSWARD) scp -o StrictHostKeyChecking=no $(LAYERNAME)*.txt $(SCP_ADDRESS):$(SCP_PATH);"]
         command: ["/bin/bash","-c","python3 TotalModel.py --set_gpu='true' --deployed_list $(DEPLOYMENT) --device_index=$(DEVICE_IDX) --device_addr_list $(DEVICE_ADDR) --resv_port_list $(RESV_PORT) --send_port_list $(SEND_PORT) --partition_location $(PART_LOCATION) --p $(RESOURCE) 1> $(WORKER_NAME).txt 2> $(WORKER_NAME)_err.txt; sshpass -p $(SSH_PASSWARD) scp -o StrictHostKeyChecking=no $(WORKER_NAME)*.txt $(SCP_ADDRESS):$(SCP_PATH);"]
         ports:
-        - containerPort: 30000
-        - containerPort: 30001
+        - containerPort: 30003
+        - containerPort: 30013
 
 ---
 
@@ -257,9 +257,9 @@ spec:
   clusterIP: 10.96.0.203
   ports:
   - name: send-port
-    port: 30000
+    port: 30003
   - name: resv-port
-    port: 30001
+    port: 30013
   selector:
     app: worker-jetson-1
 
@@ -291,9 +291,9 @@ spec:
         - name: DEVICE_ADDR
           value: "10.96.0.200 10.96.0.201 10.96.0.202 10.96.0.203 10.96.0.204 10.96.0.205"
         - name: SEND_PORT
-          value: "30000 30000 30000 30000 30000 30000"
+          value: "30000 30001 30002 30003 30004 30005"
         - name: RESV_PORT
-          value: "30001 30001 30001 30001 30001 30001"
+          value: "30010 30011 30012 30013 30014 30015"
         - name: PART_LOCATION
           value: "3 3 3 3 3 3 3 3 1 1 1 1 1 4 4 4 2 2 2 5 2 4 5 5"
         - name: RESOURCE
@@ -315,8 +315,8 @@ spec:
         #command: ["/bin/bash","-c","python3 TotalModel.py --set_gpu='true' --prev_addr='' --prev_port=30001 --next_addr='10.96.0.202' --next_port=30002 --vram_limit=128 --scheduler_addr=$(SCHEDULER_ADDR) --scheduler_port=$(SCHEDULER_PORT) 1> $(LAYERNAME).txt 2> $(LAYERNAME)_err.txt; sshpass -p $(SSH_PASSWARD) scp -o StrictHostKeyChecking=no $(LAYERNAME)*.txt $(SCP_ADDRESS):$(SCP_PATH);"]
         command: ["/bin/bash","-c","python3 TotalModel.py --set_gpu='true' --deployed_list $(DEPLOYMENT) --device_index=$(DEVICE_IDX) --device_addr_list $(DEVICE_ADDR) --resv_port_list $(RESV_PORT) --send_port_list $(SEND_PORT) --partition_location $(PART_LOCATION) --p $(RESOURCE) 1> $(WORKER_NAME).txt 2> $(WORKER_NAME)_err.txt; sshpass -p $(SSH_PASSWARD) scp -o StrictHostKeyChecking=no $(WORKER_NAME)*.txt $(SCP_ADDRESS):$(SCP_PATH);"]
         ports:
-        - containerPort: 30000
-        - containerPort: 30001
+        - containerPort: 30004
+        - containerPort: 30014
 
 ---
 
@@ -328,9 +328,9 @@ spec:
   clusterIP: 10.96.0.204
   ports:
   - name: send-port
-    port: 30000
+    port: 30004
   - name: resv-port
-    port: 30001
+    port: 30014
   selector:
     app: worker-jetson-2
 
@@ -362,9 +362,9 @@ spec:
         - name: DEVICE_ADDR
           value: "10.96.0.200 10.96.0.201 10.96.0.202 10.96.0.203 10.96.0.204 10.96.0.205"
         - name: SEND_PORT
-          value: "30000 30000 30000 30000 30000 30000"
+          value: "30000 30001 30002 30003 30004 30005"
         - name: RESV_PORT
-          value: "30001 30001 30001 30001 30001 30001"
+          value: "30010 30011 30012 30013 30014 30015"
         - name: PART_LOCATION
           value: "3 3 3 3 3 3 3 3 1 1 1 1 1 4 4 4 2 2 2 5 2 4 5 5"
         - name: RESOURCE
@@ -386,8 +386,8 @@ spec:
         #command: ["/bin/bash","-c","python3 TotalModel.py --set_gpu='true' --prev_addr='' --prev_port=30001 --next_addr='10.96.0.202' --next_port=30002 --vram_limit=128 --scheduler_addr=$(SCHEDULER_ADDR) --scheduler_port=$(SCHEDULER_PORT) 1> $(LAYERNAME).txt 2> $(LAYERNAME)_err.txt; sshpass -p $(SSH_PASSWARD) scp -o StrictHostKeyChecking=no $(LAYERNAME)*.txt $(SCP_ADDRESS):$(SCP_PATH);"]
         command: ["/bin/bash","-c","python3 TotalModel.py --set_gpu='true' --deployed_list $(DEPLOYMENT) --device_index=$(DEVICE_IDX) --device_addr_list $(DEVICE_ADDR) --resv_port_list $(RESV_PORT) --send_port_list $(SEND_PORT) --partition_location $(PART_LOCATION) --p $(RESOURCE) 1> $(WORKER_NAME).txt 2> $(WORKER_NAME)_err.txt; sshpass -p $(SSH_PASSWARD) scp -o StrictHostKeyChecking=no $(WORKER_NAME)*.txt $(SCP_ADDRESS):$(SCP_PATH);"]
         ports:
-        - containerPort: 30000
-        - containerPort: 30001
+        - containerPort: 30005
+        - containerPort: 30015
 
 ---
 
@@ -399,8 +399,8 @@ spec:
   clusterIP: 10.96.0.205
   ports:
   - name: send-port
-    port: 30000
+    port: 30005
   - name: resv-port
-    port: 30001
+    port: 30015
   selector:
     app: worker-pc
