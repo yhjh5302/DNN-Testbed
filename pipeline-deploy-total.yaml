@@ -27,7 +27,7 @@ spec:
         - name: RESV_PORT
           value: "30010 30011 30012 30013 30014 30015"
         - name: PART_LOCATION
-          value: "3 3 3 3 3 3 3 3 1 1 1 1 1 4 4 4 2 2 2 5 2 4 5 5"
+          value: "2 5 2 4 5 5 3 3 3 3 3 3 3 3 1 1 1 1 1 4 4 4 2 2"
         command: ["/bin/bash","-c","while true; do sleep 1000; done"]
         # command: ["/bin/bash","-c","python3 data_uploader.py --set_gpu='false' --prev_addr='' --prev_port=30000 --next_addr='10.96.0.201' --next_port=30001"]
         # command: ["/bin/bash","-c","python3 DataGenerator.py --set_gpu='false' --alexnet_prev_addr='' --alexnet_next_addr='10.96.0.201' --googlenet_prev_addr='' --googlenet_next_addr='10.96.0.211' --mobilenet_prev_addr='' --mobilenet_next_addr='10.96.0.221' --vggnet_prev_addr='' --vggnet_next_addr='10.96.0.231' --vggfnet_prev_addr='' --vggfnet_next_addr='10.96.0.241' --vram_limit=0"]
@@ -112,7 +112,7 @@ spec:
         - name: RESV_PORT
           value: "30010 30011 30012 30013 30014 30015"
         - name: PART_LOCATION
-          value: "3 3 3 3 3 3 3 3 1 1 1 1 1 4 4 4 2 2 2 5 2 4 5 5"
+          value: "2 5 2 4 5 5 3 3 3 3 3 3 3 3 1 1 1 1 1 4 4 4 2 2"
         - name: RESOURCE
           value: "0.234157441 0.125013369 0.170121595 0.277024282 0.193683312"
         - name: SSH_PASSWARD
@@ -215,7 +215,7 @@ spec:
         - name: RESV_PORT
           value: "30010 30011 30012 30013 30014 30015"
         - name: PART_LOCATION
-          value: "3 3 3 3 3 3 3 3 1 1 1 1 1 4 4 4 2 2 2 5 2 4 5 5"
+          value: "2 5 2 4 5 5 3 3 3 3 3 3 3 3 1 1 1 1 1 4 4 4 2 2"
         - name: RESOURCE
           value: "0.05640559 0.06652689 0.43479294 0.41262735"
         - name: SSH_PASSWARD
@@ -310,7 +310,7 @@ spec:
         image: yhjh5302/total-nano:latest
         env:
         - name: DEPLOYMENT
-          value: "ResNet-CNN_1_2 ResNet-CNN_2_1 ResNet-CNN_3_2 ResNet-CNN_4_1 ResNet-CNN_5_2 ResNet-CNN_6_1 ResNet-CNN_7_2"
+          value: "ResNet-in ResNet-CNN_1_2 ResNet-CNN_2_1 ResNet-CNN_3_2 ResNet-CNN_4_1 ResNet-CNN_5_2 ResNet-CNN_6_1 ResNet-CNN_7_2"
         - name: DEVICE_ADDR
           value: "10.96.0.200 10.96.0.201 10.96.0.202 10.96.0.203 10.96.0.204 10.96.0.205"
         - name: SEND_PORT
@@ -318,7 +318,7 @@ spec:
         - name: RESV_PORT
           value: "30010 30011 30012 30013 30014 30015"
         - name: PART_LOCATION
-          value: "3 3 3 3 3 3 3 3 1 1 1 1 1 4 4 4 2 2 2 5 2 4 5 5"
+          value: "2 5 2 4 5 5 3 3 3 3 3 3 3 3 1 1 1 1 1 4 4 4 2 2"          
         - name: RESOURCE
           value: "0.10425131 0.08563795 0.14690932 0.12069519 0.14182189 0.0881324 0.07778058 0.09682393"
         - name: SSH_PASSWARD
@@ -421,7 +421,7 @@ spec:
         - name: RESV_PORT
           value: "30010 30011 30012 30013 30014 30015"
         - name: PART_LOCATION
-          value: "3 3 3 3 3 3 3 3 1 1 1 1 1 4 4 4 2 2 2 5 2 4 5 5"
+          value: "2 5 2 4 5 5 3 3 3 3 3 3 3 3 1 1 1 1 1 4 4 4 2 2"
         - name: RESOURCE
           value: "0.06499617 0.04070891 0.06649987 0.75089987"
         - name: SSH_PASSWARD
@@ -524,7 +524,7 @@ spec:
         - name: RESV_PORT
           value: "30010 30011 30012 30013 30014 30015"
         - name: PART_LOCATION
-          value: "3 3 3 3 3 3 3 3 1 1 1 1 1 4 4 4 2 2 2 5 2 4 5 5"
+          value: "2 5 2 4 5 5 3 3 3 3 3 3 3 3 1 1 1 1 1 4 4 4 2 2"
         - name: RESOURCE
           value: "0.34651383 0.30334133 0.3454547"
         - name: SSH_PASSWARD
