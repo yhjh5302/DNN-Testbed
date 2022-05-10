@@ -59,7 +59,7 @@ def image_recver(model_name_dict,conn, label_dict, label_lock_dict, time_dict, t
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Tensorflow')
-    parser.add_argument('--device_addr_list', default=['localhost', 'localhost'], nargs='+', type=str, help='address list of kubernetes cluster')
+    parser.add_argument('--device_addr_list', default=['192.168.1.13', '192.168.1.4'], nargs='+', type=str, help='address list of kubernetes cluster')
     parser.add_argument('--resv_port_list', default=[30030, 30030], nargs='+', type=int, help='receive port')
     parser.add_argument('--send_port_list', default=[30031, 30031], nargs='+', type=int, help='send port')
     parser.add_argument('--device_index', default=0, type=int, help='device index for device')
@@ -105,6 +105,7 @@ if __name__ == "__main__":
             # send_opt = (args.device_addr_list[i], args.send_port_list[i])
             resv_opt = ("", args.resv_port_list[i]) # accept
             send_opt = (args.device_addr_list[i], args.send_port_list[i])
+            dev_id = None
 
             if i > args.device_index:
                 while True:
@@ -115,14 +116,14 @@ if __name__ == "__main__":
                         resv_conn.close()
                         send_sock.close()
                     else:
-                        div_id = args.device_addr_list.index(client_addr)
+                        dev_id = args.device_addr_list.index(client_addr)
                         break
             else:
                 resv_conn, resv_addr, send_sock, send_addr = client_socket(resv_opt, send_opt)
-                div_id = i
+                dev_id = i
 
-            print("connection with {} established".format(args.device_addr_list[div_id]))
-        dev_dict[div_id] = {
+            print("connection with {} established".format(args.device_addr_list[dev_id]))
+        dev_dict[dev_id] = {
             'send_sock': send_sock,
             'send_data_lock': send_data_lock,
             'resv_conn': resv_conn,

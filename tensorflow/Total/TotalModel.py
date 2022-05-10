@@ -131,6 +131,8 @@ if __name__ == "__main__":
             # resv_opt = (args.device_addr_list[i], args.resv_port_list[i])
             resv_opt = ("", args.resv_port_list[i]) # accept
             send_opt = (args.device_addr_list[i], args.send_port_list[i])
+            dev_id = None
+            
             if i > args.device_index:
                 while True:
                     resv_conn, resv_addr, send_sock, send_addr = server_socket(resv_opt, send_opt)
@@ -140,16 +142,16 @@ if __name__ == "__main__":
                         resv_conn.close()
                         send_sock.close()
                     else:
-                        div_id = args.device_addr_list.index(client_addr)
+                        dev_id = args.device_addr_list.index(client_addr)
                         break
             else:
                 resv_conn, resv_addr, send_sock, send_addr = client_socket(resv_opt, send_opt)
-                div_id = i
+                dev_id = i
 
-            print("connection with {} established".format(args.device_addr_list[div_id]))
+            print("connection with {} established".format(args.device_addr_list[dev_id]))
 
             threading.Thread(target=recv_data, args=(resv_conn, recv_data_dict, recv_data_lock, _stop_event, dag_man)).start()
-            threading.Thread(target=send_data, args=(send_sock, dev_send_data_list[div_id], dev_send_lock_list[div_id], _stop_event)).start()
+            threading.Thread(target=send_data, args=(send_sock, dev_send_data_list[dev_id], dev_send_lock_list[dev_id], _stop_event)).start()
     
     
     print("all connection is established")

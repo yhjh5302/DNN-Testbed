@@ -72,4 +72,4 @@ kubectl delete -f pipeline-deploy.yaml
 kubectl delete -f service.yaml
 kubectl exec -it [POD_NAME] bash
 
-python3 DataGenerator.py --set_gpu=false --device_addr_list $DEVICE_ADDR --resv_port_list $RESV_PORT --send_port_list $SEND_PORT --partition_location $PART_LOCATION
+python3 DataGenerator.py --device_addr_list $DEVICE_ADDR --resv_port_list $RESV_PORT --send_port_list $SEND_PORT --partition_location $PART_LOCATION
