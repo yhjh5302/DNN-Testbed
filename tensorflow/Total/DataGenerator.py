@@ -104,7 +104,8 @@ if __name__ == "__main__":
             # resv_opt = (args.device_addr_list[i], args.resv_port_list[i])
             # send_opt = (args.device_addr_list[i], args.send_port_list[i])
             resv_opt = ("", args.resv_port_list[i]) # accept
-            send_opt = (args.device_addr_list[i], args.send_port_list[i])
+            # send_opt = (args.device_addr_list[i], args.send_port_list[i])
+            send_opt = (args.device_addr_list[i], args.resv_port_list[i])
             dev_id = None
 
             if i > args.device_index:
@@ -123,12 +124,12 @@ if __name__ == "__main__":
                 dev_id = i
 
             print("connection with {} established".format(args.device_addr_list[dev_id]))
-        dev_dict[dev_id] = {
-            'send_sock': send_sock,
-            'send_data_lock': send_data_lock,
-            'resv_conn': resv_conn,
-            'resv_data_lock': resv_data_lock
-        }
+            dev_dict[dev_id] = {
+                'send_sock': send_sock,
+                'send_data_lock': send_data_lock,
+                'resv_conn': resv_conn,
+                'resv_data_lock': resv_data_lock
+            }
 
     for i in range(len(args.device_addr_list)):
         if i != args.device_index:

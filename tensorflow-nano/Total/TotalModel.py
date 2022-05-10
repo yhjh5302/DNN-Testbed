@@ -130,9 +130,10 @@ if __name__ == "__main__":
         if i != args.device_index:
             # resv_opt = (args.device_addr_list[i], args.resv_port_list[i])
             resv_opt = ("", args.resv_port_list[i]) # accept
-            send_opt = (args.device_addr_list[i], args.send_port_list[i])
+            # send_opt = (args.device_addr_list[i], args.send_port_list[i])
+            send_opt = (args.device_addr_list[i], args.resv_port_list[i])
             dev_id = None
-            
+
             if i > args.device_index:
                 while True:
                     resv_conn, resv_addr, send_sock, send_addr = server_socket(resv_opt, send_opt)
