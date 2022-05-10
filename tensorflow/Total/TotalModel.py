@@ -16,9 +16,6 @@ def processing(inputs, model):
     return request_id, outputs
 
 
-
-
-
 # python3 VGGNetLayer.py --layer_list 'features1' 'features2' 'features3' 'features4' 'features5' 'classifier1' 'classifier2' 'classifier3' --prev_addr='' --prev_port='30031' --next_addr='localhost' --next_port='30030' --scheduler_addr='localhost' --scheduler_port='30050' --set_gpu='true' --vram_limit=1024
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Tensorflow')
@@ -156,8 +153,6 @@ if __name__ == "__main__":
         T_tr = inputs[1]
         inputs = inputs[0]
         idx = inputs[2]
-        if type(inputs[-1]) in (list, tuple) and idx >= 6:
-            print(inputs[-1])
         request_id, outputs = processing(inputs, model_dict[idx])
         if type(outputs) in (list, tuple):
             outputs = outputs[0]  # remove short cut

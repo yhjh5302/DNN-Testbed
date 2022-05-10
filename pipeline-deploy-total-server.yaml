@@ -130,7 +130,8 @@ spec:
         #  limits:
         #    nvidia.com/gpu: 1
         #command: ["/bin/bash","-c","python3 TotalModel.py --set_gpu='true' --prev_addr='' --prev_port=30001 --next_addr='10.96.0.202' --next_port=30002 --vram_limit=128 --scheduler_addr=$(SCHEDULER_ADDR) --scheduler_port=$(SCHEDULER_PORT) 1> $(LAYERNAME).txt 2> $(LAYERNAME)_err.txt; sshpass -p $(SSH_PASSWARD) scp -o StrictHostKeyChecking=no $(LAYERNAME)*.txt $(SCP_ADDRESS):$(SCP_PATH);"]
-        command: ["/bin/bash","-c","python3 TotalModel.py --set_gpu='true' --deployed_list $(DEPLOYMENT) --device_index=$(DEVICE_IDX) --device_addr_list $(DEVICE_ADDR) --resv_port_list $(RESV_PORT) --send_port_list $(SEND_PORT) --partition_location $(PART_LOCATION) --p $(RESOURCE) 1> $(WORKER_NAME)-1.txt 2> $(WORKER_NAME)-1_err.txt; sshpass -p $(SSH_PASSWARD) scp -o StrictHostKeyChecking=no $(WORKER_NAME)*.txt $(SCP_ADDRESS):$(SCP_PATH);"]
+        # command: ["/bin/bash","-c","python3 TotalModel.py --set_gpu='true' --deployed_list $(DEPLOYMENT) --device_index=$(DEVICE_IDX) --device_addr_list $(DEVICE_ADDR) --resv_port_list $(RESV_PORT) --send_port_list $(SEND_PORT) --partition_location $(PART_LOCATION) --p $(RESOURCE) 1> $(WORKER_NAME)-1.txt 2> $(WORKER_NAME)-1_err.txt; sshpass -p $(SSH_PASSWARD) scp -o StrictHostKeyChecking=no $(WORKER_NAME)*.txt $(SCP_ADDRESS):$(SCP_PATH);"]
+        command: ["/bin/bash","-c","while true; do sleep 1000; done"]
         ports:
         - containerPort: 30000   # send image
         - containerPort: 30010   # resv image
@@ -231,7 +232,8 @@ spec:
         #  limits:
         #    nvidia.com/gpu: 1
         #command: ["/bin/bash","-c","python3 TotalModel.py --set_gpu='true' --prev_addr='' --prev_port=30001 --next_addr='10.96.0.202' --next_port=30002 --vram_limit=128 --scheduler_addr=$(SCHEDULER_ADDR) --scheduler_port=$(SCHEDULER_PORT) 1> $(LAYERNAME).txt 2> $(LAYERNAME)_err.txt; sshpass -p $(SSH_PASSWARD) scp -o StrictHostKeyChecking=no $(LAYERNAME)*.txt $(SCP_ADDRESS):$(SCP_PATH);"]
-        command: ["/bin/bash","-c","python3 TotalModel.py --set_gpu='true' --deployed_list $(DEPLOYMENT) --device_index=$(DEVICE_IDX) --device_addr_list $(DEVICE_ADDR) --resv_port_list $(RESV_PORT) --send_port_list $(SEND_PORT) --partition_location $(PART_LOCATION) --p $(RESOURCE) 1> $(WORKER_NAME).txt 2> $(WORKER_NAME)_err.txt; sshpass -p $(SSH_PASSWARD) scp -o StrictHostKeyChecking=no $(WORKER_NAME)*.txt $(SCP_ADDRESS):$(SCP_PATH);"]
+        # command: ["/bin/bash","-c","python3 TotalModel.py --set_gpu='true' --deployed_list $(DEPLOYMENT) --device_index=$(DEVICE_IDX) --device_addr_list $(DEVICE_ADDR) --resv_port_list $(RESV_PORT) --send_port_list $(SEND_PORT) --partition_location $(PART_LOCATION) --p $(RESOURCE) 1> $(WORKER_NAME).txt 2> $(WORKER_NAME)_err.txt; sshpass -p $(SSH_PASSWARD) scp -o StrictHostKeyChecking=no $(WORKER_NAME)*.txt $(SCP_ADDRESS):$(SCP_PATH);"]
+        command: ["/bin/bash","-c","while true; do sleep 1000; done"]
         ports:
         - containerPort: 30000   # send image
         - containerPort: 30010   # resv image
@@ -332,7 +334,8 @@ spec:
         #  limits:
         #    nvidia.com/gpu: 1
         #command: ["/bin/bash","-c","python3 TotalModel.py --set_gpu='true' --prev_addr='' --prev_port=30001 --next_addr='10.96.0.202' --next_port=30002 --vram_limit=128 --scheduler_addr=$(SCHEDULER_ADDR) --scheduler_port=$(SCHEDULER_PORT) 1> $(LAYERNAME).txt 2> $(LAYERNAME)_err.txt; sshpass -p $(SSH_PASSWARD) scp -o StrictHostKeyChecking=no $(LAYERNAME)*.txt $(SCP_ADDRESS):$(SCP_PATH);"]
-        command: ["/bin/bash","-c","python3 TotalModel.py --set_gpu='true' --deployed_list $(DEPLOYMENT) --device_index=$(DEVICE_IDX) --device_addr_list $(DEVICE_ADDR) --resv_port_list $(RESV_PORT) --send_port_list $(SEND_PORT) --partition_location $(PART_LOCATION) --p $(RESOURCE) 1> $(WORKER_NAME).txt 2> $(WORKER_NAME)_err.txt; sshpass -p $(SSH_PASSWARD) scp -o StrictHostKeyChecking=no $(WORKER_NAME)*.txt $(SCP_ADDRESS):$(SCP_PATH);"]
+        # command: ["/bin/bash","-c","python3 TotalModel.py --set_gpu='true' --deployed_list $(DEPLOYMENT) --device_index=$(DEVICE_IDX) --device_addr_list $(DEVICE_ADDR) --resv_port_list $(RESV_PORT) --send_port_list $(SEND_PORT) --partition_location $(PART_LOCATION) --p $(RESOURCE) 1> $(WORKER_NAME).txt 2> $(WORKER_NAME)_err.txt; sshpass -p $(SSH_PASSWARD) scp -o StrictHostKeyChecking=no $(WORKER_NAME)*.txt $(SCP_ADDRESS):$(SCP_PATH);"]
+        command: ["/bin/bash","-c","while true; do sleep 1000; done"]
         ports:
         - containerPort: 30000   # send image
         - containerPort: 30010   # resv image
@@ -433,7 +436,8 @@ spec:
         #  limits:
         #    nvidia.com/gpu: 1
         #command: ["/bin/bash","-c","python3 TotalModel.py --set_gpu='true' --prev_addr='' --prev_port=30001 --next_addr='10.96.0.202' --next_port=30002 --vram_limit=128 --scheduler_addr=$(SCHEDULER_ADDR) --scheduler_port=$(SCHEDULER_PORT) 1> $(LAYERNAME).txt 2> $(LAYERNAME)_err.txt; sshpass -p $(SSH_PASSWARD) scp -o StrictHostKeyChecking=no $(LAYERNAME)*.txt $(SCP_ADDRESS):$(SCP_PATH);"]
-        command: ["/bin/bash","-c","python3 TotalModel.py --set_gpu='true' --deployed_list $(DEPLOYMENT) --device_index=$(DEVICE_IDX) --device_addr_list $(DEVICE_ADDR) --resv_port_list $(RESV_PORT) --send_port_list $(SEND_PORT) --partition_location $(PART_LOCATION) --p $(RESOURCE) 1> $(WORKER_NAME).txt 2> $(WORKER_NAME)_err.txt; sshpass -p $(SSH_PASSWARD) scp -o StrictHostKeyChecking=no $(WORKER_NAME)*.txt $(SCP_ADDRESS):$(SCP_PATH);"]
+        # command: ["/bin/bash","-c","python3 TotalModel.py --set_gpu='true' --deployed_list $(DEPLOYMENT) --device_index=$(DEVICE_IDX) --device_addr_list $(DEVICE_ADDR) --resv_port_list $(RESV_PORT) --send_port_list $(SEND_PORT) --partition_location $(PART_LOCATION) --p $(RESOURCE) 1> $(WORKER_NAME).txt 2> $(WORKER_NAME)_err.txt; sshpass -p $(SSH_PASSWARD) scp -o StrictHostKeyChecking=no $(WORKER_NAME)*.txt $(SCP_ADDRESS):$(SCP_PATH);"]
+        command: ["/bin/bash","-c","while true; do sleep 1000; done"]
         ports:
         - containerPort: 30000   # send image
         - containerPort: 30010   # resv image
@@ -534,7 +538,8 @@ spec:
         #  limits:
         #    nvidia.com/gpu: 1
         #command: ["/bin/bash","-c","python3 TotalModel.py --set_gpu='true' --prev_addr='' --prev_port=30001 --next_addr='10.96.0.202' --next_port=30002 --vram_limit=128 --scheduler_addr=$(SCHEDULER_ADDR) --scheduler_port=$(SCHEDULER_PORT) 1> $(LAYERNAME).txt 2> $(LAYERNAME)_err.txt; sshpass -p $(SSH_PASSWARD) scp -o StrictHostKeyChecking=no $(LAYERNAME)*.txt $(SCP_ADDRESS):$(SCP_PATH);"]
-        command: ["/bin/bash","-c","python3 TotalModel.py --set_gpu='true' --deployed_list $(DEPLOYMENT) --device_index=$(DEVICE_IDX) --device_addr_list $(DEVICE_ADDR) --resv_port_list $(RESV_PORT) --send_port_list $(SEND_PORT) --partition_location $(PART_LOCATION) --p $(RESOURCE) 1> $(WORKER_NAME).txt 2> $(WORKER_NAME)_err.txt; sshpass -p $(SSH_PASSWARD) scp -o StrictHostKeyChecking=no $(WORKER_NAME)*.txt $(SCP_ADDRESS):$(SCP_PATH);"]
+        # command: ["/bin/bash","-c","python3 TotalModel.py --set_gpu='true' --deployed_list $(DEPLOYMENT) --device_index=$(DEVICE_IDX) --device_addr_list $(DEVICE_ADDR) --resv_port_list $(RESV_PORT) --send_port_list $(SEND_PORT) --partition_location $(PART_LOCATION) --p $(RESOURCE) 1> $(WORKER_NAME).txt 2> $(WORKER_NAME)_err.txt; sshpass -p $(SSH_PASSWARD) scp -o StrictHostKeyChecking=no $(WORKER_NAME)*.txt $(SCP_ADDRESS):$(SCP_PATH);"]
+        command: ["/bin/bash","-c","while true; do sleep 1000; done"]
         ports:
         - containerPort: 30000   # send image
         - containerPort: 30010   # resv image

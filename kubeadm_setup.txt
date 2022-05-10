@@ -72,10 +72,16 @@ kubectl delete -f pipeline-deploy.yaml
 kubectl delete -f service.yaml
 kubectl exec -it [POD_NAME] bash
 
-python3 DataGenerator.py --device_addr_list $DEVICE_ADDR --resv_port_list $RESV_PORT --send_port_list $SEND_PORT --partition_location $PART_LOCATION
+
+python3 DataGenerator.py --device_addr_list $DEVICE_ADDR --resv_port_list $RESV_PORT --send_port_list $SEND_PORT --partition_location $PART_LOCATION --alexnet_arrival_rate 5 --vggnet_arrival_rate 5 --nin_arrival_rate 5 --resnet_arrival_rate 5 
+
+#auto save
+python3 TotalModel.py --set_gpu='true' --deployed_list $DEPLOYMENT --device_index=$DEVICE_IDX --device_addr_list $DEVICE_ADDR --resv_port_list $RESV_PORT --send_port_list $SEND_PORT --partition_location $PART_LOCATION --p $RESOURCE 1> $WORKER_NAME-1.txt 2> $WORKER_NAME-1_err.txt; sshpass -p $SSH_PASSWARD scp -o StrictHostKeyChecking=no $WORKER_NAME*.txt $SCP_ADDRESS:$SCP_PATH;
+#non save
+python3 TotalModel.py --set_gpu='true' --deployed_list $DEPLOYMENT --device_index=$DEVICE_IDX --device_addr_list $DEVICE_ADDR --resv_port_list $RESV_PORT --send_port_list $SEND_PORT --partition_location $PART_LOCATION --p $RESOURCE
 
 kubectl rollout restart deployment worker-jetson-1
 kubectl rollout restart deployment worker-jetson-2
-kubectl rollout restart deployment worker-labtop-1
-kubectl rollout restart deployment worker-labtop-2
+kubectl rollout restart deployment worker-laptop-1
+kubectl rollout restart deployment worker-laptop-2
 kubectl rollout restart deployment worker-pc

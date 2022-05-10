@@ -8,7 +8,7 @@ from dag_config import *
 
 
 
-def image_sender(model_name, next_socket, socket_lock,images, labels, label_list, label_lock, time_dict, time_lock, arrival_rate, _stop_event, num_model=1):
+def image_sender(model_name, next_socket, socket_lock,images, labels, label_list, label_lock, time_dict, time_lock, arrival_rate, _stop_event, num_model):
     for _ in range(100):
         # sleep before sending
         #time.sleep(1/arrival_rate)
@@ -87,7 +87,15 @@ if __name__ == "__main__":
     dev_send_lock_list = list()
     dev_resv_sock_list = list()
     dev_resv_lock_list = list()
-        
+    num_model = 4
+    if args.alexnet_block:
+        num_model -= 1
+    if args.vggnet_block:
+        num_model -= 1
+    if args.nin_block:
+        num_model -= 1
+    if args.resnet_block:
+        num_model -= 1
     
     for i in range(len(args.device_addr_list)):
         if i == args.device_index:
@@ -130,7 +138,7 @@ if __name__ == "__main__":
         alexnet_label_lock = threading.Lock()
         alexnet_time_lock = threading.Lock()
         dev_id = args.partition_location[MODEL_START_PARTITION['alexnet']]
-        procs.append(threading.Thread(target=image_sender, args=("alexnet", dev_send_sock_list[dev_id], dev_send_lock_list[dev_id], images, labels, alexnet_label_list, alexnet_label_lock, alexnet_time_dict, alexnet_time_lock, args.alexnet_arrival_rate, _stop_event)))
+        procs.append(threading.Thread(target=image_sender, args=("alexnet", dev_send_sock_list[dev_id], dev_send_lock_list[dev_id], images, labels, alexnet_label_list, alexnet_label_lock, alexnet_time_dict, alexnet_time_lock, args.alexnet_arrival_rate, _stop_event, num_model)))
         last_part = MODEL_END_PARTITION['alexnet']
         dev_id = args.partition_location[last_part]
         model_name_dict[last_part] = 'alexnet'
@@ -152,7 +160,7 @@ if __name__ == "__main__":
         vggnet_label_lock = threading.Lock()
         vggnet_time_lock = threading.Lock()
         dev_id = args.partition_location[MODEL_START_PARTITION['vggnet']]
-        procs.append(threading.Thread(target=image_sender, args=("vggnet", dev_send_sock_list[dev_id], dev_send_lock_list[dev_id], images, labels, vggnet_label_list, vggnet_label_lock, vggnet_time_dict, vggnet_time_lock, args.vggnet_arrival_rate, _stop_event)))
+        procs.append(threading.Thread(target=image_sender, args=("vggnet", dev_send_sock_list[dev_id], dev_send_lock_list[dev_id], images, labels, vggnet_label_list, vggnet_label_lock, vggnet_time_dict, vggnet_time_lock, args.vggnet_arrival_rate, _stop_event, num_model)))
         last_part = MODEL_END_PARTITION['vggnet']
         dev_id = args.partition_location[last_part]
         model_name_dict[last_part] = 'vggnet'
@@ -174,7 +182,7 @@ if __name__ == "__main__":
         nin_label_lock = threading.Lock()
         nin_time_lock = threading.Lock()
         dev_id = args.partition_location[MODEL_START_PARTITION['nin']]
-        procs.append(threading.Thread(target=image_sender, args=("nin", dev_send_sock_list[dev_id], dev_send_lock_list[dev_id], images, labels, nin_label_list, nin_label_lock, nin_time_dict, nin_time_lock, args.nin_arrival_rate, _stop_event)))
+        procs.append(threading.Thread(target=image_sender, args=("nin", dev_send_sock_list[dev_id], dev_send_lock_list[dev_id], images, labels, nin_label_list, nin_label_lock, nin_time_dict, nin_time_lock, args.nin_arrival_rate, _stop_event, num_model)))
         last_part = MODEL_END_PARTITION['nin']
         dev_id = args.partition_location[last_part]
         model_name_dict[last_part] = 'nin'
@@ -196,7 +204,7 @@ if __name__ == "__main__":
         resnet_label_lock = threading.Lock()
         resnet_time_lock = threading.Lock()
         dev_id = args.partition_location[MODEL_START_PARTITION['resnet']]
-        procs.append(threading.Thread(target=image_sender, args=("resnet", dev_send_sock_list[dev_id], dev_send_lock_list[dev_id], images, labels, resnet_label_list, resnet_label_lock, resnet_time_dict, resnet_time_lock, args.resnet_arrival_rate, _stop_event)))
+        procs.append(threading.Thread(target=image_sender, args=("resnet", dev_send_sock_list[dev_id], dev_send_lock_list[dev_id], images, labels, resnet_label_list, resnet_label_lock, resnet_time_dict, resnet_time_lock, args.resnet_arrival_rate, _stop_event, num_model)))
         last_part = MODEL_END_PARTITION['resnet']
         dev_id = args.partition_location[last_part]
         model_name_dict[last_part] = 'resnet'
