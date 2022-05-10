@@ -43,7 +43,7 @@ if __name__ == "__main__":
         0.02481079, 0.02233019, 0.02436261, 0.02627764, 0.0274137, 0.02624875, 
         0.02336616, 0.02264515, 0.02113937, 0.02546869, 0.02113972, 0.0260701,
         0.02474534, 0.02531103, 0.02335365, 0.02519561, 0.02310146, 0.02305768, 
-        0.02115483, 0.07413184, 0.07294686, 0.02995578, 0.17000617, 0.17070863], nargs='+', type=float, help='percentage of time to use, total sum must be 1')
+        0.02115483, 0.07413184, 0.07294686, 0.02995578, 0.17000617, 0.17070863], nargs='*', type=float, help='percentage of time to use, total sum must be 1')
     parser.add_argument('--time', default=1.0, type=float, help='second')
     args = parser.parse_args()
 
