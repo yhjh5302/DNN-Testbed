@@ -100,17 +100,11 @@ if __name__ == "__main__":
         else:
             send_data_lock = threading.Lock()
             resv_data_lock = threading.Lock()
-        
-            # resv_opt = (args.device_addr_list[i], args.resv_port_list[i])
-            # send_opt = (args.device_addr_list[i], args.send_port_list[i])
-            resv_opt = ("", args.resv_port_list[i]) # accept
-            # send_opt = (args.device_addr_list[i], args.send_port_list[i])
-            send_opt = (args.device_addr_list[i], args.resv_port_list[i])
             dev_id = None
 
             if i > args.device_index:
                 while True:
-                    resv_conn, resv_addr, send_sock, send_addr = server_socket(resv_opt, send_opt)
+                    resv_conn, resv_addr = open_resv_sock("", args.resv_port_list[i])
                     client_addr = resv_addr[0]
                     if client_addr not in args.device_addr_list:
                         print("wrong connections with {}".format(client_addr))
@@ -119,9 +113,12 @@ if __name__ == "__main__":
                     else:
                         dev_id = args.device_addr_list.index(client_addr)
                         break
+                send_sock, send_addr = open_send_sock(args.device_addr_list[dev_id], args.send_port_list[dev_id])
             else:
-                resv_conn, resv_addr, send_sock, send_addr = client_socket(resv_opt, send_opt)
                 dev_id = i
+                send_sock, send_addr = open_send_sock(args.device_addr_list[dev_id], args.resv_port_list[dev_id])
+                resv_conn, resv_addr = open_resv_sock("", args.send_port_list[dev_id])
+
 
             print("connection with {} established".format(args.device_addr_list[dev_id]))
             dev_dict[dev_id] = {
