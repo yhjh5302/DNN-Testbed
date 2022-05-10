@@ -9,6 +9,7 @@ from dag_config import *
 
 
 def image_sender(model_name, next_socket, socket_lock,images, labels, label_list, label_lock, time_dict, time_lock, arrival_rate, _stop_event, num_model):
+    i = 0
     for _ in range(100):
         # sleep before sending
         #time.sleep(1/arrival_rate)
@@ -18,10 +19,11 @@ def image_sender(model_name, next_socket, socket_lock,images, labels, label_list
 
         # reading queue
         batch_size = 1
-        for i in range(arrival_rate):            
+        for _ in range(arrival_rate):            
             idx = np.random.randint(10000-batch_size)
             data = images[idx:idx+batch_size]
             req_id = (num_model * i) + MODEL_IDX[model_name]
+            i += 1
             start_part = MODEL_START_PARTITION[model_name]
             data = (req_id, -1, start_part, data)
             
@@ -80,7 +82,6 @@ if __name__ == "__main__":
     _, (images, labels) = keras.datasets.cifar10.load_data()
     images = images.reshape(10000, 32, 32, 3).astype('float32') / 255
     classes = ('plane', 'car', 'bird', 'cat', 'deer', 'dog', 'frog', 'horse', 'ship', 'truck')
-
 
     dev_send_sock_list = list()
     dev_send_lock_list = list()

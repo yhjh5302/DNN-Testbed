@@ -150,8 +150,8 @@ def open_send_sock(send_addr, send_port):
             print('send socket is ready, Connected by', send_addr)
             break
         except ConnectionError:
-            print("server is not opened try later")
-            sleep(10)
+            # print("server is not opened try later")
+            sleep(2)
     
     return send_sock, send_addr
 

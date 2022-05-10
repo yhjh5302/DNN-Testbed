@@ -185,7 +185,7 @@ class DAGManager:
 
     def recv_data(self, inputs, tr_start=0., tr_end=0.):
         req_id = inputs[0]
-        source_partion = inputs[1]
+        source_partition = inputs[1]
         target_partition = inputs[2]
         data = inputs[3]
         if self.input_num_infos[target_partition] == 1:
@@ -198,17 +198,15 @@ class DAGManager:
                 self.recv_data_dict[req_id][0] += 1
                 # if self.partition_input_sample.shape[0] == 1:
                 #     if self.recv_data_dict[req_id][1].ndim==1:
-                #         self.recv_data_dict[req_id][1][self.dag_input_indices[target_partition][source_partion][0]:self.dag_input_indices[target_partition][source_partion][1]] = data[:]  #chk demesion
+                #         self.recv_data_dict[req_id][1][self.dag_input_indices[target_partition][source_partition][0]:self.dag_input_indices[target_partition][source_partition][1]] = data[:]  #chk demesion
                 #     else:
-                #         self.recv_data_dict[req_id][1][:,:,:,self.dag_input_indices[target_partition][source_partion][0]:self.dag_input_indices[target_partition][source_partion][1]] = data[:]  #chk demesion
+                #         self.recv_data_dict[req_id][1][:,:,:,self.dag_input_indices[target_partition][source_partition][0]:self.dag_input_indices[target_partition][source_partition][1]] = data[:]  #chk demesion
                 # else:
                 #     if self.recv_data_dict[req_id][1].ndim==2:
-                #         self.recv_data_dict[req_id][1][self.dag_input_indices[target_partition][source_partion][0]:self.dag_input_indices[target_partition][source_partion][1],:] = data[:]  #chk demesion
+                #         self.recv_data_dict[req_id][1][self.dag_input_indices[target_partition][source_partition][0]:self.dag_input_indices[target_partition][source_partition][1],:] = data[:]  #chk demesion
                 #     else:
-                #         self.recv_data_dict[req_id][1][self.dag_input_indices[target_partition][source_partion][0]:self.dag_input_indices[target_partition][source_partion][1],:,:,:] = data[:]  #chk demesion
-            if type(data) in (list, tuple):
-                print("wrong type")
-            self.recv_data_dict[req_id][1][self.dag_input_order[target_partition][source_partion]] = data
+                #         self.recv_data_dict[req_id][1][self.dag_input_indices[target_partition][source_partition][0]:self.dag_input_indices[target_partition][source_partition][1],:,:,:] = data[:]  #chk demesion
+            self.recv_data_dict[req_id][1][self.dag_input_order[target_partition][source_partition]] = data
           
             if self.recv_data_dict[req_id][0] == self.input_num_infos[target_partition]:
                 result = (req_id, -1, target_partition, self.recv_data_dict[req_id][1])
