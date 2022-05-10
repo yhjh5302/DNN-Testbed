@@ -33,7 +33,17 @@ spec:
         #command: ["/bin/bash","-c","python3 DataGenerator.py --set_gpu='false' --alexnet_prev_addr='' --alexnet_next_addr='10.96.0.201' --googlenet_prev_addr='' --googlenet_next_addr='10.96.0.211' --mobilenet_prev_addr='' --mobilenet_next_addr='10.96.0.221' --vggnet_prev_addr='' --vggnet_next_addr='10.96.0.231' --vggfnet_prev_addr='' --vggfnet_next_addr='10.96.0.241' --vram_limit=0"]
         ports:
         - containerPort: 30000   # send image
-        - containerPort: 30001   # resv image
+        - containerPort: 30010   # resv image
+        - containerPort: 30001   # send image
+        - containerPort: 30011   # resv image
+        - containerPort: 30002   # send image
+        - containerPort: 30012   # resv image
+        - containerPort: 30003   # send image
+        - containerPort: 30013   # resv image
+        - containerPort: 30004   # send image
+        - containerPort: 30014   # resv image
+        - containerPort: 30005   # send image
+        - containerPort: 30015   # resv image
 ---
 
 apiVersion: v1
@@ -43,10 +53,30 @@ metadata:
 spec:
   clusterIP: 10.96.0.200
   ports:
-  - name: send-port
+  - name: send-port-0
     port: 30000
-  - name: resv-port
+  - name: resv-port-0
+    port: 30010
+  - name: send-port-1
     port: 30001
+  - name: resv-port-1
+    port: 30011
+  - name: send-port-2
+    port: 30002
+  - name: resv-port-2
+    port: 30012
+  - name: send-port-3
+    port: 30003
+  - name: resv-port-3
+    port: 30013
+  - name: send-port-4
+    port: 30004
+  - name: resv-port-4
+    port: 30014
+  - name: send-port-5
+    port: 30005
+  - name: resv-port-5
+    port: 30015
   selector:
     app: data-generator
 
@@ -102,8 +132,18 @@ spec:
         #command: ["/bin/bash","-c","python3 TotalModel.py --set_gpu='true' --prev_addr='' --prev_port=30001 --next_addr='10.96.0.202' --next_port=30002 --vram_limit=128 --scheduler_addr=$(SCHEDULER_ADDR) --scheduler_port=$(SCHEDULER_PORT) 1> $(LAYERNAME).txt 2> $(LAYERNAME)_err.txt; sshpass -p $(SSH_PASSWARD) scp -o StrictHostKeyChecking=no $(LAYERNAME)*.txt $(SCP_ADDRESS):$(SCP_PATH);"]
         command: ["/bin/bash","-c","python3 TotalModel.py --set_gpu='true' --deployed_list $(DEPLOYMENT) --device_index=$(DEVICE_IDX) --device_addr_list $(DEVICE_ADDR) --resv_port_list $(RESV_PORT) --send_port_list $(SEND_PORT) --partition_location $(PART_LOCATION) --p $(RESOURCE) 1> $(WORKER_NAME)-1.txt 2> $(WORKER_NAME)-1_err.txt; sshpass -p $(SSH_PASSWARD) scp -o StrictHostKeyChecking=no $(WORKER_NAME)*.txt $(SCP_ADDRESS):$(SCP_PATH);"]
         ports:
-        - containerPort: 30000
-        - containerPort: 30001
+        - containerPort: 30000   # send image
+        - containerPort: 30010   # resv image
+        - containerPort: 30001   # send image
+        - containerPort: 30011   # resv image
+        - containerPort: 30002   # send image
+        - containerPort: 30012   # resv image
+        - containerPort: 30003   # send image
+        - containerPort: 30013   # resv image
+        - containerPort: 30004   # send image
+        - containerPort: 30014   # resv image
+        - containerPort: 30005   # send image
+        - containerPort: 30015   # resv image
 
 ---
 
@@ -114,10 +154,30 @@ metadata:
 spec:
   clusterIP: 10.96.0.201
   ports:
-  - name: send-port
+  - name: send-port-0
     port: 30000
-  - name: resv-port
+  - name: resv-port-0
+    port: 30010
+  - name: send-port-1
     port: 30001
+  - name: resv-port-1
+    port: 30011
+  - name: send-port-2
+    port: 30002
+  - name: resv-port-2
+    port: 30012
+  - name: send-port-3
+    port: 30003
+  - name: resv-port-3
+    port: 30013
+  - name: send-port-4
+    port: 30004
+  - name: resv-port-4
+    port: 30014
+  - name: send-port-5
+    port: 30005
+  - name: resv-port-5
+    port: 30015
   selector:
     app: worker-laptop-1
 
@@ -173,8 +233,18 @@ spec:
         #command: ["/bin/bash","-c","python3 TotalModel.py --set_gpu='true' --prev_addr='' --prev_port=30001 --next_addr='10.96.0.202' --next_port=30002 --vram_limit=128 --scheduler_addr=$(SCHEDULER_ADDR) --scheduler_port=$(SCHEDULER_PORT) 1> $(LAYERNAME).txt 2> $(LAYERNAME)_err.txt; sshpass -p $(SSH_PASSWARD) scp -o StrictHostKeyChecking=no $(LAYERNAME)*.txt $(SCP_ADDRESS):$(SCP_PATH);"]
         command: ["/bin/bash","-c","python3 TotalModel.py --set_gpu='true' --deployed_list $(DEPLOYMENT) --device_index=$(DEVICE_IDX) --device_addr_list $(DEVICE_ADDR) --resv_port_list $(RESV_PORT) --send_port_list $(SEND_PORT) --partition_location $(PART_LOCATION) --p $(RESOURCE) 1> $(WORKER_NAME).txt 2> $(WORKER_NAME)_err.txt; sshpass -p $(SSH_PASSWARD) scp -o StrictHostKeyChecking=no $(WORKER_NAME)*.txt $(SCP_ADDRESS):$(SCP_PATH);"]
         ports:
-        - containerPort: 30000
-        - containerPort: 30001
+        - containerPort: 30000   # send image
+        - containerPort: 30010   # resv image
+        - containerPort: 30001   # send image
+        - containerPort: 30011   # resv image
+        - containerPort: 30002   # send image
+        - containerPort: 30012   # resv image
+        - containerPort: 30003   # send image
+        - containerPort: 30013   # resv image
+        - containerPort: 30004   # send image
+        - containerPort: 30014   # resv image
+        - containerPort: 30005   # send image
+        - containerPort: 30015   # resv image
 
 ---
 
@@ -185,10 +255,30 @@ metadata:
 spec:
   clusterIP: 10.96.0.202
   ports:
-  - name: send-port
+  - name: send-port-0
     port: 30000
-  - name: resv-port
+  - name: resv-port-0
+    port: 30010
+  - name: send-port-1
     port: 30001
+  - name: resv-port-1
+    port: 30011
+  - name: send-port-2
+    port: 30002
+  - name: resv-port-2
+    port: 30012
+  - name: send-port-3
+    port: 30003
+  - name: resv-port-3
+    port: 30013
+  - name: send-port-4
+    port: 30004
+  - name: resv-port-4
+    port: 30014
+  - name: send-port-5
+    port: 30005
+  - name: resv-port-5
+    port: 30015
   selector:
     app: worker-laptop-2
 
@@ -244,8 +334,18 @@ spec:
         #command: ["/bin/bash","-c","python3 TotalModel.py --set_gpu='true' --prev_addr='' --prev_port=30001 --next_addr='10.96.0.202' --next_port=30002 --vram_limit=128 --scheduler_addr=$(SCHEDULER_ADDR) --scheduler_port=$(SCHEDULER_PORT) 1> $(LAYERNAME).txt 2> $(LAYERNAME)_err.txt; sshpass -p $(SSH_PASSWARD) scp -o StrictHostKeyChecking=no $(LAYERNAME)*.txt $(SCP_ADDRESS):$(SCP_PATH);"]
         command: ["/bin/bash","-c","python3 TotalModel.py --set_gpu='true' --deployed_list $(DEPLOYMENT) --device_index=$(DEVICE_IDX) --device_addr_list $(DEVICE_ADDR) --resv_port_list $(RESV_PORT) --send_port_list $(SEND_PORT) --partition_location $(PART_LOCATION) --p $(RESOURCE) 1> $(WORKER_NAME).txt 2> $(WORKER_NAME)_err.txt; sshpass -p $(SSH_PASSWARD) scp -o StrictHostKeyChecking=no $(WORKER_NAME)*.txt $(SCP_ADDRESS):$(SCP_PATH);"]
         ports:
-        - containerPort: 30000
-        - containerPort: 30001
+        - containerPort: 30000   # send image
+        - containerPort: 30010   # resv image
+        - containerPort: 30001   # send image
+        - containerPort: 30011   # resv image
+        - containerPort: 30002   # send image
+        - containerPort: 30012   # resv image
+        - containerPort: 30003   # send image
+        - containerPort: 30013   # resv image
+        - containerPort: 30004   # send image
+        - containerPort: 30014   # resv image
+        - containerPort: 30005   # send image
+        - containerPort: 30015   # resv image
 
 ---
 
@@ -256,10 +356,30 @@ metadata:
 spec:
   clusterIP: 10.96.0.203
   ports:
-  - name: send-port
+  - name: send-port-0
     port: 30000
-  - name: resv-port
+  - name: resv-port-0
+    port: 30010
+  - name: send-port-1
     port: 30001
+  - name: resv-port-1
+    port: 30011
+  - name: send-port-2
+    port: 30002
+  - name: resv-port-2
+    port: 30012
+  - name: send-port-3
+    port: 30003
+  - name: resv-port-3
+    port: 30013
+  - name: send-port-4
+    port: 30004
+  - name: resv-port-4
+    port: 30014
+  - name: send-port-5
+    port: 30005
+  - name: resv-port-5
+    port: 30015
   selector:
     app: worker-jetson-1
 
@@ -315,8 +435,18 @@ spec:
         #command: ["/bin/bash","-c","python3 TotalModel.py --set_gpu='true' --prev_addr='' --prev_port=30001 --next_addr='10.96.0.202' --next_port=30002 --vram_limit=128 --scheduler_addr=$(SCHEDULER_ADDR) --scheduler_port=$(SCHEDULER_PORT) 1> $(LAYERNAME).txt 2> $(LAYERNAME)_err.txt; sshpass -p $(SSH_PASSWARD) scp -o StrictHostKeyChecking=no $(LAYERNAME)*.txt $(SCP_ADDRESS):$(SCP_PATH);"]
         command: ["/bin/bash","-c","python3 TotalModel.py --set_gpu='true' --deployed_list $(DEPLOYMENT) --device_index=$(DEVICE_IDX) --device_addr_list $(DEVICE_ADDR) --resv_port_list $(RESV_PORT) --send_port_list $(SEND_PORT) --partition_location $(PART_LOCATION) --p $(RESOURCE) 1> $(WORKER_NAME).txt 2> $(WORKER_NAME)_err.txt; sshpass -p $(SSH_PASSWARD) scp -o StrictHostKeyChecking=no $(WORKER_NAME)*.txt $(SCP_ADDRESS):$(SCP_PATH);"]
         ports:
-        - containerPort: 30000
-        - containerPort: 30001
+        - containerPort: 30000   # send image
+        - containerPort: 30010   # resv image
+        - containerPort: 30001   # send image
+        - containerPort: 30011   # resv image
+        - containerPort: 30002   # send image
+        - containerPort: 30012   # resv image
+        - containerPort: 30003   # send image
+        - containerPort: 30013   # resv image
+        - containerPort: 30004   # send image
+        - containerPort: 30014   # resv image
+        - containerPort: 30005   # send image
+        - containerPort: 30015   # resv image
 
 ---
 
@@ -327,10 +457,30 @@ metadata:
 spec:
   clusterIP: 10.96.0.204
   ports:
-  - name: send-port
+  - name: send-port-0
     port: 30000
-  - name: resv-port
+  - name: resv-port-0
+    port: 30010
+  - name: send-port-1
     port: 30001
+  - name: resv-port-1
+    port: 30011
+  - name: send-port-2
+    port: 30002
+  - name: resv-port-2
+    port: 30012
+  - name: send-port-3
+    port: 30003
+  - name: resv-port-3
+    port: 30013
+  - name: send-port-4
+    port: 30004
+  - name: resv-port-4
+    port: 30014
+  - name: send-port-5
+    port: 30005
+  - name: resv-port-5
+    port: 30015
   selector:
     app: worker-jetson-2
 
@@ -386,8 +536,18 @@ spec:
         #command: ["/bin/bash","-c","python3 TotalModel.py --set_gpu='true' --prev_addr='' --prev_port=30001 --next_addr='10.96.0.202' --next_port=30002 --vram_limit=128 --scheduler_addr=$(SCHEDULER_ADDR) --scheduler_port=$(SCHEDULER_PORT) 1> $(LAYERNAME).txt 2> $(LAYERNAME)_err.txt; sshpass -p $(SSH_PASSWARD) scp -o StrictHostKeyChecking=no $(LAYERNAME)*.txt $(SCP_ADDRESS):$(SCP_PATH);"]
         command: ["/bin/bash","-c","python3 TotalModel.py --set_gpu='true' --deployed_list $(DEPLOYMENT) --device_index=$(DEVICE_IDX) --device_addr_list $(DEVICE_ADDR) --resv_port_list $(RESV_PORT) --send_port_list $(SEND_PORT) --partition_location $(PART_LOCATION) --p $(RESOURCE) 1> $(WORKER_NAME).txt 2> $(WORKER_NAME)_err.txt; sshpass -p $(SSH_PASSWARD) scp -o StrictHostKeyChecking=no $(WORKER_NAME)*.txt $(SCP_ADDRESS):$(SCP_PATH);"]
         ports:
-        - containerPort: 30000
-        - containerPort: 30001
+        - containerPort: 30000   # send image
+        - containerPort: 30010   # resv image
+        - containerPort: 30001   # send image
+        - containerPort: 30011   # resv image
+        - containerPort: 30002   # send image
+        - containerPort: 30012   # resv image
+        - containerPort: 30003   # send image
+        - containerPort: 30013   # resv image
+        - containerPort: 30004   # send image
+        - containerPort: 30014   # resv image
+        - containerPort: 30005   # send image
+        - containerPort: 30015   # resv image
 
 ---
 
@@ -398,9 +558,29 @@ metadata:
 spec:
   clusterIP: 10.96.0.205
   ports:
-  - name: send-port
+  - name: send-port-0
     port: 30000
-  - name: resv-port
+  - name: resv-port-0
+    port: 30010
+  - name: send-port-1
     port: 30001
+  - name: resv-port-1
+    port: 30011
+  - name: send-port-2
+    port: 30002
+  - name: resv-port-2
+    port: 30012
+  - name: send-port-3
+    port: 30003
+  - name: resv-port-3
+    port: 30013
+  - name: send-port-4
+    port: 30004
+  - name: resv-port-4
+    port: 30014
+  - name: send-port-5
+    port: 30005
+  - name: resv-port-5
+    port: 30015
   selector:
     app: worker-pc

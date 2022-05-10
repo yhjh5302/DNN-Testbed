@@ -106,8 +106,8 @@ if __name__ == "__main__":
                 resv_conn, resv_addr = open_resv_sock("", args.resv_port_list[i])
                 send_sock, send_addr = open_send_sock(args.device_addr_list[i], args.send_port_list[i])
             else:
-                send_sock, send_addr = open_send_sock(args.device_addr_list[i], args.resv_port_list[i])
-                resv_conn, resv_addr = open_resv_sock("", args.send_port_list[i])
+                send_sock, send_addr = open_send_sock(args.device_addr_list[i], args.resv_port_list[args.device_index])
+                resv_conn, resv_addr = open_resv_sock("", args.send_port_list[args.device_index])
 
 
             print("connection with {} established".format(args.device_addr_list[i]))
