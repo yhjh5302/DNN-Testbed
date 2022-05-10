@@ -1,0 +1,397 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: data-generator
+  labels:
+    app: data-generator
+spec:
+  selector:
+    matchLabels:
+      app: data-generator
+  template:
+    metadata:
+      labels:
+        app: data-generator
+    spec:
+      nodeSelector:
+        kubernetes.io/hostname: wnlab-laptop-1
+      containers:
+      - name: data-generator
+        #image: yhjh5302/data-uploader:latest
+        image: yhjh5302/total:latest
+        command: ["/bin/bash","-c","while true; do sleep 1000; done"]
+        #command: ["/bin/bash","-c","python3 data_uploader.py --set_gpu='false' --prev_addr='' --prev_port=30000 --next_addr='10.96.0.201' --next_port=30001"]
+        #command: ["/bin/bash","-c","python3 DataGenerator.py --set_gpu='false' --alexnet_prev_addr='' --alexnet_next_addr='10.96.0.201' --googlenet_prev_addr='' --googlenet_next_addr='10.96.0.211' --mobilenet_prev_addr='' --mobilenet_next_addr='10.96.0.221' --vggnet_prev_addr='' --vggnet_next_addr='10.96.0.231' --vggfnet_prev_addr='' --vggfnet_next_addr='10.96.0.241' --vram_limit=0"]
+        ports:
+        - containerPort: 30000   # send image
+        - containerPort: 30001   # resv image
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: data-generator-cluster-ip-service
+spec:
+  clusterIP: 10.96.0.200
+  ports:
+  - name: send_port
+    port: 30000
+  - name: resv_port
+    port: 30001
+  selector:
+    app: data-generator
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: worker-laptop-1
+  labels:
+    app: worker-laptop-1
+spec:
+  selector:
+    matchLabels:
+      app: worker-laptop-1
+  template:
+    metadata:
+      labels:
+        app: worker-laptop-1
+    spec:
+      nodeSelector:
+        kubernetes.io/hostname: jin-tfx255
+      containers:
+      - name: worker-laptop-1
+        image: yhjh5302/total:latest
+        env:
+        - name: DEPLOYMENT
+          value: "ResNet-CNN_8_1 ResNet-CNN_9_2 ResNet-CNN_10_1 ResNet-CNN_11_2 ResNet-CNN_12_1"
+        - name: DEVICE_ADDR
+          value: "10.96.0.200 10.96.0.201 10.96.0.202 10.96.0.203 10.96.0.204 10.96.0.205"
+        - name: SEND_PORT
+          value: "30000 30000 30000 30000 30000 30000"
+        - name: RESV_PORT
+          value: "30001 30001 30001 30001 30001 30001"
+        - name: PART_LOCATION
+          value: "3 3 3 3 3 3 3 3 1 1 1 1 1 4 4 4 2 2 2 5 2 4 5 5"
+        - name: RESOURCE
+          value: "0.234157441 0.125013369 0.170121595 0.277024282 0.193683312"
+        - name: SSH_PASSWARD
+          value: wnlab7752!
+        - name: SCP_ADDRESS
+          value: wnlab@192.168.1.4
+        - name: SCP_PATH
+          value: ./
+        - name: DEVICE_IDX
+          value: 1
+        - name: WORKER_NAME
+          value: laptop-1
+        
+        #resources:
+        #  limits:
+        #    nvidia.com/gpu: 1
+        #command: ["/bin/bash","-c","python3 TotalModel.py --set_gpu='true' --prev_addr='' --prev_port=30001 --next_addr='10.96.0.202' --next_port=30002 --vram_limit=128 --scheduler_addr=$(SCHEDULER_ADDR) --scheduler_port=$(SCHEDULER_PORT) 1> $(LAYERNAME).txt 2> $(LAYERNAME)_err.txt; sshpass -p $(SSH_PASSWARD) scp -o StrictHostKeyChecking=no $(LAYERNAME)*.txt $(SCP_ADDRESS):$(SCP_PATH);"]
+        command: ["/bin/bash","-c","python3 TotalModel.py --set_gpu='true' --deployed_list $(DEPLOYMENT) --device_index=$(DEVICE_IDX) --device_addr_list $(DEVICE_ADDR) --resv_port_list $(RESV_PORT) --send_port_list $(SEND_PORT) --partition_location $(PART_LOCATION) -p $(RESOURCE) 1> $(WORKER_NAME)-1.txt 2> $(WORKER_NAME)-1_err.txt; sshpass -p $(SSH_PASSWARD) scp -o StrictHostKeyChecking=no $(WORKER_NAME)*.txt $(SCP_ADDRESS):$(SCP_PATH);"]
+        ports:
+        - containerPort: 30000
+        - containerPort: 30001
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: worker-laptop-1-cluster-ip-service
+spec:
+  clusterIP: 10.96.0.201
+  ports:
+  - name: send_port
+    port: 30000
+  - name: resv_port
+    port: 30001
+  selector:
+    app: worker-laptop-1
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: worker-laptop-2
+  labels:
+    app: worker-laptop-2
+spec:
+  selector:
+    matchLabels:
+      app: worker-laptop-2
+  template:
+    metadata:
+      labels:
+        app: worker-laptop-2
+    spec:
+      nodeSelector:
+        kubernetes.io/hostname: jin-w65-67sf
+      containers:
+      - name: worker-laptop-2
+        image: yhjh5302/total:latest
+        env:
+        - name: DEPLOYMENT
+          value: "ResNet-CNN_16_1 ResNet-CNN_17 AlexNet-in AlexNet-2"
+        - name: DEVICE_ADDR
+          value: "10.96.0.200 10.96.0.201 10.96.0.202 10.96.0.203 10.96.0.204 10.96.0.205"
+        - name: SEND_PORT
+          value: "30000 30000 30000 30000 30000 30000"
+        - name: RESV_PORT
+          value: "30001 30001 30001 30001 30001 30001"
+        - name: PART_LOCATION
+          value: "3 3 3 3 3 3 3 3 1 1 1 1 1 4 4 4 2 2 2 5 2 4 5 5"
+        - name: RESOURCE
+          value: "0.05640559 0.06652689 0.43479294 0.41262735"
+        - name: SSH_PASSWARD
+          value: wnlab7752!
+        - name: SCP_ADDRESS
+          value: wnlab@192.168.1.4
+        - name: SCP_PATH
+          value: ./
+        - name: DEVICE_IDX
+          value: 2
+        - name: WORKER_NAME
+          value: laptop-2
+        
+        #resources:
+        #  limits:
+        #    nvidia.com/gpu: 1
+        #command: ["/bin/bash","-c","python3 TotalModel.py --set_gpu='true' --prev_addr='' --prev_port=30001 --next_addr='10.96.0.202' --next_port=30002 --vram_limit=128 --scheduler_addr=$(SCHEDULER_ADDR) --scheduler_port=$(SCHEDULER_PORT) 1> $(LAYERNAME).txt 2> $(LAYERNAME)_err.txt; sshpass -p $(SSH_PASSWARD) scp -o StrictHostKeyChecking=no $(LAYERNAME)*.txt $(SCP_ADDRESS):$(SCP_PATH);"]
+        command: ["/bin/bash","-c","python3 TotalModel.py --set_gpu='true' --deployed_list $(DEPLOYMENT) --device_index=$(DEVICE_IDX) --device_addr_list $(DEVICE_ADDR) --resv_port_list $(RESV_PORT) --send_port_list $(SEND_PORT) --partition_location $(PART_LOCATION) -p $(RESOURCE) 1> $(WORKER_NAME).txt 2> $(WORKER_NAME)_err.txt; sshpass -p $(SSH_PASSWARD) scp -o StrictHostKeyChecking=no $(WORKER_NAME)*.txt $(SCP_ADDRESS):$(SCP_PATH);"]
+        ports:
+        - containerPort: 30000
+        - containerPort: 30001
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: worker-laptop-2-cluster-ip-service
+spec:
+  clusterIP: 10.96.0.202
+  ports:
+  - name: send_port
+    port: 30000
+  - name: resv_port
+    port: 30001
+  selector:
+    app: worker-laptop-2
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: worker-jetson-1
+  labels:
+    app: worker-jetson-2
+spec:
+  selector:
+    matchLabels:
+      app: worker-jetson-1
+  template:
+    metadata:
+      labels:
+        app: worker-jetson-1
+    spec:
+      nodeSelector:
+        kubernetes.io/hostname: wnlab-nano-001
+      containers:
+      - name: worker-jetson-1
+        image: yhjh5302/total-nano:latest
+        env:
+        - name: DEPLOYMENT
+          value: "ResNet-CNN_1_2 ResNet-CNN_2_1 ResNet-CNN_3_2 ResNet-CNN_4_1 ResNet-CNN_5_2 ResNet-CNN_6_1 ResNet-CNN_7_2"
+        - name: DEVICE_ADDR
+          value: "10.96.0.200 10.96.0.201 10.96.0.202 10.96.0.203 10.96.0.204 10.96.0.205"
+        - name: SEND_PORT
+          value: "30000 30000 30000 30000 30000 30000"
+        - name: RESV_PORT
+          value: "30001 30001 30001 30001 30001 30001"
+        - name: PART_LOCATION
+          value: "3 3 3 3 3 3 3 3 1 1 1 1 1 4 4 4 2 2 2 5 2 4 5 5"
+        - name: RESOURCE
+          value: "0.10425131 0.08563795 0.14690932 0.12069519 0.14182189 0.0881324 0.07778058 0.09682393"
+        - name: SSH_PASSWARD
+          value: wnlab7752!
+        - name: SCP_ADDRESS
+          value: wnlab@192.168.1.4
+        - name: SCP_PATH
+          value: ./
+        - name: DEVICE_IDX
+          value: 3
+        - name: WORKER_NAME
+          value: jatson-1
+        
+        #resources:
+        #  limits:
+        #    nvidia.com/gpu: 1
+        #command: ["/bin/bash","-c","python3 TotalModel.py --set_gpu='true' --prev_addr='' --prev_port=30001 --next_addr='10.96.0.202' --next_port=30002 --vram_limit=128 --scheduler_addr=$(SCHEDULER_ADDR) --scheduler_port=$(SCHEDULER_PORT) 1> $(LAYERNAME).txt 2> $(LAYERNAME)_err.txt; sshpass -p $(SSH_PASSWARD) scp -o StrictHostKeyChecking=no $(LAYERNAME)*.txt $(SCP_ADDRESS):$(SCP_PATH);"]
+        command: ["/bin/bash","-c","python3 TotalModel.py --set_gpu='true' --deployed_list $(DEPLOYMENT) --device_index=$(DEVICE_IDX) --device_addr_list $(DEVICE_ADDR) --resv_port_list $(RESV_PORT) --send_port_list $(SEND_PORT) --partition_location $(PART_LOCATION) -p $(RESOURCE) 1> $(WORKER_NAME).txt 2> $(WORKER_NAME)_err.txt; sshpass -p $(SSH_PASSWARD) scp -o StrictHostKeyChecking=no $(WORKER_NAME)*.txt $(SCP_ADDRESS):$(SCP_PATH);"]
+        ports:
+        - containerPort: 30000
+        - containerPort: 30001
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: worker-jetson-1-cluster-ip-service
+spec:
+  clusterIP: 10.96.0.203
+  ports:
+  - name: send_port
+    port: 30000
+  - name: resv_port
+    port: 30001
+  selector:
+    app: worker-jetson-1
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: worker-jetson-2
+  labels:
+    app: worker-jetson-2
+spec:
+  selector:
+    matchLabels:
+      app: worker-jetson-2
+  template:
+    metadata:
+      labels:
+        app: worker-jetson-2
+    spec:
+      nodeSelector:
+        kubernetes.io/hostname: wnlab-nano-002
+      containers:
+      - name: worker-jetson-2
+        image: yhjh5302/total-nano:latest
+        env:
+        - name: DEPLOYMENT
+          value: "ResNet-CNN_13_2 ResNet-CNN_14_1 ResNet-CNN_15_2 AlexNet-out"
+        - name: DEVICE_ADDR
+          value: "10.96.0.200 10.96.0.201 10.96.0.202 10.96.0.203 10.96.0.204 10.96.0.205"
+        - name: SEND_PORT
+          value: "30000 30000 30000 30000 30000 30000"
+        - name: RESV_PORT
+          value: "30001 30001 30001 30001 30001 30001"
+        - name: PART_LOCATION
+          value: "3 3 3 3 3 3 3 3 1 1 1 1 1 4 4 4 2 2 2 5 2 4 5 5"
+        - name: RESOURCE
+          value: "0.06499617 0.04070891 0.06649987 0.75089987"
+        - name: SSH_PASSWARD
+          value: wnlab7752!
+        - name: SCP_ADDRESS
+          value: wnlab@192.168.1.4
+        - name: SCP_PATH
+          value: ./
+        - name: DEVICE_IDX
+          value: 4
+        - name: WORKER_NAME
+          value: jetson-2
+        
+        #resources:
+        #  limits:
+        #    nvidia.com/gpu: 1
+        #command: ["/bin/bash","-c","python3 TotalModel.py --set_gpu='true' --prev_addr='' --prev_port=30001 --next_addr='10.96.0.202' --next_port=30002 --vram_limit=128 --scheduler_addr=$(SCHEDULER_ADDR) --scheduler_port=$(SCHEDULER_PORT) 1> $(LAYERNAME).txt 2> $(LAYERNAME)_err.txt; sshpass -p $(SSH_PASSWARD) scp -o StrictHostKeyChecking=no $(LAYERNAME)*.txt $(SCP_ADDRESS):$(SCP_PATH);"]
+        command: ["/bin/bash","-c","python3 TotalModel.py --set_gpu='true' --deployed_list $(DEPLOYMENT) --device_index=$(DEVICE_IDX) --device_addr_list $(DEVICE_ADDR) --resv_port_list $(RESV_PORT) --send_port_list $(SEND_PORT) --partition_location $(PART_LOCATION) -p $(RESOURCE) 1> $(WORKER_NAME).txt 2> $(WORKER_NAME)_err.txt; sshpass -p $(SSH_PASSWARD) scp -o StrictHostKeyChecking=no $(WORKER_NAME)*.txt $(SCP_ADDRESS):$(SCP_PATH);"]
+        ports:
+        - containerPort: 30000
+        - containerPort: 30001
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: worker-jetson-2-cluster-ip-service
+spec:
+  clusterIP: 10.96.0.204
+  ports:
+  - name: send_port
+    port: 30000
+  - name: resv_port
+    port: 30001
+  selector:
+    app: worker-jetson-2
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: worker-pc
+  labels:
+    app: worker-pc
+spec:
+  selector:
+    matchLabels:
+      app: worker-pc
+  template:
+    metadata:
+      labels:
+        app: worker-pc
+    spec:
+      nodeSelector:
+        kubernetes.io/hostname: server-2
+      containers:
+      - name: worker-pc
+        image: yhjh5302/total:latest
+        env:
+        - name: DEPLOYMENT
+          value: "AlexNet-1 NiN VGG"
+        - name: DEVICE_ADDR
+          value: "10.96.0.200 10.96.0.201 10.96.0.202 10.96.0.203 10.96.0.204 10.96.0.205"
+        - name: SEND_PORT
+          value: "30000 30000 30000 30000 30000 30000"
+        - name: RESV_PORT
+          value: "30001 30001 30001 30001 30001 30001"
+        - name: PART_LOCATION
+          value: "3 3 3 3 3 3 3 3 1 1 1 1 1 4 4 4 2 2 2 5 2 4 5 5"
+        - name: RESOURCE
+          value: "0.34651383 0.30334133 0.3454547"
+        - name: SSH_PASSWARD
+          value: wnlab7752!
+        - name: SCP_ADDRESS
+          value: wnlab@192.168.1.4
+        - name: SCP_PATH
+          value: ./
+        - name: DEVICE_IDX
+          value: 5
+        - name: WORKER_NAME
+          value: pc
+        
+        #resources:
+        #  limits:
+        #    nvidia.com/gpu: 1
+        #command: ["/bin/bash","-c","python3 TotalModel.py --set_gpu='true' --prev_addr='' --prev_port=30001 --next_addr='10.96.0.202' --next_port=30002 --vram_limit=128 --scheduler_addr=$(SCHEDULER_ADDR) --scheduler_port=$(SCHEDULER_PORT) 1> $(LAYERNAME).txt 2> $(LAYERNAME)_err.txt; sshpass -p $(SSH_PASSWARD) scp -o StrictHostKeyChecking=no $(LAYERNAME)*.txt $(SCP_ADDRESS):$(SCP_PATH);"]
+        command: ["/bin/bash","-c","python3 TotalModel.py --set_gpu='true' --deployed_list $(DEPLOYMENT) --device_index=$(DEVICE_IDX) --device_addr_list $(DEVICE_ADDR) --resv_port_list $(RESV_PORT) --send_port_list $(SEND_PORT) --partition_location $(PART_LOCATION) -p $(RESOURCE) 1> $(WORKER_NAME).txt 2> $(WORKER_NAME)_err.txt; sshpass -p $(SSH_PASSWARD) scp -o StrictHostKeyChecking=no $(WORKER_NAME)*.txt $(SCP_ADDRESS):$(SCP_PATH);"]
+        ports:
+        - containerPort: 30000
+        - containerPort: 30001
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: worker-pc-cluster-ip-service
+spec:
+  clusterIP: 10.96.0.205
+  ports:
+  - name: send_port
+    port: 30000
+  - name: resv_port
+    port: 30001
+  selector:
+    app: worker-pc
