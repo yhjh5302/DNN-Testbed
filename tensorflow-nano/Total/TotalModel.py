@@ -32,9 +32,9 @@ if __name__ == "__main__":
         "ResNet-CNN_12_1", "ResNet-CNN_13_2", "ResNet-CNN_14_1", "ResNet-CNN_15_2", 
         "ResNet-CNN_16_1", "ResNet-CNN_17"], nargs='+', type=str, help='layer list for this application')
     parser.add_argument('--device_index', default=1, type=int, help='device index for device')
-    parser.add_argument('--device_addr_list', default=['localhost', 'localhost'], nargs='+', type=str, help='address list of kubernetes cluster')
-    parser.add_argument('--resv_port_list', default=[30031, 30031], nargs='+', type=int, help='receive port')
-    parser.add_argument('--send_port_list', default=[30030, 30031], nargs='+', type=int, help='send port')
+    parser.add_argument('--device_addr_list', default=['192.168.1.13', '192.168.1.4'], nargs='+', type=str, help='address list of kubernetes cluster')
+    parser.add_argument('--resv_port_list', default=[30030, 30030], nargs='+', type=int, help='receive port')
+    parser.add_argument('--send_port_list', default=[30031, 30031], nargs='+', type=int, help='send port')
     parser.add_argument('--partition_location', default=[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1], nargs='+', type=int, help='deployed device number')
     parser.add_argument('--generator_idx', default=0, type=int, help='generator container idx')
     parser.add_argument('--set_gpu', default=True, type=str2bool, help='If you want to use GPU, set "True"')
@@ -128,17 +128,28 @@ if __name__ == "__main__":
     
     for i in range(len(args.device_addr_list)):
         if i != args.device_index:
-            resv_opt = (args.device_addr_list[i], args.resv_port_list[i])
+            # resv_opt = (args.device_addr_list[i], args.resv_port_list[i])
+            resv_opt = ("", args.resv_port_list[i]) # accept
             send_opt = (args.device_addr_list[i], args.send_port_list[i])
             if i > args.device_index:
-                resv_conn, resv_addr, send_sock, send_addr = server_socket(resv_opt, send_opt)
+                while True:
+                    resv_conn, resv_addr, send_sock, send_addr = server_socket(resv_opt, send_opt)
+                    client_addr = resv_addr[0]
+                    if client_addr not in args.device_addr_list:
+                        print("wrong connections with {}".format(client_addr))
+                        resv_conn.close()
+                        send_sock.close()
+                    else:
+                        div_id = args.device_addr_list.index(client_addr)
+                        break
             else:
                 resv_conn, resv_addr, send_sock, send_addr = client_socket(resv_opt, send_opt)
+                div_id = i
 
-            print("connection with {} established".format(i))
+            print("connection with {} established".format(args.device_addr_list[div_id]))
 
             threading.Thread(target=recv_data, args=(resv_conn, recv_data_dict, recv_data_lock, _stop_event, dag_man)).start()
-            threading.Thread(target=send_data, args=(send_sock, dev_send_data_list[i], dev_send_lock_list[i], _stop_event)).start()
+            threading.Thread(target=send_data, args=(send_sock, dev_send_data_list[div_id], dev_send_lock_list[div_id], _stop_event)).start()
     
     
     print("all connection is established")
