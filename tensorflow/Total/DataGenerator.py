@@ -59,7 +59,7 @@ def image_recver(model_name_dict,conn, label_dict, label_lock_dict, time_dict, t
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Tensorflow')
-    parser.add_argument('--device_addr_list', default=['localhost', 'localhost'], nargs='+', type=str, help='address list of kubernetes cluster')
+    parser.add_argument('--device_addr_list', default=['192.168.1.13', '192.168.1.4'], nargs='+', type=str, help='address list of kubernetes cluster')
     parser.add_argument('--resv_port_list', default=[30030, 30030], nargs='+', type=int, help='receive port')
     parser.add_argument('--send_port_list', default=[30031, 30031], nargs='+', type=int, help='send port')
     parser.add_argument('--device_index', default=0, type=int, help='device index for device')
