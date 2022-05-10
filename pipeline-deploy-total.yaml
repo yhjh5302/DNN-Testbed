@@ -19,6 +19,15 @@ spec:
       - name: data-generator
         #image: yhjh5302/data-uploader:latest
         image: yhjh5302/total:latest
+        env:
+        - name: DEVICE_ADDR
+          value: "10.96.0.200 10.96.0.201 10.96.0.202 10.96.0.203 10.96.0.204 10.96.0.205"
+        - name: SEND_PORT
+          value: "30000 30000 30000 30000 30000 30000"
+        - name: RESV_PORT
+          value: "30001 30001 30001 30001 30001 30001"
+        - name: PART_LOCATION
+          value: "3 3 3 3 3 3 3 3 1 1 1 1 1 4 4 4 2 2 2 5 2 4 5 5"
         command: ["/bin/bash","-c","while true; do sleep 1000; done"]
         #command: ["/bin/bash","-c","python3 data_uploader.py --set_gpu='false' --prev_addr='' --prev_port=30000 --next_addr='10.96.0.201' --next_port=30001"]
         #command: ["/bin/bash","-c","python3 DataGenerator.py --set_gpu='false' --alexnet_prev_addr='' --alexnet_next_addr='10.96.0.201' --googlenet_prev_addr='' --googlenet_next_addr='10.96.0.211' --mobilenet_prev_addr='' --mobilenet_next_addr='10.96.0.221' --vggnet_prev_addr='' --vggnet_next_addr='10.96.0.231' --vggfnet_prev_addr='' --vggfnet_next_addr='10.96.0.241' --vram_limit=0"]
@@ -34,9 +43,9 @@ metadata:
 spec:
   clusterIP: 10.96.0.200
   ports:
-  - name: send_port
+  - name: send-port
     port: 30000
-  - name: resv_port
+  - name: resv-port
     port: 30001
   selector:
     app: data-generator
@@ -79,11 +88,11 @@ spec:
         - name: SSH_PASSWARD
           value: wnlab7752!
         - name: SCP_ADDRESS
-          value: wnlab@192.168.1.4
+          value: wnlab@192.168.1.13
         - name: SCP_PATH
           value: ./
         - name: DEVICE_IDX
-          value: 1
+          value: "1"
         - name: WORKER_NAME
           value: laptop-1
         
@@ -91,7 +100,7 @@ spec:
         #  limits:
         #    nvidia.com/gpu: 1
         #command: ["/bin/bash","-c","python3 TotalModel.py --set_gpu='true' --prev_addr='' --prev_port=30001 --next_addr='10.96.0.202' --next_port=30002 --vram_limit=128 --scheduler_addr=$(SCHEDULER_ADDR) --scheduler_port=$(SCHEDULER_PORT) 1> $(LAYERNAME).txt 2> $(LAYERNAME)_err.txt; sshpass -p $(SSH_PASSWARD) scp -o StrictHostKeyChecking=no $(LAYERNAME)*.txt $(SCP_ADDRESS):$(SCP_PATH);"]
-        command: ["/bin/bash","-c","python3 TotalModel.py --set_gpu='true' --deployed_list $(DEPLOYMENT) --device_index=$(DEVICE_IDX) --device_addr_list $(DEVICE_ADDR) --resv_port_list $(RESV_PORT) --send_port_list $(SEND_PORT) --partition_location $(PART_LOCATION) -p $(RESOURCE) 1> $(WORKER_NAME)-1.txt 2> $(WORKER_NAME)-1_err.txt; sshpass -p $(SSH_PASSWARD) scp -o StrictHostKeyChecking=no $(WORKER_NAME)*.txt $(SCP_ADDRESS):$(SCP_PATH);"]
+        command: ["/bin/bash","-c","python3 TotalModel.py --set_gpu='true' --deployed_list $(DEPLOYMENT) --device_index=$(DEVICE_IDX) --device_addr_list $(DEVICE_ADDR) --resv_port_list $(RESV_PORT) --send_port_list $(SEND_PORT) --partition_location $(PART_LOCATION) --p $(RESOURCE) 1> $(WORKER_NAME)-1.txt 2> $(WORKER_NAME)-1_err.txt; sshpass -p $(SSH_PASSWARD) scp -o StrictHostKeyChecking=no $(WORKER_NAME)*.txt $(SCP_ADDRESS):$(SCP_PATH);"]
         ports:
         - containerPort: 30000
         - containerPort: 30001
@@ -105,9 +114,9 @@ metadata:
 spec:
   clusterIP: 10.96.0.201
   ports:
-  - name: send_port
+  - name: send-port
     port: 30000
-  - name: resv_port
+  - name: resv-port
     port: 30001
   selector:
     app: worker-laptop-1
@@ -150,11 +159,11 @@ spec:
         - name: SSH_PASSWARD
           value: wnlab7752!
         - name: SCP_ADDRESS
-          value: wnlab@192.168.1.4
+          value: wnlab@192.168.1.13
         - name: SCP_PATH
           value: ./
         - name: DEVICE_IDX
-          value: 2
+          value: "2"
         - name: WORKER_NAME
           value: laptop-2
         
@@ -162,7 +171,7 @@ spec:
         #  limits:
         #    nvidia.com/gpu: 1
         #command: ["/bin/bash","-c","python3 TotalModel.py --set_gpu='true' --prev_addr='' --prev_port=30001 --next_addr='10.96.0.202' --next_port=30002 --vram_limit=128 --scheduler_addr=$(SCHEDULER_ADDR) --scheduler_port=$(SCHEDULER_PORT) 1> $(LAYERNAME).txt 2> $(LAYERNAME)_err.txt; sshpass -p $(SSH_PASSWARD) scp -o StrictHostKeyChecking=no $(LAYERNAME)*.txt $(SCP_ADDRESS):$(SCP_PATH);"]
-        command: ["/bin/bash","-c","python3 TotalModel.py --set_gpu='true' --deployed_list $(DEPLOYMENT) --device_index=$(DEVICE_IDX) --device_addr_list $(DEVICE_ADDR) --resv_port_list $(RESV_PORT) --send_port_list $(SEND_PORT) --partition_location $(PART_LOCATION) -p $(RESOURCE) 1> $(WORKER_NAME).txt 2> $(WORKER_NAME)_err.txt; sshpass -p $(SSH_PASSWARD) scp -o StrictHostKeyChecking=no $(WORKER_NAME)*.txt $(SCP_ADDRESS):$(SCP_PATH);"]
+        command: ["/bin/bash","-c","python3 TotalModel.py --set_gpu='true' --deployed_list $(DEPLOYMENT) --device_index=$(DEVICE_IDX) --device_addr_list $(DEVICE_ADDR) --resv_port_list $(RESV_PORT) --send_port_list $(SEND_PORT) --partition_location $(PART_LOCATION) --p $(RESOURCE) 1> $(WORKER_NAME).txt 2> $(WORKER_NAME)_err.txt; sshpass -p $(SSH_PASSWARD) scp -o StrictHostKeyChecking=no $(WORKER_NAME)*.txt $(SCP_ADDRESS):$(SCP_PATH);"]
         ports:
         - containerPort: 30000
         - containerPort: 30001
@@ -176,9 +185,9 @@ metadata:
 spec:
   clusterIP: 10.96.0.202
   ports:
-  - name: send_port
+  - name: send-port
     port: 30000
-  - name: resv_port
+  - name: resv-port
     port: 30001
   selector:
     app: worker-laptop-2
@@ -221,11 +230,11 @@ spec:
         - name: SSH_PASSWARD
           value: wnlab7752!
         - name: SCP_ADDRESS
-          value: wnlab@192.168.1.4
+          value: wnlab@192.168.1.13
         - name: SCP_PATH
           value: ./
         - name: DEVICE_IDX
-          value: 3
+          value: "3"
         - name: WORKER_NAME
           value: jatson-1
         
@@ -233,7 +242,7 @@ spec:
         #  limits:
         #    nvidia.com/gpu: 1
         #command: ["/bin/bash","-c","python3 TotalModel.py --set_gpu='true' --prev_addr='' --prev_port=30001 --next_addr='10.96.0.202' --next_port=30002 --vram_limit=128 --scheduler_addr=$(SCHEDULER_ADDR) --scheduler_port=$(SCHEDULER_PORT) 1> $(LAYERNAME).txt 2> $(LAYERNAME)_err.txt; sshpass -p $(SSH_PASSWARD) scp -o StrictHostKeyChecking=no $(LAYERNAME)*.txt $(SCP_ADDRESS):$(SCP_PATH);"]
-        command: ["/bin/bash","-c","python3 TotalModel.py --set_gpu='true' --deployed_list $(DEPLOYMENT) --device_index=$(DEVICE_IDX) --device_addr_list $(DEVICE_ADDR) --resv_port_list $(RESV_PORT) --send_port_list $(SEND_PORT) --partition_location $(PART_LOCATION) -p $(RESOURCE) 1> $(WORKER_NAME).txt 2> $(WORKER_NAME)_err.txt; sshpass -p $(SSH_PASSWARD) scp -o StrictHostKeyChecking=no $(WORKER_NAME)*.txt $(SCP_ADDRESS):$(SCP_PATH);"]
+        command: ["/bin/bash","-c","python3 TotalModel.py --set_gpu='true' --deployed_list $(DEPLOYMENT) --device_index=$(DEVICE_IDX) --device_addr_list $(DEVICE_ADDR) --resv_port_list $(RESV_PORT) --send_port_list $(SEND_PORT) --partition_location $(PART_LOCATION) --p $(RESOURCE) 1> $(WORKER_NAME).txt 2> $(WORKER_NAME)_err.txt; sshpass -p $(SSH_PASSWARD) scp -o StrictHostKeyChecking=no $(WORKER_NAME)*.txt $(SCP_ADDRESS):$(SCP_PATH);"]
         ports:
         - containerPort: 30000
         - containerPort: 30001
@@ -247,9 +256,9 @@ metadata:
 spec:
   clusterIP: 10.96.0.203
   ports:
-  - name: send_port
+  - name: send-port
     port: 30000
-  - name: resv_port
+  - name: resv-port
     port: 30001
   selector:
     app: worker-jetson-1
@@ -292,11 +301,11 @@ spec:
         - name: SSH_PASSWARD
           value: wnlab7752!
         - name: SCP_ADDRESS
-          value: wnlab@192.168.1.4
+          value: wnlab@192.168.1.13
         - name: SCP_PATH
           value: ./
         - name: DEVICE_IDX
-          value: 4
+          value: "4"
         - name: WORKER_NAME
           value: jetson-2
         
@@ -304,7 +313,7 @@ spec:
         #  limits:
         #    nvidia.com/gpu: 1
         #command: ["/bin/bash","-c","python3 TotalModel.py --set_gpu='true' --prev_addr='' --prev_port=30001 --next_addr='10.96.0.202' --next_port=30002 --vram_limit=128 --scheduler_addr=$(SCHEDULER_ADDR) --scheduler_port=$(SCHEDULER_PORT) 1> $(LAYERNAME).txt 2> $(LAYERNAME)_err.txt; sshpass -p $(SSH_PASSWARD) scp -o StrictHostKeyChecking=no $(LAYERNAME)*.txt $(SCP_ADDRESS):$(SCP_PATH);"]
-        command: ["/bin/bash","-c","python3 TotalModel.py --set_gpu='true' --deployed_list $(DEPLOYMENT) --device_index=$(DEVICE_IDX) --device_addr_list $(DEVICE_ADDR) --resv_port_list $(RESV_PORT) --send_port_list $(SEND_PORT) --partition_location $(PART_LOCATION) -p $(RESOURCE) 1> $(WORKER_NAME).txt 2> $(WORKER_NAME)_err.txt; sshpass -p $(SSH_PASSWARD) scp -o StrictHostKeyChecking=no $(WORKER_NAME)*.txt $(SCP_ADDRESS):$(SCP_PATH);"]
+        command: ["/bin/bash","-c","python3 TotalModel.py --set_gpu='true' --deployed_list $(DEPLOYMENT) --device_index=$(DEVICE_IDX) --device_addr_list $(DEVICE_ADDR) --resv_port_list $(RESV_PORT) --send_port_list $(SEND_PORT) --partition_location $(PART_LOCATION) --p $(RESOURCE) 1> $(WORKER_NAME).txt 2> $(WORKER_NAME)_err.txt; sshpass -p $(SSH_PASSWARD) scp -o StrictHostKeyChecking=no $(WORKER_NAME)*.txt $(SCP_ADDRESS):$(SCP_PATH);"]
         ports:
         - containerPort: 30000
         - containerPort: 30001
@@ -318,9 +327,9 @@ metadata:
 spec:
   clusterIP: 10.96.0.204
   ports:
-  - name: send_port
+  - name: send-port
     port: 30000
-  - name: resv_port
+  - name: resv-port
     port: 30001
   selector:
     app: worker-jetson-2
@@ -363,11 +372,11 @@ spec:
         - name: SSH_PASSWARD
           value: wnlab7752!
         - name: SCP_ADDRESS
-          value: wnlab@192.168.1.4
+          value: wnlab@192.168.1.13
         - name: SCP_PATH
           value: ./
         - name: DEVICE_IDX
-          value: 5
+          value: "5"
         - name: WORKER_NAME
           value: pc
         
@@ -375,7 +384,7 @@ spec:
         #  limits:
         #    nvidia.com/gpu: 1
         #command: ["/bin/bash","-c","python3 TotalModel.py --set_gpu='true' --prev_addr='' --prev_port=30001 --next_addr='10.96.0.202' --next_port=30002 --vram_limit=128 --scheduler_addr=$(SCHEDULER_ADDR) --scheduler_port=$(SCHEDULER_PORT) 1> $(LAYERNAME).txt 2> $(LAYERNAME)_err.txt; sshpass -p $(SSH_PASSWARD) scp -o StrictHostKeyChecking=no $(LAYERNAME)*.txt $(SCP_ADDRESS):$(SCP_PATH);"]
-        command: ["/bin/bash","-c","python3 TotalModel.py --set_gpu='true' --deployed_list $(DEPLOYMENT) --device_index=$(DEVICE_IDX) --device_addr_list $(DEVICE_ADDR) --resv_port_list $(RESV_PORT) --send_port_list $(SEND_PORT) --partition_location $(PART_LOCATION) -p $(RESOURCE) 1> $(WORKER_NAME).txt 2> $(WORKER_NAME)_err.txt; sshpass -p $(SSH_PASSWARD) scp -o StrictHostKeyChecking=no $(WORKER_NAME)*.txt $(SCP_ADDRESS):$(SCP_PATH);"]
+        command: ["/bin/bash","-c","python3 TotalModel.py --set_gpu='true' --deployed_list $(DEPLOYMENT) --device_index=$(DEVICE_IDX) --device_addr_list $(DEVICE_ADDR) --resv_port_list $(RESV_PORT) --send_port_list $(SEND_PORT) --partition_location $(PART_LOCATION) --p $(RESOURCE) 1> $(WORKER_NAME).txt 2> $(WORKER_NAME)_err.txt; sshpass -p $(SSH_PASSWARD) scp -o StrictHostKeyChecking=no $(WORKER_NAME)*.txt $(SCP_ADDRESS):$(SCP_PATH);"]
         ports:
         - containerPort: 30000
         - containerPort: 30001
@@ -389,9 +398,9 @@ metadata:
 spec:
   clusterIP: 10.96.0.205
   ports:
-  - name: send_port
+  - name: send-port
     port: 30000
-  - name: resv_port
+  - name: resv-port
     port: 30001
   selector:
     app: worker-pc

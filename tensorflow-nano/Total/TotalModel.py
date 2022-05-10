@@ -130,7 +130,7 @@ if __name__ == "__main__":
         if i != args.device_index:
             resv_opt = (args.device_addr_list[i], args.resv_port_list[i])
             send_opt = (args.device_addr_list[i], args.send_port_list[i])
-            if i < args.device_index:
+            if i > args.device_index:
                 resv_conn, resv_addr, send_sock, send_addr = server_socket(resv_opt, send_opt)
             else:
                 resv_conn, resv_addr, send_sock, send_addr = client_socket(resv_opt, send_opt)
