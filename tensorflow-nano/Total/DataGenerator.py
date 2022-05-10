@@ -109,21 +109,11 @@ if __name__ == "__main__":
                 send_sock, send_addr = open_send_sock(args.device_addr_list[i], args.resv_port_list[args.device_index])
                 resv_conn, resv_addr = open_resv_sock("", args.send_port_list[args.device_index])
 
-
-            print("connection with {} established".format(args.device_addr_list[i]))
-            dev_dict[i] = {
-                'send_sock': send_sock,
-                'send_data_lock': send_data_lock,
-                'resv_conn': resv_conn,
-                'resv_data_lock': resv_data_lock
-            }
-
-    for i in range(len(args.device_addr_list)):
-        if i != args.device_index:
-            dev_send_sock_list.append(dev_dict[i]["send_sock"])
-            dev_send_lock_list.append(dev_dict[i]["send_data_lock"])
-            dev_resv_sock_list.append(dev_dict[i]["resv_conn"])
-            dev_resv_lock_list.append(dev_dict[i]["resv_data_lock"])
+        print("connection with {} established".format(args.device_addr_list[i]))
+        dev_send_sock_list.append(send_sock)
+        dev_send_lock_list.append(send_data_lock)
+        dev_resv_sock_list.append(resv_conn)
+        dev_resv_lock_list.append(resv_data_lock)
 
     del dev_dict
     
