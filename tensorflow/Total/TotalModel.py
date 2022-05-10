@@ -30,7 +30,7 @@ if __name__ == "__main__":
         "ResNet-CNN_4_1", "ResNet-CNN_5_2", "ResNet-CNN_6_1", "ResNet-CNN_7_2", 
         "ResNet-CNN_8_1", "ResNet-CNN_9_2", "ResNet-CNN_10_1", "ResNet-CNN_11_2", 
         "ResNet-CNN_12_1", "ResNet-CNN_13_2", "ResNet-CNN_14_1", "ResNet-CNN_15_2", 
-        "ResNet-CNN_16_1", "ResNet-CNN_17"], nargs='+', type=str, help='layer list for this application')
+        "ResNet-CNN_16_1", "ResNet-CNN_17"], nargs='*', type=str, help='layer list for this application')
     parser.add_argument('--device_index', default=1, type=int, help='device index for device')
     parser.add_argument('--device_addr_list', default=['192.168.1.13', '192.168.1.4'], nargs='+', type=str, help='address list of kubernetes cluster')
     parser.add_argument('--resv_port_list', default=[30030, 30030], nargs='+', type=int, help='receive port')
@@ -60,6 +60,7 @@ if __name__ == "__main__":
     # model = VGGNet_layer(name='VGG-16', layer_list=args.layer_list)
     model_dict = dict()
     for partition_name in args.deployed_list:
+        model = None
         if partition_name.find("VGG") > -1:
             model = VGGNet_layer(name=partition_name, layer_list=PARTITION_INFOS[partition_name])
         
@@ -73,9 +74,10 @@ if __name__ == "__main__":
             model = NiN_layer(name=partition_name, layer_list=PARTITION_INFOS[partition_name])
 
         # for cuDNN loading
-        model(model.get_random_input())
-        print('Pretrained model loading done!')
-        model_dict[PARTITION_IDX_MAP[partition_name]] = model
+        if model is not None:
+            model(model.get_random_input())
+            print('Pretrained model loading done!')
+            model_dict[PARTITION_IDX_MAP[partition_name]] = model
 
     
     dag_man = DAGManager()
