@@ -81,6 +81,8 @@ if __name__ == "__main__":
     images = images.reshape(10000, 32, 32, 3).astype('float32') / 255
     classes = ('plane', 'car', 'bird', 'cat', 'deer', 'dog', 'frog', 'horse', 'ship', 'truck')
 
+    dev_dict = dict()
+
     dev_send_sock_list = list()
     dev_send_lock_list = list()
     dev_resv_sock_list = list()
@@ -99,21 +101,43 @@ if __name__ == "__main__":
             send_data_lock = threading.Lock()
             resv_data_lock = threading.Lock()
         
-            resv_opt = (args.device_addr_list[i], args.resv_port_list[i])
+            # resv_opt = (args.device_addr_list[i], args.resv_port_list[i])
+            # send_opt = (args.device_addr_list[i], args.send_port_list[i])
+            resv_opt = ("", args.resv_port_list[i]) # accept
             send_opt = (args.device_addr_list[i], args.send_port_list[i])
+
             if i > args.device_index:
-                resv_conn, resv_addr, send_sock, send_addr = server_socket(resv_opt, send_opt)
+                while True:
+                    resv_conn, resv_addr, send_sock, send_addr = server_socket(resv_opt, send_opt)
+                    client_addr = resv_addr[0]
+                    if client_addr not in args.device_addr_list:
+                        print("wrong connections with {}".format(client_addr))
+                        resv_conn.close()
+                        send_sock.close()
+                    else:
+                        div_id = args.device_addr_list.index(client_addr)
+                        break
             else:
                 resv_conn, resv_addr, send_sock, send_addr = client_socket(resv_opt, send_opt)
+                div_id = i
 
-            print("connection with {} established".format(i))
-        
-        dev_send_sock_list.append(send_sock)
-        dev_send_lock_list.append(send_data_lock)
-        dev_resv_sock_list.append(resv_conn)
-        dev_resv_lock_list.append(resv_data_lock)
+            print("connection with {} established".format(args.device_addr_list[div_id]))
+        dev_dict[div_id] = {
+            'send_sock': send_sock,
+            'send_data_lock': send_data_lock,
+            'resv_conn': resv_conn,
+            'resv_data_lock': resv_data_lock
+        }
 
+    for i in range(len(args.device_addr_list)):
+        if i != args.device_index:
+            dev_send_sock_list.append(dev_dict[i]["send_sock"])
+            dev_send_lock_list.append(dev_dict[i]["send_data_lock"])
+            dev_resv_sock_list.append(dev_dict[i]["resv_conn"])
+            dev_resv_lock_list.append(dev_dict[i]["resv_data_lock"])
 
+    del dev_dict
+    
     input('Enter any key...')
 
     _stop_event = threading.Event()
