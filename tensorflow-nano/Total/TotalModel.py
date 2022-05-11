@@ -17,10 +17,12 @@ def processing(inputs, model):
         result = list()
         for output in outputs:
             if output is not None:
-                result.append(output.numpy())
+                if type(output) is not np.ndarray:
+                    result.append(output.numpy())
         outputs = tuple(result)
     else:
-        outputs = outputs.numpy()
+        if type(outputs) is not np.ndarray:
+            outputs = outputs.numpy()
     return request_id, outputs
 
 

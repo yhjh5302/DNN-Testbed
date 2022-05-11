@@ -163,7 +163,7 @@ class AlexNet_layer(keras.Model):
     def call(self, x):
         x_1 = None; x_2 = None
         if type(x) in (tuple, list):
-            x = np.concatenate(x, axis=-1)
+            x = keras.layers.Concatenate(x, axis=-1)
         if 'input' in self.layer_list:
             x = tf.image.resize(x, size=(224,224), method='nearest')
         if 'features_1_1' in self.layer_list:            
@@ -230,7 +230,7 @@ class AlexNet_layer(keras.Model):
         
         if x_1 is not None:
             if x_2 is not None:
-                x = np.concatenate((x_1, x_2), -1)
+                x = keras.layers.Concatenate((x_1, x_2), -1)
             else:
                 x = x_1
         elif x_2 is not None:
