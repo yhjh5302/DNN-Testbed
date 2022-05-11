@@ -1,4 +1,5 @@
 import numpy as np
+import threading
 
 
 PARTITION_INFOS={
@@ -151,10 +152,12 @@ class DAGManager:
         self.dag_infos = dict()
         self.dag_input_order = dict()
         self.input_num_infos = dict()
+        self.partition_lock = list()
+
         pred_order = dict()
         for partition_name in PARTITION_INFOS.keys():
             part_idx = PARTITION_IDX_MAP[partition_name]
-            
+            self.partition_lock.append(threading.Lock())
             if part_idx in DAG_SUCCESSORS:
                 for succ in DAG_SUCCESSORS[part_idx]:
                     # self.dag_input_order[part_idx][DAG_SUCCESSORS[part_idx][i]] = i
@@ -188,33 +191,27 @@ class DAGManager:
         source_partition = inputs[1]
         target_partition = inputs[2]
         data = inputs[3]
+        pure_tr_time = tr_end - tr_start
+
         if self.input_num_infos[target_partition] == 1:
-            return inputs, tr_end - tr_start
+            return inputs, pure_tr_time, pure_tr_time
         else:
-            if req_id not in self.recv_data_dict:
-                # self.recv_data_dict[req_id] = [1, np.zeros_like(self.partition_input_sample[target_partition]), tr_start]
-                self.recv_data_dict[req_id] = [1, [None for _ in range(self.input_num_infos[target_partition])], tr_start]
-            else:
-                self.recv_data_dict[req_id][0] += 1
-                # if self.partition_input_sample.shape[0] == 1:
-                #     if self.recv_data_dict[req_id][1].ndim==1:
-                #         self.recv_data_dict[req_id][1][self.dag_input_indices[target_partition][source_partition][0]:self.dag_input_indices[target_partition][source_partition][1]] = data[:]  #chk demesion
-                #     else:
-                #         self.recv_data_dict[req_id][1][:,:,:,self.dag_input_indices[target_partition][source_partition][0]:self.dag_input_indices[target_partition][source_partition][1]] = data[:]  #chk demesion
-                # else:
-                #     if self.recv_data_dict[req_id][1].ndim==2:
-                #         self.recv_data_dict[req_id][1][self.dag_input_indices[target_partition][source_partition][0]:self.dag_input_indices[target_partition][source_partition][1],:] = data[:]  #chk demesion
-                #     else:
-                #         self.recv_data_dict[req_id][1][self.dag_input_indices[target_partition][source_partition][0]:self.dag_input_indices[target_partition][source_partition][1],:,:,:] = data[:]  #chk demesion
-            self.recv_data_dict[req_id][1][self.dag_input_order[target_partition][source_partition]] = data
-          
-            if self.recv_data_dict[req_id][0] == self.input_num_infos[target_partition]:
-                result = (req_id, -1, target_partition, self.recv_data_dict[req_id][1])
-                tr_time = tr_end - self.recv_data_dict[req_id][2]
-                del self.recv_data_dict[req_id]
-                return result, tr_time
-            else:
-                return None
+            with self.partition_lock[target_partition]:   # target partition info updat
+                if req_id not in self.recv_data_dict:
+                    # self.recv_data_dict[req_id] = [1, np.zeros_like(self.partition_input_sample[target_partition]), tr_start]
+                    self.recv_data_dict[req_id] = [1, [None for _ in range(self.input_num_infos[target_partition])], tr_start]
+                else:
+                    self.recv_data_dict[req_id][0] += 1
+                    
+                self.recv_data_dict[req_id][1][self.dag_input_order[target_partition][source_partition]] = data
+            
+                if self.recv_data_dict[req_id][0] == self.input_num_infos[target_partition]:
+                    result = (req_id, -1, target_partition, self.recv_data_dict[req_id][1])
+                    tr_time = tr_end - self.recv_data_dict[req_id][2]
+                    del self.recv_data_dict[req_id]
+                    return result, tr_time, pure_tr_time
+                else:
+                    return None
 
 if __name__=="__main__":
     test = DAGManager()

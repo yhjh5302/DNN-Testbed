@@ -87,6 +87,7 @@ if __name__ == "__main__":
     }
 
     deployed_idx_dict = dict()
+    recv_data_lock_dict = dict()
 
     for partition in args.deployed_list:
         partition_idx = PARTITION_IDX_MAP[partition]
@@ -94,9 +95,7 @@ if __name__ == "__main__":
         recv_data_dict['proc'][partition_idx] = None
         recv_data_dict['partitions'].append(partition_idx)
         deployed_idx_dict[partition_idx] = len(recv_data_dict['partitions']) - 1
-    
-    recv_data_lock = threading.Lock()
-    
+        recv_data_lock_dict[partition_idx] = threading.Lock()
     
     _stop_event = threading.Event()
 
@@ -140,7 +139,7 @@ if __name__ == "__main__":
 
             print("connection with {} established".format(args.device_addr_list[i]))
 
-            threading.Thread(target=recv_data, args=(resv_conn, recv_data_dict, recv_data_lock, _stop_event, dag_man)).start()
+            threading.Thread(target=recv_data, args=(resv_conn, recv_data_dict, recv_data_lock_dict, _stop_event, dag_man)).start()
             threading.Thread(target=send_data, args=(send_sock, dev_send_data_list[i], dev_send_lock_list[i], _stop_event)).start()
     
     
@@ -152,7 +151,7 @@ if __name__ == "__main__":
         while sum(weights) < 1e-8:
             weights = [p * args.time for p in args.p]
             
-        inputs, start = bring_data(recv_data_dict, recv_data_lock, _stop_event, prob=weights, init_prob=init_prob)
+        inputs, start = bring_data(recv_data_dict, recv_data_lock_dict, _stop_event, prob=weights, init_prob=init_prob)
         T_tr = inputs[1]
         inputs = inputs[0]
         idx = inputs[2]
@@ -180,15 +179,14 @@ if __name__ == "__main__":
                         # request id, source partition id, target partition id, output
                         dev_send_data_list[deployment_idx].append(next_inputs)
                 else:  # local
-                    with recv_data_lock:
-                        next_inputs = dag_man.recv_data(next_inputs)
-                        
-                        if next_inputs is not None:
+                    next_inputs = dag_man.recv_data(next_inputs)
+                    if next_inputs is not None:
+                        with recv_data_lock_dict[succ_partition]:
                             target_partition = next_inputs[0][2]
                             if recv_data_dict['proc'][target_partition] is None:
                                 recv_data_dict['proc'][target_partition] = (next_inputs, time.time())
                             else:
-                                recv_data_dict[target_partition].append(next_inputs)
+                                recv_data_dict[target_partition].append(next_inputs, time.time())
                             recv_data_dict['waiting_num'] += 1
             # todo transmission time
             # with recv_time_lock:
@@ -197,8 +195,10 @@ if __name__ == "__main__":
             with dev_send_lock_list[args.generator_idx]: # send return
                 result_packet = (request_id, inputs[2], -1, outputs)
                 dev_send_data_list[args.generator_idx].append(result_packet)
-        print("{} T_tr\t{}".format(REVERSE_IDX_MAP[idx], T_tr))
-        print("{} T_cp\t{}".format(REVERSE_IDX_MAP[idx], T_cp))
+        
+        print("{}\tT_tr_pure\t{}".format(REVERSE_IDX_MAP[idx], T_tr))
+        print("{}\tT_tr\t{}".format(REVERSE_IDX_MAP[idx], T_tr))
+        print("{}\tT_cp\t{}".format(REVERSE_IDX_MAP[idx], T_cp))
 
     prev_sock.close()
     next_sock.close()
