@@ -78,19 +78,23 @@ if __name__ == '__main__':
 
         t = time.time()
         x = alexnet_in(inputs)
+        x = x.numpy()
         l1 += time.time() - t
 
         t = time.time()
         x_1 = alexnet_1(x)
+        x_1 = x_1.numpy()
         l2 += time.time() - t
 
         t = time.time()
         x_2 = alexnet_2(x)
+        x_2 = x_2.numpy()
         l3 += time.time() - t
 
         t = time.time()
         x = np.concatenate((x_1, x_2), axis=-1)
         x = alexnet_out(x)
+        x = x.numpy()
         l4 += time.time() - t
 
         predict = tf.argmax(x, 1)
@@ -117,6 +121,7 @@ if __name__ == '__main__':
 
         t = time.time()
         x = vgg(inputs)
+        x = x.numpy()
         l1 += time.time() - t
 
         predict = tf.argmax(x, 1)
@@ -139,6 +144,7 @@ if __name__ == '__main__':
 
         t = time.time()
         x = nin(inputs)
+        x = x.numpy()
         l1 += time.time() - t
 
         predict = tf.argmax(x, 1)
@@ -164,93 +170,111 @@ if __name__ == '__main__':
 
         ex_t = time.time()
         x, shortcut, shortcut2 = resnet_in(inputs)
+        x = x.numpy()
         cur_t = time.time()
         l_in += cur_t - ex_t
         ex_t = cur_t
 
         x, shortcut, shortcut2 = resnet_1(x, shortcut, shortcut2)
+        x = x.numpy()
         cur_t = time.time()
         l1 += cur_t - ex_t
         ex_t = cur_t
 
         x, shortcut, shortcut2 = resnet_2(x, shortcut, shortcut2)
+        x = x.numpy()
         cur_t = time.time()
         l2 += cur_t - ex_t
         ex_t = cur_t
 
         x, shortcut, shortcut2 = resnet_3(x, shortcut, shortcut2)
+        x = x.numpy()
         cur_t = time.time()
         l3 += cur_t - ex_t
         ex_t = cur_t
 
         x, shortcut, shortcut2 = resnet_4(x, shortcut, shortcut2)
+        x = x.numpy()
         cur_t = time.time()
         l4 += cur_t - ex_t
         ex_t = cur_t
         
         x, shortcut, shortcut2 = resnet_5(x, shortcut, shortcut2)
+        x = x.numpy()
         cur_t = time.time()
         l5 += cur_t - ex_t
         ex_t = cur_t
         
         x, shortcut, shortcut2 = resnet_6(x, shortcut, shortcut2)
+        x = x.numpy()
         cur_t = time.time()
         l6 += cur_t - ex_t
         ex_t = cur_t
         
         x, shortcut, shortcut2 = resnet_7(x, shortcut, shortcut2)
+        x = x.numpy()
         cur_t = time.time()
         l7 += cur_t - ex_t
         ex_t = cur_t
         
         x, shortcut, shortcut2 = resnet_8(x, shortcut, shortcut2)
+        x = x.numpy()
         cur_t = time.time()
         l8 += cur_t - ex_t
         ex_t = cur_t
         
         x, shortcut, shortcut2 = resnet_9(x, shortcut, shortcut2)
+        x = x.numpy()
         cur_t = time.time()
         l9 += cur_t - ex_t
         ex_t = cur_t
         
         x, shortcut, shortcut2 = resnet_10(x, shortcut, shortcut2)
+        x = x.numpy()
         cur_t = time.time()
         l10 += cur_t - ex_t
         ex_t = cur_t
         
         x, shortcut, shortcut2 = resnet_11(x, shortcut, shortcut2)
+        x = x.numpy()
         cur_t = time.time()
         l11 += cur_t - ex_t
         ex_t = cur_t
         
         x, shortcut, shortcut2 = resnet_12(x, shortcut, shortcut2)
+        x = x.numpy()
         cur_t = time.time()
         l12 += cur_t - ex_t
         ex_t = cur_t
         
         x, shortcut, shortcut2 = resnet_13(x, shortcut, shortcut2)
+        x = x.numpy()
         cur_t = time.time()
         l13 += cur_t - ex_t
         ex_t = cur_t
         
         x, shortcut, shortcut2 = resnet_14(x, shortcut, shortcut2)
+        x = x.numpy()
         cur_t = time.time()
         l14 += cur_t - ex_t
         ex_t = cur_t
 
         x, shortcut, shortcut2 = resnet_15(x, shortcut, shortcut2)
+        x = x.numpy()
         cur_t = time.time()
         l15 += cur_t - ex_t
         ex_t = cur_t
         
         
         x, shortcut, shortcut2 = resnet_16(x, shortcut, shortcut2)
+        x = x.numpy()
         cur_t = time.time()
         l16 += cur_t - ex_t
         ex_t = cur_t
         
         
         x, shortcut, shortcut2 = resnet_17(x, shortcut, shortcut2)
+        x = x.numpy()
         cur_t = time.time()
         l17 += cur_t - ex_t
         ex_t = cur_t
