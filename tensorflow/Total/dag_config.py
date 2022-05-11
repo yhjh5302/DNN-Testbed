@@ -153,6 +153,7 @@ class DAGManager:
         self.dag_input_order = dict()
         self.input_num_infos = dict()
         self.partition_lock = list()
+        self.recv_data_dict = dict()
 
         pred_order = dict()
         for partition_name in PARTITION_INFOS.keys():
@@ -168,6 +169,7 @@ class DAGManager:
                     if succ not in self.input_num_infos:
                         self.input_num_infos[succ] = 0
                     self.input_num_infos[succ] += 1
+            self.recv_data_dict[part_idx] = dict()
         
         for succ in pred_order:
             pred_order[succ].sort()
@@ -184,7 +186,7 @@ class DAGManager:
             else:
                 self.input_num_infos[start_part] = 1
 
-        self.recv_data_dict = dict()
+        
 
     def recv_data(self, inputs, tr_start=0., tr_end=0.):
         req_id = inputs[0]
@@ -197,18 +199,18 @@ class DAGManager:
             return inputs, pure_tr_time, pure_tr_time
         else:
             with self.partition_lock[target_partition]:   # target partition info updat
-                if req_id not in self.recv_data_dict:
+                if req_id not in self.recv_data_dict[part_idx]:
                     # self.recv_data_dict[req_id] = [1, np.zeros_like(self.partition_input_sample[target_partition]), tr_start]
-                    self.recv_data_dict[req_id] = [1, [None for _ in range(self.input_num_infos[target_partition])], tr_start]
+                    self.recv_data_dict[part_idx][req_id] = [1, [None for _ in range(self.input_num_infos[target_partition])], tr_start]
                 else:
-                    self.recv_data_dict[req_id][0] += 1
+                    self.recv_data_dict[part_idx][req_id][0] += 1
                     
-                self.recv_data_dict[req_id][1][self.dag_input_order[target_partition][source_partition]] = data
+                self.recv_data_dict[part_idx][req_id][1][self.dag_input_order[target_partition][source_partition]] = data
             
-                if self.recv_data_dict[req_id][0] == self.input_num_infos[target_partition]:
-                    result = (req_id, -1, target_partition, self.recv_data_dict[req_id][1])
-                    tr_time = tr_end - self.recv_data_dict[req_id][2]
-                    del self.recv_data_dict[req_id]
+                if self.recv_data_dict[part_idx][req_id][0] == self.input_num_infos[target_partition]:
+                    result = (req_id, -1, target_partition, self.recv_data_dict[part_idx][req_id][1])
+                    tr_time = tr_end - self.recv_data_dict[part_idx][req_id][2]
+                    del self.recv_data_dict[part_idx][req_id]
                     return result, tr_time, pure_tr_time
                 else:
                     return None
