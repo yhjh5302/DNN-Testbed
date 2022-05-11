@@ -13,7 +13,13 @@ from dag_config import *
 def processing(inputs, model):
     request_id = inputs[0]
     outputs = model(inputs[-1])
-    outputs = outputs.numpy()
+    if type(outputs) in (list, tuple):
+        result = list()
+        for output in outputs:
+            result.append(output.numpy())
+        outputs = tuple(result)
+    else:
+        outputs = outputs.numpy()
     return request_id, outputs
 
 
