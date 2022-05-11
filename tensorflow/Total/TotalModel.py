@@ -13,6 +13,7 @@ from dag_config import *
 def processing(inputs, model):
     request_id = inputs[0]
     outputs = model(inputs[-1])
+    outputs = outputs.numpy()
     return request_id, outputs
 
 
