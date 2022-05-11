@@ -188,7 +188,7 @@ if __name__ == "__main__":
                             if recv_data_dict['proc'][target_partition] is None:
                                 recv_data_dict['proc'][target_partition] = (next_inputs, cur_time)
                             else:
-                                recv_data_dict[target_partition].append(next_inputs, cur_time)
+                                recv_data_dict[target_partition].append((next_inputs, cur_time))
                             recv_data_dict['waiting_num'] += 1
             # todo transmission time
             # with recv_time_lock:
