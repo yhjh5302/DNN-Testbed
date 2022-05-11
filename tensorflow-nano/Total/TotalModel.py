@@ -153,6 +153,7 @@ if __name__ == "__main__":
             
         inputs, start = bring_data(recv_data_dict, recv_data_lock_dict, _stop_event, prob=weights, init_prob=init_prob)
         T_tr = inputs[1]
+        pure_tr_time = inputs[2]
         inputs = inputs[0]
         idx = inputs[2]
         request_id, outputs = processing(inputs, model_dict[idx])
@@ -179,14 +180,15 @@ if __name__ == "__main__":
                         # request id, source partition id, target partition id, output
                         dev_send_data_list[deployment_idx].append(next_inputs)
                 else:  # local
-                    next_inputs = dag_man.recv_data(next_inputs)
+                    cur_time = time.time()
+                    next_inputs = dag_man.recv_data(next_inputs, cur_time, cur_time)
                     if next_inputs is not None:
                         with recv_data_lock_dict[succ_partition]:
                             target_partition = next_inputs[0][2]
                             if recv_data_dict['proc'][target_partition] is None:
-                                recv_data_dict['proc'][target_partition] = (next_inputs, time.time())
+                                recv_data_dict['proc'][target_partition] = (next_inputs, cur_time)
                             else:
-                                recv_data_dict[target_partition].append(next_inputs, time.time())
+                                recv_data_dict[target_partition].append(next_inputs, cur_time)
                             recv_data_dict['waiting_num'] += 1
             # todo transmission time
             # with recv_time_lock:
@@ -196,7 +198,7 @@ if __name__ == "__main__":
                 result_packet = (request_id, inputs[2], -1, outputs)
                 dev_send_data_list[args.generator_idx].append(result_packet)
         
-        print("{}\tT_tr_pure\t{}".format(REVERSE_IDX_MAP[idx], T_tr))
+        print("{}\tT_tr_pure\t{}".format(REVERSE_IDX_MAP[idx], pure_tr_time))
         print("{}\tT_tr\t{}".format(REVERSE_IDX_MAP[idx], T_tr))
         print("{}\tT_cp\t{}".format(REVERSE_IDX_MAP[idx], T_cp))
 
