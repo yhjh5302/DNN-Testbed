@@ -16,7 +16,8 @@ def processing(inputs, model):
     if type(outputs) in (list, tuple):
         result = list()
         for output in outputs:
-            result.append(output.numpy())
+            if output is not None:
+                result.append(output.numpy())
         outputs = tuple(result)
     else:
         outputs = outputs.numpy()
