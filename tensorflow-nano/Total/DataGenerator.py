@@ -35,10 +35,9 @@ def image_sender(model_name, next_socket, socket_lock,images, labels, label_list
                 time_dict[req_id] = time.time()
             with socket_lock:
                 send_input(next_socket, data, _stop_event)
-        end_time = time.time()
-        time_spend = end_time - cur_time
+        time_spend = end_time - time.time()
         if time_spend < 1:
-            time.sleep(time_spend)
+            time.sleep(1. - time_spend)
     #_stop_event.set()
 
 def image_recver(model_name_dict,conn, label_dict, label_lock_dict, time_dict, time_lock_dict, _stop_event):
