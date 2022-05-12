@@ -107,6 +107,7 @@ if __name__ == "__main__":
         deployed_idx_dict[partition_idx] = len(recv_data_dict['partitions']) - 1
         recv_data_lock_dict[partition_idx] = threading.Lock()
     
+    recv_data_dict['partitions'] = np.array(recv_data_dict['partitions'])
     _stop_event = threading.Event()
 
     receive_socket = list()
