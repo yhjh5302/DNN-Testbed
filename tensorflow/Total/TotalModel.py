@@ -155,27 +155,30 @@ if __name__ == "__main__":
     
     print("all connection is established")
     weights = [p * args.time for p in args.p]   # correct options
-    init_prob = [p * args.time for p in args.p]
+    init_prob = np.array(weights)
+    weights = np.copy(init_prob)
     
     while True:        
         while sum(weights) < 1e-8:
-            weights = [p * args.time for p in args.p]
+            weights[:] = init_prob[:]
             
         inputs, start = bring_data(recv_data_dict, recv_data_lock_dict, _stop_event, prob=weights, init_prob=init_prob)
         T_tr = inputs[1]
         pure_tr_time = inputs[2]
         inputs = inputs[0]
         idx = inputs[2]
+        proc_start = time.time()
         request_id, outputs = processing(inputs, model_dict[idx])
         if type(outputs) in (list, tuple):
             outputs = outputs[0]  # remove short cut
 
         proc_end = time.time()
+        T_cp_pure = proc_end - proc_start
         T_cp = proc_end - start
 
         deployed_idx = deployed_idx_dict[idx]
 
-        weights[deployed_idx] = max(weights[deployed_idx] - T_cp, 0)           # change index
+        weights[deployed_idx] = max(weights[deployed_idx] - T_cp_pure, 0)           # change index
         
         if inputs[2] in DAG_SUCCESSORS:
             for succ_partition in DAG_SUCCESSORS[inputs[2]]:
@@ -211,6 +214,7 @@ if __name__ == "__main__":
         print("{}\tT_tr_pure\t{}".format(REVERSE_IDX_MAP[idx], pure_tr_time))
         print("{}\tT_tr\t{}".format(REVERSE_IDX_MAP[idx], T_tr))
         print("{}\tT_cp\t{}".format(REVERSE_IDX_MAP[idx], T_cp))
+        print("{}\tT_cp_pure\t{}".format(REVERSE_IDX_MAP[idx], T_cp_pure))
 
     prev_sock.close()
     next_sock.close()

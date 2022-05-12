@@ -27,7 +27,7 @@ spec:
         - name: RESV_PORT
           value: "30010 30011 30012 30013 30014 30015"
         - name: PART_LOCATION
-          value:  "5 5 5 5 2 1 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5"
+          value:  "2 2 2 2 5 5 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1"
         command: ["/bin/bash","-c","while true; do sleep 1000; done"]
         # command: ["/bin/bash","-c","python3 data_uploader.py --set_gpu='false' --prev_addr='' --prev_port=30000 --next_addr='10.96.0.201' --next_port=30001"]
         # command: ["/bin/bash","-c","python3 DataGenerator.py --set_gpu='false' --alexnet_prev_addr='' --alexnet_next_addr='10.96.0.201' --googlenet_prev_addr='' --googlenet_next_addr='10.96.0.211' --mobilenet_prev_addr='' --mobilenet_next_addr='10.96.0.221' --vggnet_prev_addr='' --vggnet_next_addr='10.96.0.231' --vggfnet_prev_addr='' --vggfnet_next_addr='10.96.0.241' --vram_limit=0"]
@@ -104,7 +104,7 @@ spec:
         image: yhjh5302/total:latest
         env:
         - name: DEPLOYMENT
-          value: "NiN"
+          value: "ResNet-in ResNet-CNN_1_2 ResNet-CNN_2_1 ResNet-CNN_3_2 ResNet-CNN_4_1 ResNet-CNN_5_2 ResNet-CNN_6_1 ResNet-CNN_7_2 ResNet-CNN_8_1 ResNet-CNN_9_2 ResNet-CNN_10_1 ResNet-CNN_11_2 ResNet-CNN_12_1 ResNet-CNN_13_2 ResNet-CNN_14_1 ResNet-CNN_15_2 ResNet-CNN_16_1 ResNet-CNN_17"
         - name: DEVICE_ADDR
           value: "10.96.0.200 10.96.0.201 10.96.0.202 10.96.0.203 10.96.0.204 10.96.0.205"
         - name: SEND_PORT
@@ -112,9 +112,9 @@ spec:
         - name: RESV_PORT
           value: "30010 30011 30012 30013 30014 30015"
         - name: PART_LOCATION
-          value:  "5 5 5 5 2 1 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5"
+          value:  "2 2 2 2 5 5 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1"
         - name: RESOURCE
-          value: "1."
+          value: "0.055555556 0.055555556 0.055555556 0.055555556 0.055555556 0.055555556 0.055555556 0.055555556 0.055555556 0.055555556 0.055555556 0.055555556 0.055555556 0.055555556 0.055555556 0.055555556 0.055555556 0.055555556"
         - name: SSH_PASSWARD
           value: wnlab7752!
         - name: SCP_ADDRESS
@@ -207,7 +207,7 @@ spec:
         image: yhjh5302/total:latest
         env:
         - name: DEPLOYMENT
-          value: "VGG"
+          value: "AlexNet-in AlexNet-1 AlexNet-2 AlexNet-out"
         - name: DEVICE_ADDR
           value: "10.96.0.200 10.96.0.201 10.96.0.202 10.96.0.203 10.96.0.204 10.96.0.205"
         - name: SEND_PORT
@@ -215,9 +215,9 @@ spec:
         - name: RESV_PORT
           value: "30010 30011 30012 30013 30014 30015"
         - name: PART_LOCATION
-          value:  "5 5 5 5 2 1 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5"
+          value:  "2 2 2 2 5 5 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1"
         - name: RESOURCE
-          value: "1."
+          value: "0.2 0.3 0.3 0.2"
         - name: SSH_PASSWARD
           value: wnlab7752!
         - name: SCP_ADDRESS
@@ -318,7 +318,7 @@ spec:
         - name: RESV_PORT
           value: "30010 30011 30012 30013 30014 30015"
         - name: PART_LOCATION
-          value:  "5 5 5 5 2 1 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5"          
+          value:  "2 2 2 2 5 5 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1"          
         - name: RESOURCE
           value: ""
         - name: SSH_PASSWARD
@@ -421,7 +421,7 @@ spec:
         - name: RESV_PORT
           value: "30010 30011 30012 30013 30014 30015"
         - name: PART_LOCATION
-          value:  "5 5 5 5 2 1 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5"
+          value:  "2 2 2 2 5 5 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1"
         - name: RESOURCE
           value: ""
         - name: SSH_PASSWARD
@@ -516,7 +516,7 @@ spec:
         image: yhjh5302/total:latest
         env:
         - name: DEPLOYMENT
-          value: "AlexNet-in AlexNet-1 AlexNet-2 AlexNet-out ResNet-in ResNet-CNN_1_2 ResNet-CNN_2_1 ResNet-CNN_3_2 ResNet-CNN_4_1 ResNet-CNN_5_2 ResNet-CNN_6_1 ResNet-CNN_7_2 ResNet-CNN_8_1 ResNet-CNN_9_2 ResNet-CNN_10_1 ResNet-CNN_11_2 ResNet-CNN_12_1 ResNet-CNN_13_2 ResNet-CNN_14_1 ResNet-CNN_15_2 ResNet-CNN_16_1 ResNet-CNN_17"
+          value: "VGG NiN"
         - name: DEVICE_ADDR
           value: "10.96.0.200 10.96.0.201 10.96.0.202 10.96.0.203 10.96.0.204 10.96.0.205"
         - name: SEND_PORT
@@ -524,9 +524,9 @@ spec:
         - name: RESV_PORT
           value: "30010 30011 30012 30013 30014 30015"
         - name: PART_LOCATION
-          value:  "5 5 5 5 2 1 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5"
+          value:  "2 2 2 2 5 5 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1"
         - name: RESOURCE
-          value: "0.045454545 0.045454545 0.045454545 0.045454545 0.045454545 0.045454545 0.045454545 0.045454545 0.045454545 0.045454545 0.045454545 0.045454545 0.045454545 0.045454545 0.045454545 0.045454545 0.045454545 0.045454545 0.045454545 0.045454545 0.045454545 0.045454545"
+          value: "0.5 0.5"
         - name: SSH_PASSWARD
           value: wnlab7752!
         - name: SCP_ADDRESS

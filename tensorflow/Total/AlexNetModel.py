@@ -167,7 +167,7 @@ class AlexNet_layer(keras.Model):
         x_1 = None; x_2 = None
 
         if type(x) in (tuple, list):
-            x = keras.layers.Concatenate(x, axis=-1)
+            x = keras.layers.Concatenate(axis=-1)(x)
         if 'input' in self.layer_list:
             x = self.resize(x)
         if 'features_1_1' in self.layer_list:            
@@ -234,7 +234,7 @@ class AlexNet_layer(keras.Model):
         
         if x_1 is not None:
             if x_2 is not None:
-                x = keras.layers.Concatenate((x_1, x_2), -1)
+                x = keras.layers.Concatenate(axis=-1)((x_1, x_2))
             else:
                 x = x_1
         elif x_2 is not None:

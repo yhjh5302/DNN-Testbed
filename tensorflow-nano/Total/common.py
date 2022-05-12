@@ -20,14 +20,19 @@ def str2bool(v):
         raise argparse.ArgumentTypeError('Boolean value expected.')
 
 def bring_data(data_dict, lock_dict, _stop_event, prob=None, init_prob=None):
-    loop_count = 0
-    loop_max = 100
     while _stop_event.is_set() == False:
         if data_dict['waiting_num'] > 0:
-            if loop_count < loop_max:
-                target = random.choices(population=data_dict['partitions'], weights=prob)[0]
+            target_list = list()
+            for target_idx in range(len(data_dict['partitions'])):
+                target = data_dict['partitions'][target_idx]
+                if data_dict['proc'][target] is not None or len(data_dict[target]) > 0:
+                    target_list.append(target_idx)
+
+            if prob[target_list].sum() > 1e-8:
+                target = random.choices(population=data_dict['partitions'][target_list], weights=prob[target_list])[0]
             else:
-                target = random.choices(population=data_dict['partitions'], weights=init_prob)[0]  # break inf loop
+                target = random.choices(population=data_dict['partitions'][target_list], weights=init_prob[target_list])[0]  # todo small
+            
             with lock_dict[target]:
                 cur_time = None
 
@@ -54,7 +59,6 @@ def bring_data(data_dict, lock_dict, _stop_event, prob=None, init_prob=None):
                         data_dict['proc'][target] = None
                     data_dict['waiting_num'] -= 1
                     return result
-                loop_count += 1
         else:
             time.sleep(0.001) # wait for data download
 
