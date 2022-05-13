@@ -86,8 +86,53 @@ kubectl rollout restart deployment worker-laptop-1
 kubectl rollout restart deployment worker-laptop-2
 kubectl rollout restart deployment worker-pc
 
-scp output-server-5.txt wnlab@192.168.1.13:./
+sshpass -p wnlab7752! scp output*.txt wnlab@192.168.1.13:./
 scp wnlab@192.168.1.13:./git/DNN-Pipeline/tensorflow/Total/dag_config.py ./
 wnlab7752!
 scp wnlab@192.168.1.13:./git/DNN-Pipeline/tensorflow/Total/TotalModel.py ./
 scp wnlab@192.168.1.13:./git/DNN-Pipeline/tensorflow/Total/common.py ./
+
+
+export PART_LOCATION="2 2 2 2 1 1 5 3 4 5 5 5 5 5 5 5 2"
+
+# ----------------------iot---------
+export PART_LOCATION="1 1 1 1 5 5 5 2 2 5 5 5 5 5 5 5 4"
+
+#laptop1
+export PART_LOCATION="1 1 1 1 5 5 5 2 2 5 5 5 5 5 5 5 4"
+export DEPLOYMENT="AlexNet-in AlexNet-1 AlexNet-2 AlexNet-out"
+export RESOURCE="0.25 0.25 0.25 0.25"
+
+#laptop2
+export PART_LOCATION="1 1 1 1 5 5 5 2 2 5 5 5 5 5 5 5 4"
+export DEPLOYMENT="NiN-1 NiN-2"
+export RESOURCE="0.5 0.5"
+
+#jetson1
+export PART_LOCATION="1 1 1 1 5 5 5 2 2 5 5 5 5 5 5 5 4"
+export DEPLOYMENT=""
+export RESOURCE=""
+
+#jetson2
+export PART_LOCATION="1 1 1 1 5 5 5 2 2 5 5 5 5 5 5 5 4"
+export DEPLOYMENT="ResNet-CNN_17"
+export RESOURCE="1."
+
+# pc
+export PART_LOCATION="1 1 1 1 5 5 5 2 2 5 5 5 5 5 5 5 4"
+export DEPLOYMENT="VGG-1 VGG-2 VGG-3 ResNet-CNN_1-10 ResNet-CNN_11_2 ResNet-CNN_12_1 ResNet-CNN_13_2 ResNet-CNN_14_1 ResNet-CNN_15_2 ResNet-CNN_16_1"
+export RESOURCE="0.1 0.1 0.1 0.1 0.1 0.1 0.1 0.1 0.1 0.1"
+
+
+# ----------------------iot---------
+export PART_LOCATION="5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5"
+# all devices
+export PART_LOCATION="5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5"
+export DEPLOYMENT=""
+export RESOURCE=""
+
+
+# pc
+export PART_LOCATION="5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5"
+export DEPLOYMENT="AlexNet-in AlexNet-1 AlexNet-2 AlexNet-out VGG-1 VGG-2 VGG-3 NiN-1 NiN-2 ResNet-CNN_1-10 ResNet-CNN_11_2 ResNet-CNN_12_1 ResNet-CNN_13_2 ResNet-CNN_14_1 ResNet-CNN_15_2 ResNet-CNN_16_1 ResNet-CNN_17"
+export RESOURCE="0.058823529 0.058823529 0.058823529 0.058823529 0.058823529 0.058823529 0.058823529 0.058823529 0.058823529 0.058823529 0.058823529 0.058823529 0.058823529 0.058823529 0.058823529 0.058823529 0.058823529"

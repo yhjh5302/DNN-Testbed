@@ -210,6 +210,8 @@ if __name__ == "__main__":
             # with recv_time_lock:
             #     T_tr = recv_time_list.pop(0)
         else:
+            if type(outputs) == tuple:
+                outputs = outputs[0]
             result_packet = (request_id, inputs[2], -1, outputs)
             with dev_send_lock_list[args.generator_idx]: # send return
                 dev_send_data_list[args.generator_idx].append(result_packet)
