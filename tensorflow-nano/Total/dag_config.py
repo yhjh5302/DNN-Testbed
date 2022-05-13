@@ -1,5 +1,6 @@
 import numpy as np
 import threading
+import copy
 
 
 PARTITION_INFOS={
@@ -239,18 +240,18 @@ class DAGManager:
                 else:
                     return None
     
-    def send_data(self, source, outputs):  # todo!!!
+    def send_data(self, req_id, source, outputs):  # todo!!!
         targets = DAG_SUCCESSORS[source]
         
         
         if len(targets) == 1:  # for fast operation
-            return ((request_id, source, targets[0], outputs),)
+            return ((req_id, source, targets[0], outputs),)
         else:
             result = list()
             first = True
             for target in targets:
                 new_output = self.convert_output(outputs, source, target, first)
-                new_output = (request_id, source, target, new_output)
+                new_output = (req_id, source, target, new_output)
                 if first:
                     first = False
                 result.append(new_output)                
@@ -269,7 +270,7 @@ class DAGManager:
                 result.append(outputs[data_idx])
             return result
         else:
-            return (outputs
+            return outputs
 
 
 if __name__=="__main__":

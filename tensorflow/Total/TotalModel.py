@@ -180,7 +180,7 @@ if __name__ == "__main__":
         weights[deployed_idx] = max(weights[deployed_idx] - T_cp_pure, 0)           # change index
         
         if inputs[2] in DAG_SUCCESSORS:
-            next_inputs_list = dag_man.send_data(idx, outputs)  # get next partition packets
+            next_inputs_list = dag_man.send_data(inputs[0], idx, outputs)  # get next partition packets
 
             for next_inputs in next_inputs_list:
                 succ_partition = next_inputs[2]
