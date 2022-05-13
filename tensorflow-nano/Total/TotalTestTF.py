@@ -53,19 +53,22 @@ if __name__ == '__main__':
     alexnet_1(alexnet_1.get_random_input())
     alexnet_2(alexnet_2.get_random_input())
     alexnet_out(alexnet_out.get_random_input())
+
     vgg_1(vgg_1.get_random_input())
     vgg_2(vgg_2.get_random_input())
     vgg_3(vgg_3.get_random_input())
+
     nin_1(nin_1.get_random_input())
     nin_2(nin_2.get_random_input())
+
     resnet_1_10(resnet_1_10.get_random_input())
-    resnet_11 = resnet_11(resnet_11.get_random_input())
-    resnet_12 = resnet_12(resnet_12.get_random_input())
-    resnet_13 = resnet_13(resnet_13.get_random_input())
-    resnet_14 = resnet_14(resnet_14.get_random_input())
-    resnet_15 = resnet_15(resnet_15.get_random_input())
-    resnet_16 = resnet_16(resnet_16.get_random_input())
-    resnet_17 = resnet_17(resnet_17.get_random_input())
+    resnet_11(resnet_11.get_random_input())
+    resnet_12(resnet_12.get_random_input())
+    resnet_13(resnet_13.get_random_input())
+    resnet_14(resnet_14.get_random_input())
+    resnet_15(resnet_15.get_random_input())
+    resnet_16(resnet_16.get_random_input())
+    resnet_17(resnet_17.get_random_input())
 
 
     batch_size = 1
@@ -154,7 +157,7 @@ if __name__ == '__main__':
         l1 += cur_t - ex_t
         ex_t = cur_t
 
-        x, shortcut, shortcut2 = resnet_11((x, shortcut, shortcut2))
+        x, shortcut, shortcut2 = resnet_11(x, shortcut, shortcut2)
         x = x.numpy()
         if shortcut is not None and type(shortcut) is not np.ndarray:
             shortcut = shortcut.numpy()
@@ -164,7 +167,7 @@ if __name__ == '__main__':
         l2 += cur_t - ex_t
         ex_t = cur_t
 
-        x, shortcut, shortcut2 = resnet_12((x, shortcut, shortcut2))
+        x, shortcut, shortcut2 = resnet_12(x, shortcut, shortcut2)
         x = x.numpy()
         if shortcut is not None and type(shortcut) is not np.ndarray:
             shortcut = shortcut.numpy()
@@ -174,7 +177,7 @@ if __name__ == '__main__':
         l3 += cur_t - ex_t
         ex_t = cur_t
 
-        x, shortcut, shortcut2 = resnet_13((x, shortcut, shortcut2))
+        x, shortcut, shortcut2 = resnet_13(x, shortcut, shortcut2)
         x = x.numpy()
         if shortcut is not None and type(shortcut) is not np.ndarray:
             shortcut = shortcut.numpy()
@@ -184,7 +187,7 @@ if __name__ == '__main__':
         l4 += cur_t - ex_t
         ex_t = cur_t
 
-        x, shortcut, shortcut2 = resnet_14((x, shortcut, shortcut2))
+        x, shortcut, shortcut2 = resnet_14(x, shortcut, shortcut2)
         x = x.numpy()
         if shortcut is not None and type(shortcut) is not np.ndarray:
             shortcut = shortcut.numpy()
@@ -194,7 +197,7 @@ if __name__ == '__main__':
         l5 += cur_t - ex_t
         ex_t = cur_t
         
-        x, shortcut, shortcut2 = resnet_15((x, shortcut, shortcut2))
+        x, shortcut, shortcut2 = resnet_15(x, shortcut, shortcut2)
         x = x.numpy()
         if shortcut is not None and type(shortcut) is not np.ndarray:
             shortcut = shortcut.numpy()
@@ -204,7 +207,7 @@ if __name__ == '__main__':
         l6 += cur_t - ex_t
         ex_t = cur_t
         
-        x, shortcut, shortcut2 = resnet_16((x, shortcut, shortcut2))
+        x, shortcut, shortcut2 = resnet_16(x, shortcut, shortcut2)
         x = x.numpy()
         if shortcut is not None and type(shortcut) is not np.ndarray:
             shortcut = shortcut.numpy()
@@ -213,7 +216,7 @@ if __name__ == '__main__':
         cur_t = time.time()
         l7 += cur_t - ex_t
         ex_t = cur_t        
-        x, shortcut, shortcut2 = resnet_17((x, shortcut, shortcut2))
+        x, shortcut, shortcut2 = resnet_17(x, shortcut, shortcut2)
         x = x.numpy()
         if shortcut is not None and type(shortcut) is not np.ndarray:
             shortcut = shortcut.numpy()
@@ -223,25 +226,14 @@ if __name__ == '__main__':
         l8 += cur_t - ex_t
         ex_t = cur_t
 
-    print("resnet accuracy: {}%".format(correct/10))
-    print("resnet-in took {} ms".format(l_in*1000/max_times))
-    print("resnet-1 took {} ms".format(l1*1000/max_times))
-    print("resnet-2 took {} ms".format(l2*1000/max_times))
-    print("resnet-3 took {} ms".format(l3*1000/max_times))
-    print("resnet-4 took {} ms".format(l4*1000/max_times))
-    print("resnet-5 took {} ms".format(l5*1000/max_times))
-    print("resnet-6 took {} ms".format(l6*1000/max_times))
-    print("resnet-7 took {} ms".format(l7*1000/max_times))
-    print("resnet-8 took {} ms".format(l8*1000/max_times))
-    print("resnet-9 took {} ms".format(l9*1000/max_times))
-    print("resnet-10 took {} ms".format(l10*1000/max_times))
-    print("resnet-11 took {} ms".format(l11*1000/max_times))
-    print("resnet-12 took {} ms".format(l12*1000/max_times))
-    print("resnet-13 took {} ms".format(l13*1000/max_times))
-    print("resnet-14 took {} ms".format(l14*1000/max_times))
-    print("resnet-15 took {} ms".format(l15*1000/max_times))
-    print("resnet-16 took {} ms".format(l16*1000/max_times))
-    print("resnet-17 took {} ms".format(l17*1000/max_times))
+    print("resnet-1-10 took {} ms".format(l1*1000/max_times))
+    print("resnet-11 took {} ms".format(l2*1000/max_times))
+    print("resnet-12 took {} ms".format(l3*1000/max_times))
+    print("resnet-13 took {} ms".format(l4*1000/max_times))
+    print("resnet-14 took {} ms".format(l5*1000/max_times))
+    print("resnet-15 took {} ms".format(l6*1000/max_times))
+    print("resnet-16 took {} ms".format(l7*1000/max_times))
+    print("resnet-17 took {} ms".format(l8*1000/max_times))
 
 
 
