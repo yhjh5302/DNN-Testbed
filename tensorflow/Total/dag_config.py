@@ -17,7 +17,7 @@ PARTITION_INFOS={
 
     "VGG-1": ('features1', 'features2', ),
     "VGG-2": ('features3', 'features4', ),
-    "VGG-3": ('features5', 'classifier1', 'classifier2', 'classifier3',)
+    "VGG-3": ('features5', 'classifier1', 'classifier2', 'classifier3',),
 
     "NiN-1": ("features_1", 'features_2', 'features_3'),
     "NiN-2": ("features_1", 'features_2', 'features_3'),
