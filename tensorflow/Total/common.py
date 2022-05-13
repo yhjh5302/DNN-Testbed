@@ -57,7 +57,8 @@ def bring_data(data_dict, lock_dict, _stop_event, prob=None, init_prob=None):
                         data_dict['proc'][target] = (new_data[0], cur_time)
                     else:
                         data_dict['proc'][target] = None
-                    data_dict['waiting_num'] -= 1
+                    with recv_data_lock_dict["waiting num"]:
+                        data_dict['waiting_num'] -= 1
                     return result
         else:
             time.sleep(0.001) # wait for data download
@@ -83,6 +84,7 @@ def recv_data(conn, recv_data_dict, recv_data_lock_dict, _stop_event, dag_man):
                         recv_data_dict['proc'][target_partition] = (result, cur_time)
                     else:
                         recv_data_dict[target_partition].append((result, cur_time))
+                with recv_data_lock_dict["waiting num"]:
                     recv_data_dict['waiting_num'] += 1
             
     except:

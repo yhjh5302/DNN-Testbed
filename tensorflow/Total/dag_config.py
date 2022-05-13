@@ -247,10 +247,10 @@ class DAGManager:
     
     def send_data(self, req_id, source, outputs):  # todo!!!
         targets = DAG_SUCCESSORS[source]
-        
-        
-        if len(targets) == 1:  # for fast operation
-            return ((req_id, source, targets[0], outputs),)
+               
+        if len(targets) == 1:  # for fast operation            
+            new_output = self.convert_output(outputs, source, targets[0])
+            return ((req_id, source, targets[0], new_output),)
         else:
             result = list()
             first = True
