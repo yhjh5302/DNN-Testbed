@@ -19,11 +19,11 @@ class VGGNet_layer(keras.Model):
                 keras.layers.Conv2D(filters=128, kernel_size=(3,3), activation='relu', padding='same'),
                 keras.layers.Conv2D(filters=128, kernel_size=(3,3), activation='relu', padding='same'),
                 keras.layers.MaxPool2D(pool_size=(2,2), strides=2),
+                keras.layers.Conv2D(filters=256, kernel_size=(3,3), activation='relu', padding='same'),
             ], name='features2')
             # self.features2.load_weights('./VGGNet_features2_weights')
         if 'features3' in self.layer_list:
             self.features3 = keras.models.Sequential([
-                keras.layers.Conv2D(filters=256, kernel_size=(3,3), activation='relu', padding='same'),
                 keras.layers.Conv2D(filters=256, kernel_size=(3,3), activation='relu', padding='same'),
                 keras.layers.Conv2D(filters=256, kernel_size=(3,3), activation='relu', padding='same'),
                 keras.layers.MaxPool2D(pool_size=(2,2), strides=2),

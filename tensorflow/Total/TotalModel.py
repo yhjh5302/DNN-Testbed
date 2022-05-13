@@ -170,9 +170,7 @@ if __name__ == "__main__":
         idx = inputs[2]
         proc_start = time.time()
         request_id, outputs = processing(inputs, model_dict[idx])
-        if type(outputs) in (list, tuple):
-            outputs = outputs[0]  # remove short cut
-
+        
         proc_end = time.time()
         T_cp_pure = proc_end - proc_start
         T_cp = proc_end - start
@@ -182,17 +180,16 @@ if __name__ == "__main__":
         weights[deployed_idx] = max(weights[deployed_idx] - T_cp_pure, 0)           # change index
         
         if inputs[2] in DAG_SUCCESSORS:
-            for succ_partition in DAG_SUCCESSORS[inputs[2]]:
-                if len(DAG_SUCCESSORS[inputs[2]]) == 1:
-                    next_inputs = (request_id, inputs[2], succ_partition, outputs)
-                else:
-                    next_inputs = (request_id, inputs[2], succ_partition, deepcopy(outputs))
+            next_inputs_list = dag_man.send_data(inputs[2], outputs)  # get next partition packets
+
+            for next_inputs in next_inputs_list:
+                succ_partition = next_inputs[2]
                 deployment_idx = partition_location[succ_partition]
-                # print("deployment_idx", deployment_idx)
-                if deployment_idx > -1:
+                if deployment_idx > -1:   # different devices
                     with dev_send_lock_list[deployment_idx]:
                         # request id, source partition id, target partition id, output
                         dev_send_data_list[deployment_idx].append(next_inputs)
+
                 else:  # local
                     cur_time = time.time()
                     next_inputs = dag_man.recv_data(next_inputs, cur_time, cur_time)

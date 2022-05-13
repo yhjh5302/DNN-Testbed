@@ -14,19 +14,18 @@ PARTITION_INFOS={
     "AlexNet-1": ('features_1_1', 'features_2_1', 'features_3_1', 'features_4_1', 'features_5_1', 'classifier_1_1', 'classifier_2_1', 'classifier_3_1'),
     "AlexNet-2": ('features_1_2', 'features_2_2', 'features_3_2', 'features_4_2', 'features_5_2', 'classifier_1_2', 'classifier_2_2', 'classifier_3_2'),
     "AlexNet-out": ('output',),
-    "VGG": ('features1', 'features2', 'features3', 'features4', 'features5', 'classifier1', 'classifier2', 'classifier3'),
-    "NiN": ("features_1", 'features_2', 'features_3'),
-    "ResNet-in": ('input',),
-    "ResNet-CNN_1_2": ('cnn_1_2',), 
-    "ResNet-CNN_2_1": ('cnn_2_1',), 
-    "ResNet-CNN_3_2": ('cnn_3_2',), 
-    "ResNet-CNN_4_1": ('cnn_4_1',), 
-    "ResNet-CNN_5_2": ('cnn_5_2',), 
-    "ResNet-CNN_6_1": ('cnn_6_1',), 
-    "ResNet-CNN_7_2": ('cnn_7_2',),
-    "ResNet-CNN_8_1": ('cnn_8_1',), 
-    "ResNet-CNN_9_2": ('cnn_9_2',),
-    "ResNet-CNN_10_1": ('cnn_10_1',), 
+
+    "VGG-1": ('features1', 'features2', ),
+    "VGG-2": ('features3', 'features4', ),
+    "VGG-3": ('features5', 'classifier1', 'classifier2', 'classifier3',)
+
+    "NiN-1": ("features_1", 'features_2', 'features_3'),
+    "NiN-2": ("features_1", 'features_2', 'features_3'),
+
+    "ResNet-CNN_1-10": (
+        'input', 'cnn_1_2', 'cnn_2_1', 'cnn_3_2', 'cnn_4_1', 'cnn_5_2',
+        'cnn_6_1', 'cnn_7_2','cnn_8_1','cnn_9_2', 'cnn_10_1',
+        ),
     "ResNet-CNN_11_2": ('cnn_11_2',),
     "ResNet-CNN_12_1": ('cnn_12_1',), 
     "ResNet-CNN_13_2": ('cnn_13_2',),
@@ -46,26 +45,22 @@ PARTITION_IDX_MAP={
     "AlexNet-1": 1,
     "AlexNet-2": 2,
     "AlexNet-out": 3,
-    "VGG": 4,
-    "NiN": 5,
-    "ResNet-in": 6,
-    "ResNet-CNN_1_2": 7, 
-    "ResNet-CNN_2_1": 8, 
-    "ResNet-CNN_3_2": 9, 
-    "ResNet-CNN_4_1": 10, 
-    "ResNet-CNN_5_2": 11, 
-    "ResNet-CNN_6_1": 12, 
-    "ResNet-CNN_7_2": 13,
-    "ResNet-CNN_8_1": 14, 
-    "ResNet-CNN_9_2": 15,
-    "ResNet-CNN_10_1": 16, 
-    "ResNet-CNN_11_2": 17,
-    "ResNet-CNN_12_1": 18, 
-    "ResNet-CNN_13_2": 19,
-    "ResNet-CNN_14_1": 20, 
-    "ResNet-CNN_15_2": 21, 
-    "ResNet-CNN_16_1": 22, 
-    "ResNet-CNN_17": 23,
+
+    "VGG-1": 4,
+    "VGG-2": 5,
+    "VGG-3": 6,
+
+    "NiN-1": 7,
+    "NiN-2": 8,
+
+    "ResNet-CNN_1-10": 9,
+    "ResNet-CNN_11_2": 10,
+    "ResNet-CNN_12_1": 11,
+    "ResNet-CNN_13_2": 12,
+    "ResNet-CNN_14_1": 13,
+    "ResNet-CNN_15_2": 14,
+    "ResNet-CNN_16_1": 15,
+    "ResNet-CNN_17": 16,
 }
 
 
@@ -78,26 +73,22 @@ REVERSE_IDX_MAP = {
     1: "AlexNet-1",
     2: "AlexNet-2",
     3: "AlexNet-out",
-    4: "VGG",
-    5: "NiN",
-    6:"ResNet-in",
-    7: "ResNet-CNN_1_2",
-    8: "ResNet-CNN_2_1",
-    9: "ResNet-CNN_3_2",
-    10: "ResNet-CNN_4_1",
-    11: "ResNet-CNN_5_2",
-    12: "ResNet-CNN_6_1",
-    13: "ResNet-CNN_7_2",
-    14: "ResNet-CNN_8_1",
-    15: "ResNet-CNN_9_2",
-    16: "ResNet-CNN_10_1",
-    17: "ResNet-CNN_11_2",
-    18: "ResNet-CNN_12_1",
-    19: "ResNet-CNN_13_2",
-    20: "ResNet-CNN_14_1",
-    21: "ResNet-CNN_15_2",
-    22: "ResNet-CNN_16_1",
-    23: "ResNet-CNN_17",
+    
+    4: "VGG-1",
+    5: "VGG-2",
+    6: "VGG-3",
+    
+    7: "NiN-1",
+    8: "NiN-2",
+    
+    9: "ResNet-CNN_1-10",
+    10: "ResNet-CNN_11_2",
+    11: "ResNet-CNN_12_1",
+    12: "ResNet-CNN_13_2",
+    13: "ResNet-CNN_14_1",
+    14: "ResNet-CNN_15_2",
+    15: "ResNet-CNN_16_1",
+    16: "ResNet-CNN_17",
 }
 
 DAG_SUCCESSORS = {
@@ -105,16 +96,12 @@ DAG_SUCCESSORS = {
     PARTITION_IDX_MAP['AlexNet-1']:(PARTITION_IDX_MAP['AlexNet-out'],),
     PARTITION_IDX_MAP['AlexNet-2']:(PARTITION_IDX_MAP['AlexNet-out'],),
 
-    PARTITION_IDX_MAP['ResNet-in']:(PARTITION_IDX_MAP['ResNet-CNN_1_2'], PARTITION_IDX_MAP['ResNet-CNN_2_1']),
-    PARTITION_IDX_MAP['ResNet-CNN_1_2']:(PARTITION_IDX_MAP['ResNet-CNN_2_1'], PARTITION_IDX_MAP['ResNet-CNN_3_2']),
-    PARTITION_IDX_MAP['ResNet-CNN_2_1']:(PARTITION_IDX_MAP['ResNet-CNN_3_2'], PARTITION_IDX_MAP['ResNet-CNN_4_1'],),
-    PARTITION_IDX_MAP['ResNet-CNN_3_2']:(PARTITION_IDX_MAP['ResNet-CNN_4_1'], PARTITION_IDX_MAP['ResNet-CNN_5_2'],),
-    PARTITION_IDX_MAP['ResNet-CNN_4_1']:(PARTITION_IDX_MAP['ResNet-CNN_5_2'], PARTITION_IDX_MAP['ResNet-CNN_6_1'],),
-    PARTITION_IDX_MAP['ResNet-CNN_5_2']:(PARTITION_IDX_MAP['ResNet-CNN_6_1'], PARTITION_IDX_MAP['ResNet-CNN_7_2'],),
-    PARTITION_IDX_MAP['ResNet-CNN_6_1']:(PARTITION_IDX_MAP['ResNet-CNN_7_2'], PARTITION_IDX_MAP['ResNet-CNN_8_1'],),
-    PARTITION_IDX_MAP['ResNet-CNN_7_2']:(PARTITION_IDX_MAP['ResNet-CNN_8_1'], PARTITION_IDX_MAP['ResNet-CNN_9_2'],),
-    PARTITION_IDX_MAP['ResNet-CNN_8_1']:(PARTITION_IDX_MAP['ResNet-CNN_9_2'], PARTITION_IDX_MAP['ResNet-CNN_10_1'],),
-    PARTITION_IDX_MAP['ResNet-CNN_9_2']:(PARTITION_IDX_MAP['ResNet-CNN_10_1'], PARTITION_IDX_MAP['ResNet-CNN_11_2'],),
+    PARTITION_IDX_MAP['VGG-1']:(PARTITION_IDX_MAP['VGG-2'],),
+    PARTITION_IDX_MAP['VGG-2']:(PARTITION_IDX_MAP['VGG-3'],),
+
+    PARTITION_IDX_MAP['NiN-1']:(PARTITION_IDX_MAP['NiN-2'],),
+
+    PARTITION_IDX_MAP['ResNet-CNN_1-10']:(PARTITION_IDX_MAP['ResNet-CNN_10_1'], PARTITION_IDX_MAP['ResNet-CNN_11_2']),
     PARTITION_IDX_MAP['ResNet-CNN_10_1']:(PARTITION_IDX_MAP['ResNet-CNN_11_2'], PARTITION_IDX_MAP['ResNet-CNN_12_1'],),
     PARTITION_IDX_MAP['ResNet-CNN_11_2']:(PARTITION_IDX_MAP['ResNet-CNN_12_1'], PARTITION_IDX_MAP['ResNet-CNN_13_2'],),
     PARTITION_IDX_MAP['ResNet-CNN_12_1']:(PARTITION_IDX_MAP['ResNet-CNN_13_2'], PARTITION_IDX_MAP['ResNet-CNN_14_1'],),
@@ -135,15 +122,50 @@ MODEL_IDX = {
 MODEL_START_PARTITION = {
     'alexnet':0,
     'vggnet':4,
-    'nin':5,
-    'resnet':6
+    'nin':7,
+    'resnet':9
 }
 
 MODEL_END_PARTITION = {
     'alexnet':3,
-    'vggnet':4,
-    'nin':5,
-    'resnet':23
+    'vggnet':6,
+    'nin':8,
+    'resnet':16
+}
+
+MODEL_OUTPUT_MAP = {  # select output tuple
+    PARTITION_IDX_MAP['AlexNet-in']: {
+        PARTITION_IDX_MAP['AlexNet-1']: (0,),
+        PARTITION_IDX_MAP['AlexNet-2']: (0,),
+        }
+    
+    PARTITION_IDX_MAP['AlexNet-1']:{PARTITION_IDX_MAP['AlexNet-out']:(0,)},
+    PARTITION_IDX_MAP['AlexNet-2']:{PARTITION_IDX_MAP['AlexNet-out']:(0,)},
+
+    PARTITION_IDX_MAP['ResNet-CNN_1-10']: {
+        PARTITION_IDX_MAP["ResNet-CNN_11_2"]: ((0, 1), (2, 0)),
+        PARTITION_IDX_MAP["ResNet-CNN_12_2"]: ((0, 0)),
+    }, 
+    
+    PARTITION_IDX_MAP['ResNet-CNN_12_1']: {
+        PARTITION_IDX_MAP["ResNet-CNN_13_2"]: ((0, 1), (1, 0)),
+        PARTITION_IDX_MAP["ResNet-CNN_14_1"]: ((0, 0)),
+        },
+    PARTITION_IDX_MAP['ResNet-CNN_13_2']: {
+        PARTITION_IDX_MAP["ResNet-CNN_14_1"]: ((0, 1), (2, 0)),
+        PARTITION_IDX_MAP['ResNet-CNN_15_2']: ((0, 0)),
+        },
+    PARTITION_IDX_MAP['ResNet-CNN_14_1']: {
+        PARTITION_IDX_MAP['ResNet-CNN_15_2']: ((0, 1), (1, 0)),
+        PARTITION_IDX_MAP['ResNet-CNN_16_1']: ((0, 0)),
+        },
+    PARTITION_IDX_MAP['ResNet-CNN_15_2']: {
+        PARTITION_IDX_MAP['ResNet-CNN_16_1']: ((0, 1), (2, 0)),
+         PARTITION_IDX_MAP['ResNet-CNN_17']: ((0, 0)),
+        },
+    PARTITION_IDX_MAP['ResNet-CNN_16_1']: {
+        PARTITION_IDX_MAP['ResNet-CNN_17']: ((0, 1)),
+        },
 }
 
 
@@ -186,8 +208,6 @@ class DAGManager:
             else:
                 self.input_num_infos[start_part] = 1
 
-        
-
     def recv_data(self, inputs, tr_start=0., tr_end=0.):
         req_id = inputs[0]
         source_partition = inputs[1]
@@ -204,8 +224,12 @@ class DAGManager:
                     self.recv_data_dict[target_partition][req_id] = [1, [None for _ in range(self.input_num_infos[target_partition])], tr_start]
                 else:
                     self.recv_data_dict[target_partition][req_id][0] += 1
-                    
-                self.recv_data_dict[target_partition][req_id][1][self.dag_input_order[target_partition][source_partition]] = data
+                if type(data) in (tuple, list):
+                    for data_idx in range(len(data)):
+                        _, tuple_idx = MODEL_OUTPUT_MAP[source_partition][data_idx]
+                        self.recv_data_dict[target_partition][req_id][1][tuple_idx] = data[data_idx]
+                else:
+                    self.recv_data_dict[target_partition][req_id][1][self.dag_input_order[target_partition][source_partition]] = data
             
                 if self.recv_data_dict[target_partition][req_id][0] == self.input_num_infos[target_partition]:
                     result = (req_id, -1, target_partition, self.recv_data_dict[target_partition][req_id][1])
@@ -214,6 +238,39 @@ class DAGManager:
                     return result, tr_time, pure_tr_time
                 else:
                     return None
+    
+    def send_data(self, source_partition, outputs):  # todo!!!
+        succ_partitions = DAG_SUCCESSORS[source_partition]
+        
+        
+        if len(succ_partitions) == 1:  # for fast operation
+            return ((request_id, source_partition, target_partition, outputs),)
+        else:
+            result = list()
+            first = True
+            for succ in succ_partitions:
+                new_output = self.convert_output(outputs, source, succ, first)
+                next_inputs = (request_id, source_partition, target_partition, new_output)
+                if first:
+                    first = False
+                result.append(next_inputs)                
+            return result
+        # if type outputs()
+
+    def convert_output(self, outputs, source, target, first=True):
+        if first:
+            outputs = outputs
+        else:
+            outputs = copy.deepcopy(outputs)
+
+        if type(target) in (tuple, list): # multiple outputs
+            result = list()
+            for data_idx, _ in MODEL_OUTPUT_MAP[source][target]:
+                result.append(outputs[data_idx])
+            return result
+        else:
+            return outputs
+
 
 if __name__=="__main__":
     test = DAGManager()
