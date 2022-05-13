@@ -33,32 +33,41 @@ def bring_data(data_dict, lock_dict, _stop_event, prob=None, init_prob=None):
             else:
                 target = random.choices(population=data_dict['partitions'][target_list], weights=init_prob[target_list])[0]  # todo small
             
+            cur_time = None
+            queing_time = False
             with lock_dict[target]:
-                cur_time = None
-
                 if data_dict['proc'][target] is not None:
                     result = data_dict['proc'][target]
-
+                    
                 elif len(data_dict[target]) > 0:
                     result = data_dict[target].pop(0)
+                    queing_time = True
                     cur_time = time.time()
-                    print("{}\tT_q\t{}".format(target, cur_time - result[1]))
                     result =  (result[0], cur_time)
-
                 else:
                     result = None
 
-                if result is not None:
+            if queing_time:
+                print("{}\tT_q\t{}".format(target, cur_time - result[1]))
+            queing_time = False
+            
+            if result is not None:
+                with lock_dict[target]:
                     if len(data_dict[target]) > 0:  # update new processing
                         if cur_time is None:
                             cur_time = time.time()
                         new_data = data_dict[target].pop(0)
-                        print("{}\tT_q\t{}".format(target, cur_time - new_data[1]))
+                        queing_time = True
                         data_dict['proc'][target] = (new_data[0], cur_time)
                     else:
                         data_dict['proc'][target] = None
+                
+                with lock_dict["waiting num"]:
                     data_dict['waiting_num'] -= 1
-                    return result
+
+                if queing_time:
+                    print("{}\tT_q\t{}".format(target, cur_time - new_data[1]))
+                return result
         else:
             time.sleep(0.001) # wait for data download
 
@@ -83,6 +92,7 @@ def recv_data(conn, recv_data_dict, recv_data_lock_dict, _stop_event, dag_man):
                         recv_data_dict['proc'][target_partition] = (result, cur_time)
                     else:
                         recv_data_dict[target_partition].append((result, cur_time))
+                with recv_data_lock_dict["waiting num"]:
                     recv_data_dict['waiting_num'] += 1
             
     except:
