@@ -70,7 +70,7 @@ if __name__ == '__main__':
 
     batch_size = 1
     mat_times = 100
-    l1, l2, l3, l4 = 0, 0, 0, 0, 0
+    l1, l2, l3, l4 = 0, 0, 0, 0
     inputs = alexnet_in.get_random_input()
 
     for i in range(max_times):
@@ -99,7 +99,7 @@ if __name__ == '__main__':
     print("alexnet-2 took {} ms".format(l3 / max_times * 1000))
     print("alexnet-out took {} ms".format(l4 / max_times * 1000))
 
-    correct, l1, l2, l3 = 0, 0
+    l1, l2, l3 = 0, 0, 0
     for i in range(max_times):
 
         t = time.time()
@@ -110,18 +110,18 @@ if __name__ == '__main__':
         t = time.time()
         x = vgg_2(x)
         x = x.numpy()
-        l1 += time.time() - t
+        l2 += time.time() - t
 
         t = time.time()
         x = vgg_3(x)
         x = x.numpy()
-        l1 += time.time() - t
+        l3 += time.time() - t
 
     print("vgg-1 took {} ms".format(l1*1000/max_times))
     print("vgg-2 took {} ms".format(l2*1000/max_times))
     print("vgg-3 took {} ms".format(l3*1000/max_times))
 
-    correct, l1, l2 = 0, 0
+    l1, l2 = 0, 0
     for i in range(max_times):
         t = time.time()
         x = nin_1(inputs)
@@ -131,12 +131,12 @@ if __name__ == '__main__':
         t = time.time()
         x = nin_2(x)
         x = x.numpy()
-        l1 += time.time() - t
+        l2 += time.time() - t
 
     print("nin-1 took {} ms".format(l1*1000/max_times))
     print("nin-2 took {} ms".format(l2*1000/max_times))
 
-    correct, l1, l2, l3, l4 = 0, 0, 0, 0, 0, 0
+    l1, l2, l3, l4 = 0, 0, 0, 0,
     l5, l6, l7, l8 = 0, 0, 0, 0, 
 
     for i in range(max_times):
@@ -149,7 +149,7 @@ if __name__ == '__main__':
         if shortcut2 is not None and type(shortcut2) is not np.ndarray:
             shortcut2 = shortcut2.numpy()        
         cur_t = time.time()
-        l_in += cur_t - ex_t
+        l1 += cur_t - ex_t
         ex_t = cur_t
 
         x, shortcut, shortcut2 = resnet_11(x, shortcut, shortcut2)
@@ -159,7 +159,7 @@ if __name__ == '__main__':
         if shortcut2 is not None and type(shortcut2) is not np.ndarray:
             shortcut2 = shortcut2.numpy()
         cur_t = time.time()
-        l1 += cur_t - ex_t
+        l2 += cur_t - ex_t
         ex_t = cur_t
 
         x, shortcut, shortcut2 = resnet_12(x, shortcut, shortcut2)
@@ -169,7 +169,7 @@ if __name__ == '__main__':
         if shortcut2 is not None and type(shortcut2) is not np.ndarray:
             shortcut2 = shortcut2.numpy()
         cur_t = time.time()
-        l2 += cur_t - ex_t
+        l3 += cur_t - ex_t
         ex_t = cur_t
 
         x, shortcut, shortcut2 = resnet_13(x, shortcut, shortcut2)
@@ -179,7 +179,7 @@ if __name__ == '__main__':
         if shortcut2 is not None and type(shortcut2) is not np.ndarray:
             shortcut2 = shortcut2.numpy()
         cur_t = time.time()
-        l3 += cur_t - ex_t
+        l4 += cur_t - ex_t
         ex_t = cur_t
 
         x, shortcut, shortcut2 = resnet_14(x, shortcut, shortcut2)
@@ -189,7 +189,7 @@ if __name__ == '__main__':
         if shortcut2 is not None and type(shortcut2) is not np.ndarray:
             shortcut2 = shortcut2.numpy()
         cur_t = time.time()
-        l4 += cur_t - ex_t
+        l5 += cur_t - ex_t
         ex_t = cur_t
         
         x, shortcut, shortcut2 = resnet_15(x, shortcut, shortcut2)
@@ -199,7 +199,7 @@ if __name__ == '__main__':
         if shortcut2 is not None and type(shortcut2) is not np.ndarray:
             shortcut2 = shortcut2.numpy()
         cur_t = time.time()
-        l5 += cur_t - ex_t
+        l6 += cur_t - ex_t
         ex_t = cur_t
         
         x, shortcut, shortcut2 = resnet_16(x, shortcut, shortcut2)
@@ -209,9 +209,8 @@ if __name__ == '__main__':
         if shortcut2 is not None and type(shortcut2) is not np.ndarray:
             shortcut2 = shortcut2.numpy()
         cur_t = time.time()
-        l6 += cur_t - ex_t
-        ex_t = cur_t
-        
+        l7 += cur_t - ex_t
+        ex_t = cur_t        
         x, shortcut, shortcut2 = resnet_17(x, shortcut, shortcut2)
         x = x.numpy()
         if shortcut is not None and type(shortcut) is not np.ndarray:
@@ -219,7 +218,7 @@ if __name__ == '__main__':
         if shortcut2 is not None and type(shortcut2) is not np.ndarray:
             shortcut2 = shortcut2.numpy()
         cur_t = time.time()
-        l7 += cur_t - ex_t
+        l8 += cur_t - ex_t
         ex_t = cur_t
 
     print("resnet accuracy: {}%".format(correct/10))
