@@ -154,7 +154,7 @@ if __name__ == '__main__':
         l1 += cur_t - ex_t
         ex_t = cur_t
 
-        x, shortcut, shortcut2 = resnet_11(x, shortcut, shortcut2)
+        x, shortcut, shortcut2 = resnet_11((x, shortcut, shortcut2))
         x = x.numpy()
         if shortcut is not None and type(shortcut) is not np.ndarray:
             shortcut = shortcut.numpy()
@@ -164,7 +164,7 @@ if __name__ == '__main__':
         l2 += cur_t - ex_t
         ex_t = cur_t
 
-        x, shortcut, shortcut2 = resnet_12(x, shortcut, shortcut2)
+        x, shortcut, shortcut2 = resnet_12((x, shortcut, shortcut2))
         x = x.numpy()
         if shortcut is not None and type(shortcut) is not np.ndarray:
             shortcut = shortcut.numpy()
@@ -174,7 +174,7 @@ if __name__ == '__main__':
         l3 += cur_t - ex_t
         ex_t = cur_t
 
-        x, shortcut, shortcut2 = resnet_13(x, shortcut, shortcut2)
+        x, shortcut, shortcut2 = resnet_13((x, shortcut, shortcut2))
         x = x.numpy()
         if shortcut is not None and type(shortcut) is not np.ndarray:
             shortcut = shortcut.numpy()
@@ -184,7 +184,7 @@ if __name__ == '__main__':
         l4 += cur_t - ex_t
         ex_t = cur_t
 
-        x, shortcut, shortcut2 = resnet_14(x, shortcut, shortcut2)
+        x, shortcut, shortcut2 = resnet_14((x, shortcut, shortcut2))
         x = x.numpy()
         if shortcut is not None and type(shortcut) is not np.ndarray:
             shortcut = shortcut.numpy()
@@ -194,7 +194,7 @@ if __name__ == '__main__':
         l5 += cur_t - ex_t
         ex_t = cur_t
         
-        x, shortcut, shortcut2 = resnet_15(x, shortcut, shortcut2)
+        x, shortcut, shortcut2 = resnet_15((x, shortcut, shortcut2))
         x = x.numpy()
         if shortcut is not None and type(shortcut) is not np.ndarray:
             shortcut = shortcut.numpy()
@@ -204,7 +204,7 @@ if __name__ == '__main__':
         l6 += cur_t - ex_t
         ex_t = cur_t
         
-        x, shortcut, shortcut2 = resnet_16(x, shortcut, shortcut2)
+        x, shortcut, shortcut2 = resnet_16((x, shortcut, shortcut2))
         x = x.numpy()
         if shortcut is not None and type(shortcut) is not np.ndarray:
             shortcut = shortcut.numpy()
@@ -213,7 +213,7 @@ if __name__ == '__main__':
         cur_t = time.time()
         l7 += cur_t - ex_t
         ex_t = cur_t        
-        x, shortcut, shortcut2 = resnet_17(x, shortcut, shortcut2)
+        x, shortcut, shortcut2 = resnet_17((x, shortcut, shortcut2))
         x = x.numpy()
         if shortcut is not None and type(shortcut) is not np.ndarray:
             shortcut = shortcut.numpy()
