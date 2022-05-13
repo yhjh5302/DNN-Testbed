@@ -19,8 +19,8 @@ PARTITION_INFOS={
     "VGG-2": ('features3', 'features4', ),
     "VGG-3": ('features5', 'classifier1', 'classifier2', 'classifier3',),
 
-    "NiN-1": ("features_1", 'features_2', 'features_3'),
-    "NiN-2": ("features_1", 'features_2', 'features_3'),
+    "NiN-1": ("features_1",'features_2',),
+    "NiN-2": ('features_3', "feature_4",),
 
     "ResNet-CNN_1-10": (
         'input', 'cnn_1_2', 'cnn_2_1', 'cnn_3_2', 'cnn_4_1', 'cnn_5_2',

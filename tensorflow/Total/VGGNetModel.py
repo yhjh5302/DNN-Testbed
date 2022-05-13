@@ -70,7 +70,7 @@ class VGGNet_layer(keras.Model):
         elif 'features2' in self.layer_list:
             return np.zeros((1,112,112,64))
         elif 'features3' in self.layer_list:
-            return np.zeros((1,56,56,128))
+            return np.zeros((1,56,56,256))
         elif 'features4' in self.layer_list:
             return np.zeros((1,28,28,256))
         elif 'features5' in self.layer_list:

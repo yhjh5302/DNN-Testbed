@@ -33,11 +33,11 @@ if __name__ == '__main__':
     alexnet_out = AlexNet_layer(name='AlexNet-out', layer_list=PARTITION_INFOS["AlexNet-out"])
     
     # loading weights
-    vgg_1 = VGGNet_layer(name='VGG', layer_list=PARTITION_INFOS['VGG-1'])
-    vgg_2 = VGGNet_layer(name='VGG', layer_list=PARTITION_INFOS['VGG-2'])
-    vgg_3 = VGGNet_layer(name='VGG', layer_list=PARTITION_INFOS['VGG-3'])
-    nin_1 = NiN_layer(name='NIN',  layer_list=PARTITION_INFOS['NiN-1'])
-    nin_2 = NiN_layer(name='NIN',  layer_list=PARTITION_INFOS['NiN-2'])
+    vgg_1 = VGGNet_layer(name='VGG-1', layer_list=PARTITION_INFOS['VGG-1'])
+    vgg_2 = VGGNet_layer(name='VGG-2', layer_list=PARTITION_INFOS['VGG-2'])
+    vgg_3 = VGGNet_layer(name='VGG-3', layer_list=PARTITION_INFOS['VGG-3'])
+    nin_1 = NiN_layer(name='NIN-1',  layer_list=PARTITION_INFOS['NiN-1'])
+    nin_2 = NiN_layer(name='NIN-2',  layer_list=PARTITION_INFOS['NiN-2'])
 
     resnet_1_10 = ResNet_layer(name='ResNet-in',  layer_list=PARTITION_INFOS['ResNet-CNN_1-10'])
     resnet_11 = ResNet_layer(name='ResNet-CNN_11_2',  layer_list=PARTITION_INFOS['ResNet-CNN_11_2'])
@@ -69,7 +69,7 @@ if __name__ == '__main__':
 
 
     batch_size = 1
-    mat_times = 100
+    max_times = 100
     l1, l2, l3, l4 = 0, 0, 0, 0
     inputs = alexnet_in.get_random_input()
 
@@ -90,7 +90,7 @@ if __name__ == '__main__':
         l3 += time.time() - t
 
         t = time.time()
-        x = alexnet_out(x_1, x_2)
+        x = alexnet_out((x_1, x_2))
         x = x.numpy()
         l4 += time.time() - t
 
@@ -100,6 +100,7 @@ if __name__ == '__main__':
     print("alexnet-out took {} ms".format(l4 / max_times * 1000))
 
     l1, l2, l3 = 0, 0, 0
+    inputs = vgg_1.get_random_input()
     for i in range(max_times):
 
         t = time.time()
@@ -122,6 +123,7 @@ if __name__ == '__main__':
     print("vgg-3 took {} ms".format(l3*1000/max_times))
 
     l1, l2 = 0, 0
+    inputs = nin_1.get_random_input()
     for i in range(max_times):
         t = time.time()
         x = nin_1(inputs)
@@ -138,7 +140,7 @@ if __name__ == '__main__':
 
     l1, l2, l3, l4 = 0, 0, 0, 0,
     l5, l6, l7, l8 = 0, 0, 0, 0, 
-
+    inputs = resnet_1_10.get_random_input()
     for i in range(max_times):
 
         ex_t = time.time()
