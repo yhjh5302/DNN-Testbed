@@ -180,7 +180,7 @@ if __name__ == "__main__":
         weights[deployed_idx] = max(weights[deployed_idx] - T_cp_pure, 0)           # change index
         
         if inputs[2] in DAG_SUCCESSORS:
-            next_inputs_list = dag_man.send_data(inputs[2], outputs)  # get next partition packets
+            next_inputs_list = dag_man.send_data(idx, outputs)  # get next partition packets
 
             for next_inputs in next_inputs_list:
                 succ_partition = next_inputs[2]
@@ -192,14 +192,14 @@ if __name__ == "__main__":
 
                 else:  # local
                     cur_time = time.time()
-                    next_inputs = dag_man.recv_data(next_inputs, cur_time, cur_time)
-                    if next_inputs is not None:
+                    merged_inputs = dag_man.recv_data(next_inputs, cur_time, cur_time)
+                    if merged_inputs is not None:
                         with recv_data_lock_dict[succ_partition]:
-                            target_partition = next_inputs[0][2]
+                            target_partition = merged_inputs[0][2]
                             if recv_data_dict['proc'][target_partition] is None:
-                                recv_data_dict['proc'][target_partition] = (next_inputs, cur_time)
+                                recv_data_dict['proc'][target_partition] = (merged_inputs, cur_time)
                             else:
-                                recv_data_dict[target_partition].append((next_inputs, cur_time))
+                                recv_data_dict[target_partition].append((merged_inputs, cur_time))
                             recv_data_dict['waiting_num'] += 1
             # todo transmission time
             # with recv_time_lock:

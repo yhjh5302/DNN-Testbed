@@ -239,21 +239,21 @@ class DAGManager:
                 else:
                     return None
     
-    def send_data(self, source_partition, outputs):  # todo!!!
-        succ_partitions = DAG_SUCCESSORS[source_partition]
+    def send_data(self, source, outputs):  # todo!!!
+        targets = DAG_SUCCESSORS[source]
         
         
-        if len(succ_partitions) == 1:  # for fast operation
-            return ((request_id, source_partition, target_partition, outputs),)
+        if len(targets) == 1:  # for fast operation
+            return ((request_id, source, targets[0], outputs),)
         else:
             result = list()
             first = True
-            for succ in succ_partitions:
-                new_output = self.convert_output(outputs, source, succ, first)
-                next_inputs = (request_id, source_partition, target_partition, new_output)
+            for target in targets:
+                new_output = self.convert_output(outputs, source, target, first)
+                new_output = (request_id, source, target, new_output)
                 if first:
                     first = False
-                result.append(next_inputs)                
+                result.append(new_output)                
             return result
         # if type outputs()
 
@@ -269,7 +269,7 @@ class DAGManager:
                 result.append(outputs[data_idx])
             return result
         else:
-            return outputs
+            return (outputs
 
 
 if __name__=="__main__":
