@@ -106,6 +106,8 @@ if __name__ == "__main__":
         recv_data_dict['partitions'].append(partition_idx)
         deployed_idx_dict[partition_idx] = len(recv_data_dict['partitions']) - 1
         recv_data_lock_dict[partition_idx] = threading.Lock()
+
+    recv_data_lock_dict["waiting num"] = threading.Lock()
     
     recv_data_dict['partitions'] = np.array(recv_data_dict['partitions'])
     _stop_event = threading.Event()
@@ -194,19 +196,22 @@ if __name__ == "__main__":
                     cur_time = time.time()
                     merged_inputs = dag_man.recv_data(next_inputs, cur_time, cur_time)
                     if merged_inputs is not None:
-                        with recv_data_lock_dict[succ_partition]:
-                            target_partition = merged_inputs[0][2]
+                        new_proc_workload = (merged_inputs, cur_time)
+                        target_partition = merged_inputs[0][2]
+                        with recv_data_lock_dict[succ_partition]:                            
                             if recv_data_dict['proc'][target_partition] is None:
-                                recv_data_dict['proc'][target_partition] = (merged_inputs, cur_time)
+                                recv_data_dict['proc'][target_partition] = new_proc_workload
                             else:
-                                recv_data_dict[target_partition].append((merged_inputs, cur_time))
+                                recv_data_dict[target_partition].append(new_proc_workload)
+
+                        with recv_data_lock_dict["waiting num"]:
                             recv_data_dict['waiting_num'] += 1
             # todo transmission time
             # with recv_time_lock:
             #     T_tr = recv_time_list.pop(0)
         else:
+            result_packet = (request_id, inputs[2], -1, outputs)
             with dev_send_lock_list[args.generator_idx]: # send return
-                result_packet = (request_id, inputs[2], -1, outputs)
                 dev_send_data_list[args.generator_idx].append(result_packet)
         
         print("{}\tT_tr_pure\t{}".format(REVERSE_IDX_MAP[idx], pure_tr_time))
