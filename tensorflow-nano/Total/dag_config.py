@@ -134,38 +134,43 @@ MODEL_END_PARTITION = {
     'resnet':16
 }
 
-MODEL_OUTPUT_MAP = {  # select output tuple
+MODEL_OUTPUT_MAP = {  # select output tuple  [source][target][data_tuple_idx] = (output_val_position, input position)
     PARTITION_IDX_MAP['AlexNet-in']: {
-        PARTITION_IDX_MAP['AlexNet-1']: (0,),
-        PARTITION_IDX_MAP['AlexNet-2']: (0,),
+        PARTITION_IDX_MAP['AlexNet-1']: ((0, 0),),
+        PARTITION_IDX_MAP['AlexNet-2']: ((0, 0),),
         },
     
-    PARTITION_IDX_MAP['AlexNet-1']:{PARTITION_IDX_MAP['AlexNet-out']:(0,)},
-    PARTITION_IDX_MAP['AlexNet-2']:{PARTITION_IDX_MAP['AlexNet-out']:(0,)},
+    PARTITION_IDX_MAP['AlexNet-1']:{PARTITION_IDX_MAP['AlexNet-out']:((0,0),)},
+    PARTITION_IDX_MAP['AlexNet-2']:{PARTITION_IDX_MAP['AlexNet-out']:((0,1),)},
 
     PARTITION_IDX_MAP['ResNet-CNN_1-10']: {
         PARTITION_IDX_MAP["ResNet-CNN_11_2"]: ((0, 1), (2, 0)),
-        PARTITION_IDX_MAP["ResNet-CNN_12_1"]: ((0, 0)),
+        PARTITION_IDX_MAP["ResNet-CNN_12_1"]: ((0, 0),),
+    }, 
+
+    PARTITION_IDX_MAP['ResNet-CNN_11_2']: {
+        PARTITION_IDX_MAP["ResNet-CNN_12_1"]: ((0, 1),),
+        PARTITION_IDX_MAP["ResNet-CNN_13_2"]: ((0, 0),),
     }, 
     
     PARTITION_IDX_MAP['ResNet-CNN_12_1']: {
-        PARTITION_IDX_MAP["ResNet-CNN_13_2"]: ((0, 1), (1, 0)),
-        PARTITION_IDX_MAP["ResNet-CNN_14_1"]: ((0, 0)),
+        PARTITION_IDX_MAP["ResNet-CNN_13_2"]: ((0, 1),),
+        PARTITION_IDX_MAP["ResNet-CNN_14_1"]: ((0, 0),),
         },
     PARTITION_IDX_MAP['ResNet-CNN_13_2']: {
-        PARTITION_IDX_MAP["ResNet-CNN_14_1"]: ((0, 1), (2, 0)),
-        PARTITION_IDX_MAP['ResNet-CNN_15_2']: ((0, 0)),
+        PARTITION_IDX_MAP["ResNet-CNN_14_1"]: ((0, 1),),
+        PARTITION_IDX_MAP['ResNet-CNN_15_2']: ((0, 0),),
         },
     PARTITION_IDX_MAP['ResNet-CNN_14_1']: {
-        PARTITION_IDX_MAP['ResNet-CNN_15_2']: ((0, 1), (1, 0)),
-        PARTITION_IDX_MAP['ResNet-CNN_16_1']: ((0, 0)),
+        PARTITION_IDX_MAP['ResNet-CNN_15_2']: ((0, 1),),
+        PARTITION_IDX_MAP['ResNet-CNN_16_1']: ((0, 0),),
         },
     PARTITION_IDX_MAP['ResNet-CNN_15_2']: {
-        PARTITION_IDX_MAP['ResNet-CNN_16_1']: ((0, 1), (2, 0)),
-         PARTITION_IDX_MAP['ResNet-CNN_17']: ((0, 0)),
+        PARTITION_IDX_MAP['ResNet-CNN_16_1']: ((0, 1),),
+         PARTITION_IDX_MAP['ResNet-CNN_17']: ((0, 0),),
         },
     PARTITION_IDX_MAP['ResNet-CNN_16_1']: {
-        PARTITION_IDX_MAP['ResNet-CNN_17']: ((0, 1)),
+        PARTITION_IDX_MAP['ResNet-CNN_17']: ((0, 1),),
         },
 }
 
@@ -227,7 +232,7 @@ class DAGManager:
                     self.recv_data_dict[target_partition][req_id][0] += 1
                 if type(data) in (tuple, list):
                     for data_idx in range(len(data)):
-                        _, tuple_idx = MODEL_OUTPUT_MAP[source_partition][data_idx]
+                        _, tuple_idx = MODEL_OUTPUT_MAP[source_partition][target_partition][data_idx]
                         self.recv_data_dict[target_partition][req_id][1][tuple_idx] = data[data_idx]
                 else:
                     self.recv_data_dict[target_partition][req_id][1][self.dag_input_order[target_partition][source_partition]] = data
@@ -264,9 +269,9 @@ class DAGManager:
         else:
             outputs = copy.deepcopy(outputs)
 
-        if type(target) in (tuple, list): # multiple outputs
+        if type(outputs) in (tuple, list): # multiple outputs
             result = list()
-            for data_idx, _ in MODEL_OUTPUT_MAP[source][target]:
+            for data_idx, _  in MODEL_OUTPUT_MAP[source][target]:
                 result.append(outputs[data_idx])
             return result
         else:

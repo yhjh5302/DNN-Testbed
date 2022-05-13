@@ -87,3 +87,6 @@ kubectl rollout restart deployment worker-laptop-2
 kubectl rollout restart deployment worker-pc
 
 scp output-server-5.txt wnlab@192.168.1.13:./
+scp wnlab@192.168.1.13:./git/DNN-Pipeline/tensorflow/Total/dag_config.py ./
+wnlab7752!
+scp wnlab@192.168.1.13:./git/DNN-Pipeline/tensorflow/Total/TotalModel.py
