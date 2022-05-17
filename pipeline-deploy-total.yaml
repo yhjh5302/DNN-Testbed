@@ -114,7 +114,7 @@ spec:
         - name: PART_LOCATION
           value: "1 1 1 1 5 5 5 2 2 5 5 5 5 5 5 5 4"
         - name: RESOURCE
-          value: "0.25 0.25 0.25 0.25"
+          value: "0.21018279 0.26407903 0.25859567 0.18651899"
         - name: SSH_PASSWARD
           value: wnlab7752!
         - name: SCP_ADDRESS
@@ -217,7 +217,7 @@ spec:
         - name: PART_LOCATION
           value: "1 1 1 1 5 5 5 2 2 5 5 5 5 5 5 5 4"
         - name: RESOURCE
-          value: "0.5 0.5"
+          value: "0.47882203 0.37697781"
         - name: SSH_PASSWARD
           value: wnlab7752!
         - name: SCP_ADDRESS
@@ -423,7 +423,7 @@ spec:
         - name: PART_LOCATION
           value: "1 1 1 1 5 5 5 2 2 5 5 5 5 5 5 5 4"
         - name: RESOURCE
-          value: "1."
+          value: "0.83392894"
         - name: SSH_PASSWARD
           value: wnlab7752!
         - name: SCP_ADDRESS
@@ -526,7 +526,7 @@ spec:
         - name: PART_LOCATION
           value: "1 1 1 1 5 5 5 2 2 5 5 5 5 5 5 5 4"
         - name: RESOURCE
-          value: "0.1 0.1 0.1 0.1 0.1 0.1 0.1 0.1 0.1 0.1"
+          value: "0.0809034 0.08529295 0.07958685 0.24342048 0.06215062 0.07097891 0.0896321 0.09892408 0.10791526 0.07551591"
         - name: SSH_PASSWARD
           value: wnlab7752!
         - name: SCP_ADDRESS
