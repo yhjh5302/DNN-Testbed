@@ -52,7 +52,7 @@ sudo chown $(id -u):$(id -g) $HOME/.kube/config
 sudo kubeadm token create --print-join-command
 
 sudo swapoff -a
-sudo kubeadm join 192.168.1.13:6443 --token ldqz6b.6livz6smsj8sm9br --discovery-token-ca-cert-hash sha256:e9dd398cb61154948ade8cb1cc8998fd4453bde254a1e9c95622c42ac83d56e8
+kubeadm join 192.168.1.13:6443 --token ll7up9.zlyhywebzw4ep50w --discovery-token-ca-cert-hash sha256:937d52510efd0519dd103ee068ec52bbb5ff0bd96cedd3ad3dbc880a07b46ac6 
 
 #### network
 kubectl apply -f https://raw.githubusercontent.com/flannel-io/flannel/master/Documentation/kube-flannel.yml
@@ -63,7 +63,7 @@ kubectl create -f $ kubectl create -f https://raw.githubusercontent.com/NVIDIA/k
 
 #### master node untaint
 kubectl taint nodes jin-tfx255 node-role.kubernetes.io/master-
-kubectl taint nodes wnlab-labtop-2 node-role.kubernetes.io/master-
+kubectl taint nodes wnlab-labtop-1 node-role.kubernetes.io/master-
 
 #### pod deploy
 kubectl apply -f pipeline-deploy.yaml
@@ -74,7 +74,7 @@ kubectl exec -it [POD_NAME] bash
 
 
 python3 DataGenerator.py --device_addr_list $DEVICE_ADDR --resv_port_list $RESV_PORT --send_port_list $SEND_PORT --partition_location $PART_LOCATION --alexnet_arrival_rate 1 --vggnet_arrival_rate 1 --nin_arrival_rate 1 --resnet_arrival_rate 1 
-python3 DataGenerator.py --device_addr_list $DEVICE_ADDR --resv_port_list $RESV_PORT --send_port_list $SEND_PORT --partition_location $PART_LOCATION --alexnet_arrival_rate 1 --vggnet_arrival_rate 1 --nin_arrival_rate 1 --resnet_arrival_rate 1 2>&1 | tee output-iot-1.txt
+python3 DataGenerator.py --device_addr_list $DEVICE_ADDR --resv_port_list $RESV_PORT --send_port_list $SEND_PORT --partition_location $PART_LOCATION --alexnet_arrival_rate 10 --vggnet_arrival_rate 10 --nin_arrival_rate 10 --resnet_arrival_rate 10 2>&1 | tee output-iot-10.txt
 #auto save
 python3 TotalModel.py --set_gpu='true' --deployed_list $DEPLOYMENT --device_index=$DEVICE_IDX --device_addr_list $DEVICE_ADDR --resv_port_list $RESV_PORT --send_port_list $SEND_PORT --partition_location $PART_LOCATION --p $RESOURCE 1> $WORKER_NAME-1.txt 2> $WORKER_NAME-1_err.txt; sshpass -p $SSH_PASSWARD scp -o StrictHostKeyChecking=no $WORKER_NAME*.txt $SCP_ADDRESS:$SCP_PATH;
 #non save
@@ -124,7 +124,7 @@ export DEPLOYMENT="VGG-1 VGG-2 VGG-3 ResNet-CNN_1-10 ResNet-CNN_11_2 ResNet-CNN_
 export RESOURCE="0.0809034 0.08529295 0.07958685 0.24342048 0.06215062 0.07097891 0.0896321 0.09892408 0.10791526 0.07551591"
 
 
-# ----------------------iot---------
+# ----------------------server---------
 export PART_LOCATION="5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5"
 # all devices
 export PART_LOCATION="5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5"
