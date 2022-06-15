@@ -59,11 +59,11 @@ kubectl apply -f https://raw.githubusercontent.com/flannel-io/flannel/master/Doc
 kubectl apply -f kube-flannel.yml   # use this command until flannel update
 
 #### GPU enable
-kubectl create -f $ kubectl create -f https://raw.githubusercontent.com/NVIDIA/k8s-device-plugin/v0.10.0/nvidia-device-plugin.yml
+kubectl create -f https://raw.githubusercontent.com/NVIDIA/k8s-device-plugin/v0.10.0/nvidia-device-plugin.yml
 
 #### master node untaint
 kubectl taint nodes jin-tfx255 node-role.kubernetes.io/master-
-kubectl taint nodes wnlab-labtop-1 node-role.kubernetes.io/master-
+kubectl taint nodes wnlab-laptop-1 node-role.kubernetes.io/master-
 
 #### pod deploy
 kubectl apply -f pipeline-deploy.yaml
@@ -75,6 +75,8 @@ kubectl exec -it [POD_NAME] bash
 
 python3 DataGenerator.py --device_addr_list $DEVICE_ADDR --resv_port_list $RESV_PORT --send_port_list $SEND_PORT --partition_location $PART_LOCATION --alexnet_arrival_rate 1 --vggnet_arrival_rate 1 --nin_arrival_rate 1 --resnet_arrival_rate 1 
 python3 DataGenerator.py --device_addr_list $DEVICE_ADDR --resv_port_list $RESV_PORT --send_port_list $SEND_PORT --partition_location $PART_LOCATION --alexnet_arrival_rate 10 --vggnet_arrival_rate 10 --nin_arrival_rate 10 --resnet_arrival_rate 10 2>&1 | tee output-iot-10.txt
+export ARRIVAL_RATE=5
+python3 DataGenerator.py --device_addr_list $DEVICE_ADDR --resv_port_list $RESV_PORT --send_port_list $SEND_PORT --partition_location $PART_LOCATION --alexnet_arrival_rate $ARRIVAL_RATE --vggnet_arrival_rate $ARRIVAL_RATE --nin_arrival_rate $ARRIVAL_RATE --resnet_arrival_rate $ARRIVAL_RATE 2>&1 | tee output-server-$ARRIVAL_RATE.txt
 #auto save
 python3 TotalModel.py --set_gpu='true' --deployed_list $DEPLOYMENT --device_index=$DEVICE_IDX --device_addr_list $DEVICE_ADDR --resv_port_list $RESV_PORT --send_port_list $SEND_PORT --partition_location $PART_LOCATION --p $RESOURCE 1> $WORKER_NAME-1.txt 2> $WORKER_NAME-1_err.txt; sshpass -p $SSH_PASSWARD scp -o StrictHostKeyChecking=no $WORKER_NAME*.txt $SCP_ADDRESS:$SCP_PATH;
 #non save
