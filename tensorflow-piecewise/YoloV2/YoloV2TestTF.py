@@ -17,7 +17,7 @@ if __name__ == '__main__':
     # load dataset
     epoch = 1
     batch_size = 16
-    _, test_dataset = tfds.load('voc/2012', split=['train', 'test'], shuffle_files=True, download=True)
+    _, test_dataset = tfds.load('voc/2007', split=['train', 'test'], shuffle_files=True, download=True)
     test_dataset = (test_dataset.map(get_image_and_objects)
             .map(bbox_to_matrix)
             .map(resize_image)
