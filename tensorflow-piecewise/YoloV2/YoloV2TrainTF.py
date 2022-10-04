@@ -3,15 +3,15 @@ from YoloV2Model import *
 if __name__ == '__main__':
     # load dataset
     epoch = 1
-    batch_size = 16
-    train_dataset, test_dataset = tfds.load('voc/2012', split=['train', 'test'], shuffle_files=True, download=True)
+    batch_size = 4
+    train_dataset, test_dataset = tfds.load('voc/2007', split=['train', 'test'], shuffle_files=True, download=True)
     train_dataset = (train_dataset.map(get_image_and_objects)
               .map(bbox_to_matrix)
               .map(resize_image)
               .map(scale_boxes_to_yolo_grid)
               .map(boxes_to_yx_hw_pairs)
               .map(normalize_image_zero_one)
-              .shuffle(256)
+              .shuffle(1500)
               .batch(batch_size))
     test_dataset = (test_dataset.map(get_image_and_objects)
             .map(bbox_to_matrix)
@@ -35,8 +35,6 @@ if __name__ == '__main__':
                 print("%3d/%3d Curr loss %.3f" % (i, len(train_dataset), sum(epoch_losses)/len(epoch_losses)))
                 grads = tape.gradient(loss_tensor, model.trainable_variables)
                 optimizer.apply_gradients(zip(grads, model.trainable_variables))
-                if i == 30:
-                    break
 
     # saving weights
     model.stage1_conv1.save_weights('./YoloV2_stage1_conv1_weights', save_format='tf')

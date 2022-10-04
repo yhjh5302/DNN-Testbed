@@ -3,7 +3,7 @@ import math
 import time
 
 if __name__ == '__main__':
-    set_gpu = False # True
+    set_gpu = True
     vram_limit = 1024
     if set_gpu:
         gpu_devices = tf.config.list_physical_devices(device_type='GPU')
@@ -53,13 +53,13 @@ if __name__ == '__main__':
     model.anchor_head.load_weights('./YoloV2_anchor_head_weights')
 
     # for cudnn load
-    model(np.zeros((1,512,512,3)))
+    model(np.zeros((1,416,416,3)))
 
     num_images = 1000
     correct, total_took = 0, 0
     for i, (image, true_boxes) in enumerate(test_dataset.take(num_images)):
         t = time.time()
-        x = model(tf.reshape(image, (1,512,512,3)))
+        x = model(tf.reshape(image, (1,416,416,3)))
         total_took += time.time() - t
         print(i, total_took)
     print("total_took {:.3f} ms".format(total_took))

@@ -5,3 +5,6 @@
 *.tar
 *-logs.txt
 __pycache__
+~/
+*.pyc
+checkpoint

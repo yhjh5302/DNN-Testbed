@@ -108,8 +108,8 @@ class AnchorLayer(keras.Model):
 class YoloV2(keras.Model):
     def __init__(self, name=None):
         super(YoloV2, self).__init__(name=name)
-        self.IMAGE_H, self.IMAGE_W = 512, 512
-        self.GRID_H, self.GRID_W  = 16, 16  # grid size = image size / 32
+        self.IMAGE_H, self.IMAGE_W = 416, 416
+        self.GRID_H, self.GRID_W  = 13, 13  # grid size = image size / 32
         self.LAMBDA_NO_OBJECT = 1.0
         self.LAMBDA_OBJECT    = 5.0
         self.LAMBDA_COORD     = 1.0
@@ -302,7 +302,7 @@ def bbox_to_matrix(image, objects, MAX_TRAIN_BOXES=5):
     bbox_matrix = bbox_matrix[:MAX_TRAIN_BOXES] # Drop any extra train boxes
     return image, bbox_matrix
 
-def resize_image(image, bbox_matrix, INPUT_H=512, INPUT_W=512):
+def resize_image(image, bbox_matrix, INPUT_H=416, INPUT_W=416):
     resized_image = tf.image.resize(image, (INPUT_H, INPUT_W))
     return resized_image, bbox_matrix
 
