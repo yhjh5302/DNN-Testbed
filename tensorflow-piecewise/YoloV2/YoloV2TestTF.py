@@ -15,8 +15,6 @@ if __name__ == '__main__':
         tf.config.set_visible_devices([], 'GPU')
 
     # load dataset
-    epoch = 1
-    batch_size = 16
     _, test_dataset = tfds.load('voc/2007', split=['train', 'test'], shuffle_files=True, download=True)
     test_dataset = (test_dataset.map(get_image_and_objects)
             .map(bbox_to_matrix)
