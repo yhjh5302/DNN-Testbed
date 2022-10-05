@@ -4,7 +4,7 @@ import time
 
 if __name__ == '__main__':
     set_gpu = True
-    vram_limit = 1024
+    vram_limit = 2048
     if set_gpu:
         gpu_devices = tf.config.list_physical_devices(device_type='GPU')
         if not gpu_devices:
@@ -15,7 +15,7 @@ if __name__ == '__main__':
         tf.config.set_visible_devices([], 'GPU')
 
     # load dataset
-    _, test_dataset = tfds.load('voc/2007', split=['train', 'test'], shuffle_files=True, download=True)
+    test_dataset = tfds.load('voc/2007', split='test[75%:]', shuffle_files=True, download=True)
     test_dataset = (test_dataset.map(get_image_and_objects)
             .map(bbox_to_matrix)
             .map(resize_image)
