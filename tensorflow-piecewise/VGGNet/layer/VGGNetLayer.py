@@ -5,16 +5,14 @@ def processing(inputs, model):
     outputs = model(inputs)
     return outputs
 
-# python3 VGGNetLayer.py --layer_list 'conv_1' 'conv_2' 'maxpool_1' 'conv_3' 'conv_4' 'maxpool_2' 'conv_5' 'conv_6' 'conv_7' 'maxpool_3' 'conv_8' 'conv_9' 'conv_10' 'maxpool_4' 'conv_11' 'conv_12' 'conv_13' 'maxpool_5' 'classifier_1' 'classifier_2' 'classifier_3' --prev_addr='' --prev_port='30031' --next_addr='localhost' --next_port='30030' --scheduler_addr='localhost' --scheduler_port='30050' --set_gpu='true' --vram_limit=1024
+# python3 VGGNetLayer.py --layer_list 'conv_1' 'conv_2' 'maxpool_1' 'conv_3' 'conv_4' 'maxpool_2' 'conv_5' 'conv_6' 'conv_7' 'maxpool_3' 'conv_8' 'conv_9' 'conv_10' 'maxpool_4' 'conv_11' 'conv_12' 'conv_13' 'maxpool_5' 'classifier_1' 'classifier_2' 'classifier_3' --prev_addr='' --prev_port='30031' --next_addr='localhost' --next_port='30030' --set_gpu='true' --vram_limit=1024
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Tensorflow')
     parser.add_argument('--layer_list', default=['conv_1', 'conv_2', 'maxpool_1', 'conv_3', 'conv_4', 'maxpool_2', 'conv_5', 'conv_6', 'conv_7', 'maxpool_3', 'conv_8', 'conv_9', 'conv_10', 'maxpool_4', 'conv_11', 'conv_12', 'conv_13', 'maxpool_5', 'classifier_1', 'classifier_2', 'classifier_3'], nargs='+', type=str, help='layer list for this application')
-    parser.add_argument('--prev_addr', default='10.96.0.231', type=str, help='Previous node address')
-    parser.add_argument('--prev_port', default=30031, type=int, help='Previous node port')
-    parser.add_argument('--next_addr', default='10.96.0.230', type=str, help='Next node address')
-    parser.add_argument('--next_port', default=30030, type=int, help='Next node port')
-    parser.add_argument('--scheduler_addr', default='10.96.0.250', type=str, help='Scheduler address')
-    parser.add_argument('--scheduler_port', default=30050, type=int, help='Scheduler port')
+    parser.add_argument('--prev_addr', default='localhost', type=str, help='Previous node address')
+    parser.add_argument('--prev_port', default=30021, type=int, help='Previous node port')
+    parser.add_argument('--next_addr', default='localhost', type=str, help='Next node address')
+    parser.add_argument('--next_port', default=30020, type=int, help='Next node port')
     parser.add_argument('--set_gpu', default=True, type=str2bool, help='If you want to use GPU, set "True"')
     parser.add_argument('--vram_limit', default=1024, type=int, help='Vram limitation')
     args = parser.parse_args()
@@ -48,12 +46,6 @@ if __name__ == "__main__":
     next_sock.connect((args.next_addr, args.next_port))
     print('Next node is ready, Connected by', args.next_addr)
 
-    if args.set_gpu:
-        scheduler_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        scheduler_sock.settimeout(1000) # 1000 seconds
-        scheduler_sock.connect((args.scheduler_addr, args.scheduler_port))
-        print('Scheduler is ready, Connected by', args.scheduler_addr)
-
     # for data multi-processing
     recv_data_list = []
     recv_data_lock = threading.Lock()
@@ -68,13 +60,8 @@ if __name__ == "__main__":
     threading.Thread(target=send_data, args=(next_sock, send_data_list, send_data_lock, _stop_event)).start()
 
     while True:
-        if args.set_gpu:
-            inputs = bring_data(recv_data_list, recv_data_lock, _stop_event, scheduler_sock)
-            outputs = processing(inputs, model)
-            send_done(scheduler_sock)
-        else:
-            inputs = bring_data(recv_data_list, recv_data_lock, _stop_event)
-            outputs = processing(inputs, model)
+        inputs = bring_data(recv_data_list, recv_data_lock, _stop_event)
+        outputs = processing(inputs, model)
         with send_data_lock:
             send_data_list.append(outputs)
 
@@ -88,5 +75,3 @@ if __name__ == "__main__":
 
     prev_sock.close()
     next_sock.close()
-    if args.set_gpu:
-        scheduler_sock.close()

@@ -5,7 +5,7 @@ import time
 
 if __name__ == '__main__':
     set_gpu = True
-    vram_limit = 2048
+    vram_limit = 1024
     if set_gpu:
         gpu_devices = tf.config.list_physical_devices(device_type='GPU')
         if not gpu_devices:
@@ -66,7 +66,7 @@ if __name__ == '__main__':
         
         temp_took = time.time() - t
         temp_loss = loss(x, true_boxes, model)
-        print("#{} took: {:.3f} loss: {:.3f}".format(i+1, temp_took, temp_loss))
+        print("#{} took: {:.3f}ms loss: {:.3f}".format(i+1, temp_took*1000, temp_loss))
         total_took += temp_took
         total_loss.append(temp_loss)
     print("average_loss: {:.3f}".format(sum(total_loss)/num_images))

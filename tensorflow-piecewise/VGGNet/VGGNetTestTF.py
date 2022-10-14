@@ -4,7 +4,7 @@ import time
 
 if __name__ == '__main__':
     set_gpu = True
-    vram_limit = 3072
+    vram_limit = 1500
     if set_gpu:
         gpu_devices = tf.config.list_physical_devices(device_type='GPU')
         if not gpu_devices:
