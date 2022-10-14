@@ -2,7 +2,6 @@ import numpy as np
 import tensorflow as tf
 from tensorflow import keras
 import tensorflow_datasets as tfds
-from YoloV2Loss import loss
 
 ''' https://github.com/FlorisHoogenboom/yolo-v2-tf-2/blob/master/Demo.ipynb '''
 
@@ -252,17 +251,17 @@ class YoloV2(keras.Model):
     def call(self, inputs):
         output = tf.image.resize(inputs, size=(self.IMAGE_H, self.IMAGE_W), method='nearest')
         output = self.stage1_conv1(output)
-        output_1 = self.stage1_maxpl1(output)
+        output = self.stage1_maxpl1(output)
         output = self.stage1_conv2(output)
-        output_1 = self.stage1_maxpl2(output)
+        output = self.stage1_maxpl2(output)
         output = self.stage1_conv3(output)
         output = self.stage1_conv4(output)
         output = self.stage1_conv5(output)
-        output_1 = self.stage1_maxpl3(output)
+        output = self.stage1_maxpl3(output)
         output = self.stage1_conv6(output)
         output = self.stage1_conv7(output)
         output = self.stage1_conv8(output)
-        output_1 = self.stage1_maxpl4(output)
+        output = self.stage1_maxpl4(output)
         output = self.stage1_conv9(output)
         output = self.stage1_conv10(output)
         output = self.stage1_conv11(output)

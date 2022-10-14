@@ -48,7 +48,6 @@ def boxes_to_coords(boxes):
     """
     top_left_yx = boxes[..., 0:2] - 0.5 * boxes[..., 2:4]
     bottom_right_yx = boxes[..., 0:2] + 0.5 * boxes[..., 2:4]
-
     return tf.concat([top_left_yx, bottom_right_yx], axis=-1)
 
 

@@ -30,11 +30,9 @@ class AlexNet(keras.Model):
         self.flatten = keras.layers.Flatten()
         self.classifier_1 = keras.models.Sequential([
             keras.layers.Dense(4096, activation='relu', input_shape=(256*6*6,)),
-            # keras.layers.Dropout(0.5),
         ], name='classifier_1')
         self.classifier_2 = keras.models.Sequential([
             keras.layers.Dense(4096, activation='relu', input_shape=(4096,)),
-            # keras.layers.Dropout(0.5),
         ], name='classifier_2')
         self.classifier_3 = keras.models.Sequential([
             keras.layers.Dense(1000, activation='softmax', input_shape=(4096,)),

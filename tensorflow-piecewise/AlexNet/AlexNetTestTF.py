@@ -3,7 +3,7 @@ import math
 import time
 
 if __name__ == '__main__':
-    set_gpu = False # True
+    set_gpu = True
     vram_limit = 1024
     if set_gpu:
         gpu_devices = tf.config.list_physical_devices(device_type='GPU')
@@ -34,7 +34,7 @@ if __name__ == '__main__':
 
     batch_size = 1
     max = math.ceil(1000/batch_size)
-    correct, took = 0, 0
+    correct, total_took = 0, 0
     for i in range(max):
         start = i * batch_size
         if i == max-1:
@@ -46,12 +46,26 @@ if __name__ == '__main__':
         test = y_test[start:end]
 
         t = time.time()
-        x = model(inputs)
-        took += time.time() - t
+        x = tf.image.resize(inputs, size=(224, 224), method='nearest')
+        x = model.conv_1(x)
+        x = model.maxpool_1(x)
+        x = model.conv_2(x)
+        x = model.maxpool_2(x)
+        x = model.conv_3(x)
+        x = model.conv_4(x)
+        x = model.conv_5(x)
+        x = model.maxpool_3(x)
+        x = model.flatten(x)
+        x = model.classifier_1(x)
+        x = model.classifier_2(x)
+        x = model.classifier_3(x)
 
+        temp_took = time.time() - t
         predict = tf.argmax(x, 1)
         answer = test.reshape(-1)
+        print("#{} took: {:.3f}ms answer: {}".format(i+1, temp_took*1000, (predict == answer)[0]))
+        total_took += temp_took
         correct += tf.reduce_sum(tf.cast(predict == answer, tf.float32))
 
     print("accuracy: {:.2f}%".format(correct/10))
-    print("took {:.3f} ms".format(took))
+    print("avg took {:.3f} ms".format(total_took))

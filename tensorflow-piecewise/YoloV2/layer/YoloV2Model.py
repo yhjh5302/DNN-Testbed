@@ -2,7 +2,6 @@ import numpy as np
 import tensorflow as tf
 from tensorflow import keras
 import tensorflow_datasets as tfds
-from YoloV2Loss import loss
 
 ''' https://github.com/FlorisHoogenboom/yolo-v2-tf-2/blob/master/Demo.ipynb '''
 
@@ -126,20 +125,18 @@ class YoloV2(keras.Model):
         self.block_size = 2
         self.num_classes = 20
 
-        self.resize = keras.layers.Resizing(height=self.IMAGE_H, width=self.IMAGE_W, interpolation='nearest', name='resize')
-
         self.stage1_conv1 = keras.models.Sequential([
             keras.layers.Conv2D(filters=32, kernel_size=(3,3), strides=1, padding='same', use_bias=False),
             keras.layers.BatchNormalization(),
             keras.layers.LeakyReLU(alpha=0.1),
-            keras.layers.MaxPool2D(pool_size=(2,2)),
         ], name = 'stage1_conv1')
+        self.stage1_maxpl1 = keras.layers.MaxPool2D(pool_size=(2,2))
         self.stage1_conv2 = keras.models.Sequential([
             keras.layers.Conv2D(filters=64, kernel_size=(3,3), strides=1, padding='same', use_bias=False),
             keras.layers.BatchNormalization(),
             keras.layers.LeakyReLU(alpha=0.1),
-            keras.layers.MaxPool2D(pool_size=(2,2)),
         ], name = 'stage1_conv2')
+        self.stage1_maxpl2 = keras.layers.MaxPool2D(pool_size=(2,2))
         self.stage1_conv3 = keras.models.Sequential([
             keras.layers.Conv2D(filters=128, kernel_size=(3,3), strides=1, padding='same', use_bias=False),
             keras.layers.BatchNormalization(),
@@ -154,8 +151,8 @@ class YoloV2(keras.Model):
             keras.layers.Conv2D(filters=128, kernel_size=(3,3), strides=1, padding='same', use_bias=False),
             keras.layers.BatchNormalization(),
             keras.layers.LeakyReLU(alpha=0.1),
-            keras.layers.MaxPool2D(pool_size=(2,2)),
         ], name = 'stage1_conv5')
+        self.stage1_maxpl3 = keras.layers.MaxPool2D(pool_size=(2,2))
         self.stage1_conv6 = keras.models.Sequential([
             keras.layers.Conv2D(filters=256, kernel_size=(3,3), strides=1, padding='same', use_bias=False),
             keras.layers.BatchNormalization(),
@@ -170,8 +167,8 @@ class YoloV2(keras.Model):
             keras.layers.Conv2D(filters=256, kernel_size=(3,3), strides=1, padding='same', use_bias=False),
             keras.layers.BatchNormalization(),
             keras.layers.LeakyReLU(alpha=0.1),
-            keras.layers.MaxPool2D(pool_size=(2,2)),
         ], name = 'stage1_conv8')
+        self.stage1_maxpl4 = keras.layers.MaxPool2D(pool_size=(2,2))
         self.stage1_conv9 = keras.models.Sequential([
             keras.layers.Conv2D(filters=512, kernel_size=(3,3), strides=1, padding='same', use_bias=False),
             keras.layers.BatchNormalization(),
@@ -252,15 +249,19 @@ class YoloV2(keras.Model):
         self.anchor_heads = [self.anchor_head]
 
     def call(self, inputs):
-        output = self.resize(inputs)
+        output = tf.image.resize(inputs, size=(self.IMAGE_H, self.IMAGE_W), method='nearest')
         output = self.stage1_conv1(output)
+        output = self.stage1_maxpl1(output)
         output = self.stage1_conv2(output)
+        output = self.stage1_maxpl2(output)
         output = self.stage1_conv3(output)
         output = self.stage1_conv4(output)
         output = self.stage1_conv5(output)
+        output = self.stage1_maxpl3(output)
         output = self.stage1_conv6(output)
         output = self.stage1_conv7(output)
         output = self.stage1_conv8(output)
+        output = self.stage1_maxpl4(output)
         output = self.stage1_conv9(output)
         output = self.stage1_conv10(output)
         output = self.stage1_conv11(output)

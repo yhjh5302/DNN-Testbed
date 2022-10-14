@@ -1,4 +1,5 @@
 from YoloV2Model import *
+from YoloV2Loss import loss
 import math
 import time
 
@@ -55,9 +56,18 @@ if __name__ == '__main__':
 
     num_images = 1000
     correct, total_took = 0, 0
+    total_loss = []
     for i, (image, true_boxes) in enumerate(test_dataset.take(num_images)):
+        image = tf.reshape(image, (1,416,416,3))
+        true_boxes = tf.reshape(true_boxes, (1,5,4))
+        
         t = time.time()
-        x = model(tf.reshape(image, (1,416,416,3)))
-        total_took += time.time() - t
-        print(i, total_took)
-    print("total_took {:.3f} ms".format(total_took))
+        x = model(image)
+        
+        temp_took = time.time() - t
+        temp_loss = loss(x, true_boxes, model)
+        print("#{} took: {:.3f} loss: {:.3f}".format(i+1, temp_took, temp_loss))
+        total_took += temp_took
+        total_loss.append(temp_loss)
+    print("average_loss: {:.3f}".format(sum(total_loss)/num_images))
+    print("average_took {:.3f} ms".format(total_took))

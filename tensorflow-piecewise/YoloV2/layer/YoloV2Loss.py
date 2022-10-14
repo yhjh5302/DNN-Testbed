@@ -1,12 +1,9 @@
 import tensorflow as tf
-
 import YoloV2Utils as utils
-
 
 IOU_THRESHOLD = 0.6
 COORD_LOSS_WEIGHT = 5
 NEG_CONF_LOSS_WEIGHT = 0.5
-
 
 def compute_iou(pred_coords, true_coords):
     """
@@ -42,7 +39,6 @@ def compute_iou(pred_coords, true_coords):
 
     # We add a small epsilon to the denominator to prevent divisions by zero
     div_result = tf.truediv(intersection_area, union_area + 0.0001)
-
     return div_result
 
 

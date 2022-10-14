@@ -7,10 +7,10 @@ if __name__ == '__main__':
 
     # model training
     model = VGGNet(name='VGGNet')
-    model.compile(loss='sparse_categorical_crossentropy', optimizer=tf.optimizers.SGD(learning_rate=0.001, momentum=0.9), metrics=['accuracy'])
+    model.compile(loss='sparse_categorical_crossentropy', optimizer=tf.optimizers.SGD(learning_rate=0.001, momentum=0.9, clipnorm=1.), metrics=['accuracy'])
     model.build((None,32,32,3))
     model.summary()
-    history = model.fit(x_train, y_train, batch_size=64, epochs=10)
+    history = model.fit(x_train, y_train, batch_size=32, epochs=10)
 
     # saving weights
     model.conv_1.save_weights('./VGGNet_conv_1_weights', save_format='tf')

@@ -1,9 +1,10 @@
 from YoloV2Model import *
+from YoloV2Loss import loss
 
 if __name__ == '__main__':
     # load dataset
-    epoch = 1
-    batch_size = 4
+    epoch = 10
+    batch_size = 16
     train_dataset, test_dataset = tfds.load('voc/2007', split=['train', 'test'], shuffle_files=True, download=True)
     train_dataset = (train_dataset.map(get_image_and_objects)
               .map(bbox_to_matrix)
@@ -25,14 +26,13 @@ if __name__ == '__main__':
 
     optimizer = tf.keras.optimizers.Adam(lr=0.00001, beta_1=0.9, beta_2=0.999, epsilon=1e-08, decay=0)
     for e in range(epoch):
-        print("Epoch #{}".format(e))
         epoch_losses = []
         for i, (x, y_true) in enumerate(train_dataset):
             with tf.GradientTape() as tape:
                 y_pred = model(x)
                 loss_tensor = loss(y_pred, y_true, model)
                 epoch_losses.append(loss_tensor)
-                print("%3d/%3d Curr loss %.3f" % (i, len(train_dataset), sum(epoch_losses)/len(epoch_losses)))
+                print("#%d epoch: %3d/%3d Curr loss %.3f" % (e, i, len(train_dataset), sum(epoch_losses)/len(epoch_losses)))
                 grads = tape.gradient(loss_tensor, model.trainable_variables)
                 optimizer.apply_gradients(zip(grads, model.trainable_variables))
 
