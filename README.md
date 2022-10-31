@@ -13,7 +13,9 @@ This project includes an entire testbed environment, such as
 ## Prerequisites
 *  Linux OS
 *  kubelet, kubeadm, kubectl, kubernetes-cni
-*  python>=3.6, pytorch, numpy
+*  python>=3.6
+*  numpy
+*  pytorch
 *  tensorflow==2.5.0
 *  *(optional)* Nvidia GPU, nvidia-container-runtime, nvidia-docker2
 *  *(optional)* Plenty of free memory *(for each nvidia-container, 1GB memory is required for cuda kernel)*
