@@ -11,10 +11,9 @@ This project includes an entire testbed environment, such as
 *  DNN container deployment and resource allocation using kubernetes
 
 ## Prerequisites
-#### General
 *  Linux OS
 *  kubelet, kubeadm, kubectl, kubernetes-cni
-*  pytorch
+*  python>=3.6, pytorch, numpy
 *  tensorflow==2.5.0
 *  *(optional)* Nvidia GPU, nvidia-container-runtime, nvidia-docker2
 *  *(optional)* Plenty of free memory *(for each nvidia-container, 1GB memory is required for cuda kernel)*
