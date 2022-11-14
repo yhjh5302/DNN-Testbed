@@ -13,8 +13,8 @@ flags.DEFINE_string('classes', './data/coco.names', 'path to classes file')
 flags.DEFINE_string('weights', './checkpoints/yolov3.tf', 'path to weights file')
 flags.DEFINE_boolean('tiny', False, 'yolov3 or yolov3-tiny')
 flags.DEFINE_integer('size', 416, 'resize images to')
-flags.DEFINE_string('video', '../../Data/AIC22_Track1_MTMC_Tracking/train/S03/c013/vdo.avi', 'path to video file or number for webcam)')
-flags.DEFINE_string('roi_mask', '../../Data/AIC22_Track1_MTMC_Tracking/train/S03/c013/roi.jpg', 'path to image file)')
+flags.DEFINE_string('video', '../../Data/AIC22_Track1_MTMC_Tracking/train/S03/c011/vdo.avi', 'path to video file or number for webcam)')
+flags.DEFINE_string('roi_mask', '../../Data/AIC22_Track1_MTMC_Tracking/train/S03/c011/roi.jpg', 'path to image file)')
 flags.DEFINE_string('output', None, 'path to output video')
 flags.DEFINE_string('output_format', 'XVID', 'codec used in VideoWriter when saving video to file')
 flags.DEFINE_integer('num_classes', 80, 'number of classes in the model')
@@ -83,7 +83,7 @@ def main(_argv):
         # loop over each contour found in the frame.
         for cnt in contours:
             # We need to be sure about the area of the contours i.e. it should be higher than 256 to reduce the noise.
-            if cv2.contourArea(cnt) > 256:
+            if cv2.contourArea(cnt) > 1024:
                 detected = True
                 # Accessing the x, y and height, width of the objects
                 x, y, w, h = cv2.boundingRect(cnt)

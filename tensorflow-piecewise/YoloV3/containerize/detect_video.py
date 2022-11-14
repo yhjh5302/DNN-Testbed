@@ -21,9 +21,15 @@ flags.DEFINE_integer('num_classes', 80, 'number of classes in the model')
 
 
 def main(_argv):
-    physical_devices = tf.config.experimental.list_physical_devices('GPU')
-    for physical_device in physical_devices:
-        tf.config.experimental.set_memory_growth(physical_device, True)
+    # physical_devices = tf.config.experimental.list_physical_devices('GPU')
+    # for physical_device in physical_devices:
+    #     tf.config.experimental.set_memory_growth(physical_device, True)
+    
+    gpu_devices = tf.config.list_physical_devices(device_type='GPU')
+    if not gpu_devices:
+        raise ValueError('Cannot detect physical GPU device in TF')
+    tf.config.set_logical_device_configuration(gpu_devices[0], [tf.config.LogicalDeviceConfiguration(memory_limit=1536)])
+    tf.config.list_logical_devices()
 
     if FLAGS.tiny:
         yolo = YoloV3Tiny(classes=FLAGS.num_classes)
@@ -85,12 +91,12 @@ def main(_argv):
             # We need to be sure about the area of the contours i.e. it should be higher than 256 to reduce the noise.
             if cv2.contourArea(cnt) > 256:
                 detected = True
-                # Accessing the x, y and height, width of the objects
-                x, y, w, h = cv2.boundingRect(cnt)
-                # Here we will be drawing the bounding box on the objects
-                cv2.rectangle(boxedFrame, (x , y), (x + w, y + h),(0, 0, 255), 2)
-                # Then with the help of putText method we will write the 'detected' on every object with a bounding box
-                cv2.putText(boxedFrame, 'Detected', (x, y-10), cv2.FONT_HERSHEY_SIMPLEX, 0.3, (0,255,0), 1, cv2.LINE_AA)
+                # # Accessing the x, y and height, width of the objects
+                # x, y, w, h = cv2.boundingRect(cnt)
+                # # Here we will be drawing the bounding box on the objects
+                # cv2.rectangle(boxedFrame, (x , y), (x + w, y + h),(0, 0, 255), 2)
+                # # Then with the help of putText method we will write the 'detected' on every object with a bounding box
+                # cv2.putText(boxedFrame, 'Detected', (x, y-10), cv2.FONT_HERSHEY_SIMPLEX, 0.3, (0,255,0), 1, cv2.LINE_AA)
         
         # inference
         yoloFrame = frame.copy()
@@ -105,18 +111,18 @@ def main(_argv):
             times.append(t2-t1)
             times = times[-20:]
 
-            yoloFrame = draw_outputs(yoloFrame, (boxes, scores, classes, nums), class_names)
-            yoloFrame = cv2.putText(yoloFrame, "Time: {:.2f}ms".format(sum(times)/len(times)*1000), (0, 30),
-                            cv2.FONT_HERSHEY_COMPLEX_SMALL, 1, (0, 0, 255), 2)
-            if FLAGS.output:
-                out.write(yoloFrame)
-            cv2.imshow("yoloFrame", yoloFrame)
+            # yoloFrame = draw_outputs(yoloFrame, (boxes, scores, classes, nums), class_names)
+            # yoloFrame = cv2.putText(yoloFrame, "Time: {:.2f}ms".format(sum(times)/len(times)*1000), (0, 30),
+            #                 cv2.FONT_HERSHEY_COMPLEX_SMALL, 1, (0, 0, 255), 2)
+            # if FLAGS.output:
+            #     out.write(yoloFrame)
+            # cv2.imshow("yoloFrame", yoloFrame)
             print("detect {:.5f} ms".format((time.time() - took) * 1000))
 
         # show_all_frames = np.hstack((frame, foregroundPart, boxedFrame))
-        foregroundPart = cv2.bitwise_and(frame, frame, mask=foreground_mask)
-        cv2.imshow('foregroundPart', foregroundPart)
-        cv2.imshow('boxedFrame', boxedFrame)
+        # foregroundPart = cv2.bitwise_and(frame, frame, mask=foreground_mask)
+        # cv2.imshow('foregroundPart', foregroundPart)
+        # cv2.imshow('boxedFrame', boxedFrame)
 
         if cv2.waitKey(delay) == ord('q'):
             break
