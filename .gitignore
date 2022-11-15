@@ -1,11 +1,11 @@
 *.index
 *.data-00000-of-00001
 *.pth
-*/*/cifar10_data/
 *.tar
 *-logs.txt
 __pycache__
 ~/
 *.pyc
 Data/
+cifar10_data/
 checkpoint

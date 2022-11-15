@@ -11,7 +11,7 @@ def image_sender(model_name, next_socket, images, labels, label_list, label_lock
     for _ in range(100):
         # sleep before sending
         #time.sleep(1/arrival_rate)
-        time.sleep(1) # per 1 seconds
+        time.sleep(0.1) # per 1 seconds
 
         # reading queue
         batch_size = 1
@@ -24,27 +24,26 @@ def image_sender(model_name, next_socket, images, labels, label_list, label_lock
             with label_lock:
                 label_list.append(labels.flatten()[idx:idx+batch_size])
             # sending data
+            send_input(next_socket, data, _stop_event)
             with time_lock:
                 time_list.append(time.time())
-            send_input(next_socket, data, _stop_event)
     #_stop_event.set()
 
 def image_recver(model_name, conn, label_list, label_lock, time_list, time_lock, _stop_event):
-    init = False
+    init = time.time()
     while _stop_event.is_set() == False:
         # make data receiving thread
         outputs = recv_output(conn, _stop_event)
-        if init == False:
-            init = time.time()
         predicted = tf.argmax(outputs, 1)
         with label_lock:
             answer = label_list.pop(0)
         correct = np.sum(predicted == answer)
+        curr = time.time()
 
         with time_lock:
             start = time_list.pop(0)
         # wait for response
-        print(model_name, "\t", time.time() - start, "\t", time.time() - init)
+        print(model_name, "\t", curr - start, "\t", curr - init)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Tensorflow')
