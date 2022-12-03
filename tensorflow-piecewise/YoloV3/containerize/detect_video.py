@@ -28,7 +28,7 @@ def main(_argv):
     gpu_devices = tf.config.list_physical_devices(device_type='GPU')
     if not gpu_devices:
         raise ValueError('Cannot detect physical GPU device in TF')
-    tf.config.set_logical_device_configuration(gpu_devices[0], [tf.config.LogicalDeviceConfiguration(memory_limit=1536)])
+    tf.config.set_logical_device_configuration(gpu_devices[0], [tf.config.LogicalDeviceConfiguration(memory_limit=1024)])
     tf.config.list_logical_devices()
 
     if FLAGS.tiny:
