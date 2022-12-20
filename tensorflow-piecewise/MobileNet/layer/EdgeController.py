@@ -4,9 +4,10 @@ import argparse
 #import multiprocessing as mp
 
 
-model_idx = {
-    'alexnet':0
-}
+def get_scheduling_decision(model_name, next_sock, images, labels, label_list, label_lock, time_list, time_lock, _stop_event, num_model=1):
+    schedule = [(partition_id, execution_order)]
+    return schedule
+
 def image_sender(model_name, next_sock, images, labels, label_list, label_lock, time_list, time_lock, _stop_event, num_model=1):
     for _ in range(100):
         # reading queue
@@ -67,55 +68,7 @@ if __name__ == "__main__":
     else:
         tf.config.set_visible_devices([], 'GPU')
 
-    vid = cv2.VideoCapture(args.data_path+args.video_name)
-    fps = vid.get(cv2.CAP_PROP_FPS)
-    delay = int(600/fps)
-    roi_mask = cv2.imread(args.data_path+args.roi_name, cv2.IMREAD_UNCHANGED)
-    roi_mask = cv2.resize(roi_mask, args.resolution, interpolation=cv2.INTER_CUBIC)
-
-    kernel = None
-    backgroundObject = cv2.createBackgroundSubtractorMOG2(history=1000, varThreshold=128, detectShadows=False)
-    while vid.isOpened():
-        _, frame = vid.read()
-
-        if frame is None:
-            logging.warning("Empty Frame")
-            time.sleep(0.1)
-            continue
-        frame = cv2.resize(frame, args.resolution, interpolation=cv2.INTER_CUBIC)
-        detected = False
-
-        # calculate the foreground mask
-        took = time.time()
-        foreground_mask = cv2.bitwise_and(frame, frame, mask=roi_mask)
-        foreground_mask = backgroundObject.apply(foreground_mask)
-        _, foreground_mask = cv2.threshold(foreground_mask, 250, 255, cv2.THRESH_BINARY)
-        foreground_mask = cv2.erode(foreground_mask, kernel, iterations=1)
-        foreground_mask = cv2.dilate(foreground_mask, kernel, iterations=10)
-        print("mask {:.5f} ms".format((time.time() - took) * 1000))
-
-        contours, _ = cv2.findContours(foreground_mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-        boxedFrame = frame.copy()
-        # loop over each contour found in the frame.
-        for cnt in contours:
-            # We need to be sure about the area of the contours i.e. it should be higher than 256 to reduce the noise.
-            if cv2.contourArea(cnt) > 256:
-                detected = True
-                # Accessing the x, y and height, width of the objects
-                x, y, w, h = cv2.boundingRect(cnt)
-                # Here we will be drawing the bounding box on the objects
-                cv2.rectangle(boxedFrame, (x , y), (x + w, y + h),(0, 0, 255), 2)
-                # Then with the help of putText method we will write the 'detected' on every object with a bounding box
-                cv2.putText(boxedFrame, 'Detected', (x, y-10), cv2.FONT_HERSHEY_SIMPLEX, 0.3, (0,255,0), 1, cv2.LINE_AA)
-
-        # show_all_frames = np.hstack((frame, foreground_mask, boxedFrame))
-        foregroundPart = cv2.bitwise_and(frame, frame, mask=foreground_mask)
-        cv2.imshow('foregroundPart', foregroundPart)
-        cv2.imshow('boxedFrame', boxedFrame)
-
-        if cv2.waitKey(delay) == ord('q'):
-            break
-
+    # connection setup
     sock_list = []
     conn_list = []
     for i in range(len(addr_list)):

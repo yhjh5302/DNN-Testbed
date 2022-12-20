@@ -1,0 +1,4 @@
+sudo nvidia-docker run --rm -it horovod/horovod:latest
+scp -r jin@172.17.0.1:/home/jin/git/DNN/horovod_test/* ./
+horovodrun --verbose -np 1 python3 horovod_train.py
+python3 ddp_train.py
