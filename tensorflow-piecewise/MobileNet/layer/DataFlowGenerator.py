@@ -1,7 +1,7 @@
 from common import *
 from tensorflow import keras
 import argparse
-#import multiprocessing as mp
+import zmq
 
 
 model_idx = {
@@ -119,18 +119,15 @@ if __name__ == "__main__":
     sock_list = []
     conn_list = []
     for i in range(len(addr_list)):
-        addr, port = addr_list[i], port_list[i]
-        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        sock.settimeout(600)
-        sock.connect((addr, port))
+        context = zmq.Context()
+        sock = context.socket(zmq.REQ)
+        sock.connect("tcp://{}:{}".format(addr_list[i], port_list[i]))
         print('Node is ready, Connected by', addr+":", port)
         sock_list.append(sock)
 
-        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-        sock.bind((addr, port))
-        sock.listen()
-        conn, addr = sock.accept()
+        context = zmq.Context()
+        sock = context.socket(zmq.REP)
+        sock.bind("tcp://{}:{}".format("*", port))
         print('AlexNet prev node is ready, Connected by', addr)
         conn_list.append(conn)
 

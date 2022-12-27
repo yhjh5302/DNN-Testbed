@@ -4,42 +4,13 @@ import argparse
 #import multiprocessing as mp
 
 
-def get_scheduling_decision(model_name, next_sock, images, labels, label_list, label_lock, time_list, time_lock, _stop_event, num_model=1):
+def scheduler(model_name, next_sock, images, labels, label_list, label_lock, time_list, time_lock, _stop_event, num_model=1):
     schedule = [(partition_id, execution_order)]
     return schedule
 
-def image_sender(model_name, next_sock, images, labels, label_list, label_lock, time_list, time_lock, _stop_event, num_model=1):
-    for _ in range(100):
-        # reading queue
-        batch_size = 1
-        idx = np.random.randint(10000-batch_size)
-        data = images[idx:idx+batch_size]
-        # req_id = (num_model * i) + model_idx[model_name]
-        # data = (req_id, 0, 2, data)
-        
-        with label_lock:
-            label_list.append(labels.flatten()[idx:idx+batch_size])
-        # sending data
-        send_input(next_sock, data, _stop_event)
-        with time_lock:
-            time_list.append(time.time())
-    #_stop_event.set()
-
-def image_recver(model_name, conn, label_list, label_lock, time_list, time_lock, _stop_event):
-    init = time.time()
-    while _stop_event.is_set() == False:
-        # make data receiving thread
-        outputs = recv_output(conn, _stop_event)
-        predicted = tf.argmax(outputs, 1)
-        with label_lock:
-            answer = label_list.pop(0)
-        correct = np.sum(predicted == answer)
-        curr = time.time()
-
-        with time_lock:
-            start = time_list.pop(0)
-        # wait for response
-        print(model_name, "\t", curr - start, "\t", curr - init)
+def processing(inputs, model):
+    outputs = model(inputs)
+    return outputs
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Tensorflow')
@@ -68,48 +39,32 @@ if __name__ == "__main__":
     else:
         tf.config.set_visible_devices([], 'GPU')
 
-    # connection setup
-    sock_list = []
-    conn_list = []
-    for i in range(len(addr_list)):
-        addr, port = addr_list[i], port_list[i]
-        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        sock.settimeout(600)
-        sock.connect((addr, port))
-        print('Node is ready, Connected by', addr+":", port)
-        sock_list.append(sock)
-
-        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-        sock.bind((addr, port))
-        sock.listen()
-        conn, addr = sock.accept()
-        print('AlexNet prev node is ready, Connected by', addr)
-        conn_list.append(conn)
-
     input('Enter any key...')
 
+    # connection setup
+    sock_list = []
+    
+
+    # for data multi-processing
+    requests = []
+    requests_lock = threading.Lock()
+    schedule = []
+    schedule_lock = threading.Lock()
+    recv_data_list = [[] for _ in sock_list]
+    recv_lock_list = [threading.Lock() for _ in sock_list]
+    send_data_list = [[] for _ in sock_list]
+    send_lock_list = [threading.Lock() for _ in sock_list]
     _stop_event = threading.Event()
-    procs = []
+    for i, sock in enumerate(sock_list):
+        threading.Thread(target=edge_recv_data, args=(sock, recv_data_list[i], recv_lock_list[i], requests, requests_lock, _stop_event)).start()
+        threading.Thread(target=edge_send_data, args=(sock, send_data_list[i], send_lock_list[i], schedule, schedule_lock, _stop_event)).start()
+    threading.Thread(target=scheduler, args=(requests, requests_lock, schedule, schedule_lock, _stop_event)).start()
 
-    for i in range(len(addr_list)):
-        sock, conn = sock_list[i], conn_list[i]
-        label_list = []
-        time_list = []
-        label_lock = threading.Lock()
-        time_lock = threading.Lock()
-        procs.append(threading.Thread(target=image_sender, args=("MobileNet", sock, images, labels, label_list, label_lock, time_list, time_lock, _stop_event)))
-        procs.append(threading.Thread(target=image_recver, args=("MobileNet", conn, label_list, label_lock, time_list, time_lock, _stop_event)))
+    while True:
+        inputs = bring_data(recv_data_list, recv_lock_list, _stop_event)
+        outputs = processing(inputs, model)
+        with send_lock_list[]:
+            send_data_list.append(outputs)
 
-    for proc in procs:
-        proc.start()
-
-    for proc in procs:
-        proc.join()
-
-    if args.block == False:
-        next_sock.close()
-        prev_sock.close()
-
-    vid.release()
-    cv2.destroyAllWindows()
+    prev_sock.close()
+    next_sock.close()

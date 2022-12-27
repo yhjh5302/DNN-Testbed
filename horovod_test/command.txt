@@ -1,4 +1,4 @@
-sudo nvidia-docker run --rm -it horovod/horovod:latest
-scp -r jin@172.17.0.1:/home/jin/git/DNN/horovod_test/* ./
-horovodrun --verbose -np 1 python3 horovod_train.py
-python3 ddp_train.py
+도커 실행: sudo nvidia-docker run --rm -it horovod/horovod:latest
+호스트로부터 코드 가져옴: scp -r jin@172.17.0.1:/home/jin/git/DNN/horovod_test/* ./
+horovod로 학습실행: horovodrun --verbose -np 1 python3 horovod_train.py
+DDP로 학습실행: python3 ddp_train.py

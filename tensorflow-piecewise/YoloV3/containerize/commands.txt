@@ -1,3 +1,4 @@
-sudo docker run --runtime nvidia -it --rm yhjh5302/nano-test
+sudo jetson_clocks
+sudo docker run --runtime nvidia -it --rm yhjh5302/nano-opencv
 python3 detect_video.py --video ./vdo.avi --roi_mask ./roi.jpg
 python3 detect_video.py --weights ./checkpoints/yolov3-tiny.tf --tiny --video ./vdo.avi --roi_mask ./roi.jpg
