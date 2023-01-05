@@ -4,7 +4,10 @@ import torch.nn as nn
 import torchvision
 import torchvision.transforms as transforms
 
+from torch.utils.data import DataLoader
+
 import math
+import numpy as np
 
 class MobileNetV1(nn.Module):
     def __init__(self, num_classes: int = 1000, init_weights: bool = True ) -> None:
@@ -156,17 +159,35 @@ class MobileNetV1(nn.Module):
                 nn.init.normal_(m.weight, 0, 0.01)
                 nn.init.zeros_(m.bias)
 
+def calculate_norm(dataset):
+    mean_ = np.array([np.mean(x.numpy(), axis=(1, 2)) for x, _ in dataset])
+    mean_r = mean_[:, 0].mean()
+    mean_g = mean_[:, 1].mean()
+    mean_b = mean_[:, 2].mean()
+
+    std_ = np.array([np.std(x.numpy(), axis=(1, 2)) for x, _ in dataset])
+    std_r = std_[:, 0].mean()
+    std_g = std_[:, 1].mean()
+    std_b = std_[:, 2].mean()
+    return (mean_r, mean_g, mean_b), (std_r, std_g, std_b)
+
 if __name__ == '__main__':
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     print(device)
     print(torch.cuda.get_device_name(0))
     
-    transform = transforms.Compose([transforms.Resize(size=(224,224),interpolation=0), transforms.ToTensor(), transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))])
-    trainset = torchvision.datasets.CIFAR10(root='./cifar10_data', train=True, download=True, transform=transform)
-    trainloader = torch.utils.data.DataLoader(trainset, batch_size=10, shuffle=True, num_workers=8)
-    testset = torchvision.datasets.CIFAR10(root='./cifar10_data', train=False, download=True, transform=transform)
-    testloader = torch.utils.data.DataLoader(testset, batch_size=10, shuffle=False, num_workers=8)
-    classes = ('plane', 'car', 'bird', 'cat', 'deer', 'dog', 'frog', 'horse', 'ship', 'truck')
+    transform = transforms.Compose([transforms.Resize(size=(224,224),interpolation=0), transforms.ToTensor()])
+    
+    path = '/home/pjs/dataset/AIC20_track2/AIC20_ReID_Simulation/label'
+
+    trainset = torchvision.datasets.ImageFolder(root = path + '/train', transform=transform)
+    mean_, std_ = calculate_norm(trainset)
+    transform = transforms.Compose([transforms.Resize(size=(224,224),interpolation=0), transforms.ToTensor(), transforms.Normalize(mean_, std_)])
+    bsize = 16
+    trainset = torchvision.datasets.ImageFolder(root = path + '/train', transform=transform)
+    trainloader = torch.utils.data.DataLoader(trainset, batch_size=bsize, shuffle=True, num_workers=8, pin_memory=True)
+
+    classes = ('bus', 'estate', 'hatchback', 'mpv', 'pickup', 'RV', 'sedan', 'sportscar', 'suv', 'truck', 'van')
     
     epoch_size = 20
     model = MobileNetV1()
@@ -177,7 +198,8 @@ if __name__ == '__main__':
     import torch.optim as optim
 
     criterion = nn.CrossEntropyLoss()
-    optimizer = optim.SGD(model.parameters(), lr=0.1, momentum=0.9, weight_decay=1e-4)
+    optimizer = optim.Adam(model.parameters(), lr=0.001, eps=1e-8)
+    scheduler = optim.lr_scheduler.LambdaLR(optimizer, lr_lambda= lambda epoch: 0.95 ** epoch)
 
     for epoch in range(epoch_size):   # repeat process with same data
         running_loss = 0.0
@@ -196,29 +218,50 @@ if __name__ == '__main__':
 
             # print progress
             running_loss += loss.item()
-            if i % 1000 == 999:
-                print('[%2d/%2d,%4d/%4d] loss: %.3f' % (epoch + 1, epoch_size, i + 1, len(trainset)/10, running_loss / 1000))
+            if i % 200 == 199:
+                print('[%2d/%2d,%4d/%4d] loss: %.3f' % (epoch + 1, epoch_size, i + 1, len(trainset)/bsize, running_loss / 1000))
                 running_loss = 0.0
+        scheduler.step()
+
+        # validation
+        model.eval()
+        correct = 0
+        total = 0
+        with torch.no_grad():
+            testset = torchvision.datasets.ImageFolder(root = path + '/test', transform=transform)
+            testloader = torch.utils.data.DataLoader(testset, batch_size=1, shuffle=True, num_workers=8, pin_memory=True)
+            for i, data in enumerate(testloader, 0):
+                images, labels = data[0], data[1]
+                # MobileNet FP32
+                outputs = model(images.cuda())
+                _, predicted = torch.max(outputs.data, 1)
+                total += labels.size(0)
+                correct += (predicted == labels.cuda()).sum().item()
+                if i == 99:
+                    break
+        print('Accuracy: %d %%' % (100 * correct / total))
+        model.train()
+            
 
     print('Finished Training')
 
     #### save trained model
 
-    PATH = './cifar/'
-    torch.save(model.conv1.state_dict(), PATH + 'cifar_MobileNetV1_conv1.pth')
-    torch.save(model.separable_conv2.state_dict(), PATH + 'cifar_MobileNetV1_separable_conv2.pth')
-    torch.save(model.separable_conv3.state_dict(), PATH + 'cifar_MobileNetV1_separable_conv3.pth')
-    torch.save(model.separable_conv4.state_dict(), PATH + 'cifar_MobileNetV1_separable_conv4.pth')
-    torch.save(model.separable_conv5.state_dict(), PATH + 'cifar_MobileNetV1_separable_conv5.pth')
-    torch.save(model.separable_conv6.state_dict(), PATH + 'cifar_MobileNetV1_separable_conv6.pth')
-    torch.save(model.separable_conv7.state_dict(), PATH + 'cifar_MobileNetV1_separable_conv7.pth')
-    torch.save(model.separable_conv8.state_dict(), PATH + 'cifar_MobileNetV1_separable_conv8.pth')
-    torch.save(model.separable_conv9.state_dict(), PATH + 'cifar_MobileNetV1_separable_conv9.pth')
-    torch.save(model.separable_conv10.state_dict(), PATH + 'cifar_MobileNetV1_separable_conv10.pth')
-    torch.save(model.separable_conv11.state_dict(), PATH + 'cifar_MobileNetV1_separable_conv11.pth')
-    torch.save(model.separable_conv12.state_dict(), PATH + 'cifar_MobileNetV1_separable_conv12.pth')
-    torch.save(model.separable_conv13.state_dict(), PATH + 'cifar_MobileNetV1_separable_conv13.pth')
-    torch.save(model.separable_conv14.state_dict(), PATH + 'cifar_MobileNetV1_separable_conv14.pth')
-    torch.save(model.fc.state_dict(), PATH + 'cifar_MobileNetV1_fc.pth')
+    PATH = '/home/pjs/testbed/pytorch/MobileNet/vehicle/'
+    torch.save(model.conv1.state_dict(), PATH + 'vehicle_MobileNetV1_conv1.pth')
+    torch.save(model.separable_conv2.state_dict(), PATH + 'vehicle_MobileNetV1_separable_conv2.pth')
+    torch.save(model.separable_conv3.state_dict(), PATH + 'vehicle_MobileNetV1_separable_conv3.pth')
+    torch.save(model.separable_conv4.state_dict(), PATH + 'vehicle_MobileNetV1_separable_conv4.pth')
+    torch.save(model.separable_conv5.state_dict(), PATH + 'vehicle_MobileNetV1_separable_conv5.pth')
+    torch.save(model.separable_conv6.state_dict(), PATH + 'vehicle_MobileNetV1_separable_conv6.pth')
+    torch.save(model.separable_conv7.state_dict(), PATH + 'vehicle_MobileNetV1_separable_conv7.pth')
+    torch.save(model.separable_conv8.state_dict(), PATH + 'vehicle_MobileNetV1_separable_conv8.pth')
+    torch.save(model.separable_conv9.state_dict(), PATH + 'vehicle_MobileNetV1_separable_conv9.pth')
+    torch.save(model.separable_conv10.state_dict(), PATH + 'vehicle_MobileNetV1_separable_conv10.pth')
+    torch.save(model.separable_conv11.state_dict(), PATH + 'vehicle_MobileNetV1_separable_conv11.pth')
+    torch.save(model.separable_conv12.state_dict(), PATH + 'vehicle_MobileNetV1_separable_conv12.pth')
+    torch.save(model.separable_conv13.state_dict(), PATH + 'vehicle_MobileNetV1_separable_conv13.pth')
+    torch.save(model.separable_conv14.state_dict(), PATH + 'vehicle_MobileNetV1_separable_conv14.pth')
+    torch.save(model.fc.state_dict(), PATH + 'vehicle_MobileNetV1_fc.pth')
 
     print('Model Saved')
