@@ -159,6 +159,7 @@ class MobileNetV1(nn.Module):
 if __name__ == '__main__':
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     torch.cuda.set_per_process_memory_fraction(fraction=0.2, device=device)
+    torch.backends.cudnn.benchmark = True
     print(device)
     print(torch.cuda.get_device_name(0))
     half = True
@@ -169,9 +170,11 @@ if __name__ == '__main__':
     classes = ('plane', 'car', 'bird', 'cat', 'deer', 'dog', 'frog', 'horse', 'ship', 'truck')
     
     if half == True:
-        model = MobileNetV1().half().cuda()
+        model = MobileNetV1().cuda().eval().half()
+        test_input = torch.zeros(1,3,224,224).cuda().half()
     else:
-        model = MobileNetV1().cuda()
+        model = MobileNetV1().cuda().eval()
+        test_input = torch.zeros(1,3,224,224).cuda()
 
     model.conv1.load_state_dict(torch.load('./cifar_MobileNetV1_conv1.pth'))
     model.separable_conv2.load_state_dict(torch.load('./cifar_MobileNetV1_separable_conv2.pth'))
@@ -188,25 +191,30 @@ if __name__ == '__main__':
     model.separable_conv13.load_state_dict(torch.load('./cifar_MobileNetV1_separable_conv13.pth'))
     model.separable_conv14.load_state_dict(torch.load('./cifar_MobileNetV1_separable_conv14.pth'))
     model.fc.load_state_dict(torch.load('./cifar_MobileNetV1_fc.pth'))
+    model(test_input)
 
     correct = 0
     total = 0
     avg_time = 0
+    torch.cuda.synchronize()
     with torch.no_grad():
         for i, data in enumerate(testloader, 0):
             images, labels = data[0], data[1]
             if half == True:
-                images = images.to(torch.float16)
+                images = images.to(torch.float16).cuda()
+            else:
+                images = images.cuda()
             
-            total_start = time.time()
-            
-            # MobileNet FP32
-            outputs = model(images.cuda())
+            start = time.time()
+            outputs = model(images)
+            torch.cuda.synchronize()
             
             _, predicted = torch.max(outputs.data, 1)
-            avg_time += time.time() - total_start
+            took = time.time() - start
+            avg_time += took
             total += labels.size(0)
             correct += (predicted == labels.cuda()).sum().item()
+            print("{}th took {:3f}".format(i, took))
             if i == 99:
                 print('total: ', total)
                 print('correct: ', correct)

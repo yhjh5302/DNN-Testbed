@@ -1,10 +1,8 @@
-import numpy as np
-import zmq
-import io
-import time
-import threading
-import struct
-import argparse
+import threading, time, argparse
+import torch
+import torch.distributed as dist
+
+SCHEDULE = -1
 
 def str2bool(v):
     if isinstance(v, bool):
@@ -16,14 +14,6 @@ def str2bool(v):
     else:
         raise argparse.ArgumentTypeError('Boolean value expected.')
 
-def connection_setup(sock_list, _stop_event):
-    while _stop_event.is_set() == False:
-        # server open and connect
-        context = zmq.Context()
-        sock = context.socket(zmq.REP)
-        sock.bind("tcp://{}:{}".format("*", 30000))
-        sock_list.append(sock)
-
 def bring_data(data_list, data_lock, _stop_event):
     while _stop_event.is_set() == False:
         if len(data_list) > 0:
@@ -31,34 +21,25 @@ def bring_data(data_list, data_lock, _stop_event):
                 data = data_list.pop(0)
             return data
         else:
-            time.sleep(0.00001) # wait for data download
+            time.sleep(0.000001) # wait for data download
 
-def edge_recv_data(sock, data_list, data_lock, requests_list, requests_lock, _stop_event):
-    try:
-        while True:
-            packet = sock.recv()
-            header = packet[:1].decode('utf-8')
-            data = packet[1:]
-            if header == "d":
-                with data_lock:
-                    data_list.append(np.load(io.BytesIO(data), allow_pickle=True))
-            elif header == "r":
-                with requests_lock:
-                    requests_list.append(np.load(io.BytesIO(data), allow_pickle=True))
-    except:
-        _stop_event.set()
-        raise RuntimeError('ERROR: something wrong with previous node', sock, 'in recv_data!')
+def recv_thread(schedule_list, schedule_lock, data_list, data_lock, _stop_event):
+    while _stop_event.is_set() == False:
+        if len(schedule_list) > 0:
+            with schedule_lock:
+                src, dst, layer = schedule_list.pop(0)
+        src, dst, input_shape = schedule_list.pop()
+        data = torch.zeros(input_shape)
+        src = dist.recv(tensor=data, tag=0)
+        with data_lock:
+            data_list.append((src, data))
 
-def edge_send_data(sock, data_list, data_lock, schedule_list, schedule_lock, _stop_event):
+def send_thread(schedule_list, schedule_lock, data_list, data_lock, _stop_event):
     while _stop_event.is_set() == False:
         if len(data_list) > 0:
             with data_lock:
                 data = data_list.pop(0)
-            f = io.BytesIO()
-            np.save(f, data, allow_pickle=True)
-            f.seek(0)
-            out = "d".encode('utf-8') + f.read()
-            sock.send(out)
+            dist.send(tensor=data, dst=, tag=0)
         elif len(schedule_list) > 0:
             with schedule_lock:
                 data = schedule_list.pop(0)

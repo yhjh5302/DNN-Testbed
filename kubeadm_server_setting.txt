@@ -93,44 +93,6 @@ sudo kubeadm config images pull
 sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
 sudo chown $(id -u):$(id -g) $HOME/.kube/config
 
-#### (After kubeadm init and join) Add following options to /var/lib/kubelet/config.yaml for enabling swap memory
-sudo nano /var/lib/kubelet/config.yaml
-featureGates:
-  NodeSwap: true
-failSwapOn: false
-memorySwap:
-  swapBehavior: UnlimitedSwap
-
-sudo mkdir -p /etc/containerd && containerd config default | sudo tee /etc/containerd/config.toml
-sudo nano /etc/containerd/config.toml
-          [plugins."io.containerd.grpc.v1.cri".containerd.runtimes.runc.options]
-            BinaryName = ""
-            CriuImagePath = ""
-            CriuPath = ""
-            CriuWorkPath = ""
-            IoGid = 0
-            IoUid = 0
-            NoNewKeyring = false
-            NoPivotRoot = false
-            Root = ""
-            ShimCgroup = ""
-            SystemdCgroup = true
-
-          [plugins."io.containerd.grpc.v1.cri".containerd.runtimes.nvidia]
-            privileged_without_host_devices = false
-            runtime_engine = ""
-            runtime_root = ""
-            runtime_type = "io.containerd.runc.v1"
-
-            [plugins."io.containerd.grpc.v1.cri".containerd.runtimes.nvidia.options]
-              BinaryName = "/usr/bin/nvidia-container-runtime"
-              SystemdCgroup = true
-
-sudo systemctl restart containerd
-
-#### inspect
-journalctl -fu kubelet
-
 #### network
 kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/master/Documentation/kube-flannel.yml
 kubectl apply -f https://raw.githubusercontent.com/flannel-io/flannel/v0.20.2/Documentation/kube-flannel.yml
@@ -141,7 +103,6 @@ kubectl create -f https://raw.githubusercontent.com/NVIDIA/k8s-device-plugin/1.0
 
 #### master node untaint
 kubectl taint nodes jin-tfx255 node-role.kubernetes.io/master-
-kubectl taint nodes --all node-role.kubernetes.io/control-plane-
 
 #### 
 kubectl apply -f pipeline-deploy.yaml
@@ -180,7 +141,7 @@ sudo iw reg set US
 
 #### slave
 sudo swapoff -a
-sudo kubeadm join 192.168.0.11:6443 --token ffb2dv.1hkm9b8y7vqnwxls --discovery-token-ca-cert-hash sha256:f073c3eb91f54776cef89bf4ee7dc2650bae85d7d3dfc09feb4cbb3092e8dd3d
+sudo kubeadm join 192.168.0.2:6443 --token ffb2dv.1hkm9b8y7vqnwxls --discovery-token-ca-cert-hash sha256:f073c3eb91f54776cef89bf4ee7dc2650bae85d7d3dfc09feb4cbb3092e8dd3d
 
 #### (NOT Necessary) nginx run on master node
 kubectl apply -f capstone_2020/ingress-nginx-mandatory.yaml
