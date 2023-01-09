@@ -52,11 +52,10 @@ def data_generator():
             cv2.imshow('boxedFrame', boxedFrame)
         
         # send image info to the master and recv scheduling decision
-
+        pass # TODO
 
         if cv2.waitKey(delay) == ord('q'):
             break
-
 
 
 if __name__ == "__main__":
@@ -88,17 +87,24 @@ if __name__ == "__main__":
 
     # data sender/receiver thread start
     _stop_event = threading.Event()
-    threading.Thread
-    threading.Thread(target=image_sender, args=(sock, images, labels, label_list, label_lock, time_list, time_lock, _stop_event))).start()
-    threading.Thread(target=image_recver, args=(conn, label_list, label_lock, time_list, time_lock, _stop_event))).start()
+    recv_data_list = []
+    recv_data_lock = threading.Lock()
+    send_data_list = []
+    send_data_lock = threading.Lock()
+    recv_schedule_list = []
+    recv_schedule_lock = threading.Lock()
+    send_schedule_list = []
+    send_schedule_lock = threading.Lock()
 
-    while True:
-        inputs = bring_data(recv_data_list, recv_lock, _stop_event)
-        outputs = processing(inputs, model)
-        with send_lock:
+    threading.Thread(target=schedule_thread, args=(recv_schedule_list, recv_schedule_lock, send_schedule_list, send_schedule_lock, _stop_event))).start()
+    threading.Thread(target=recv_thread, args=(recv_schedule_list, recv_schedule_lock, recv_data_list, recv_data_lock, _stop_event))).start()
+    threading.Thread(target=send_thread, args=(send_schedule_list, send_schedule_lock, send_data_list, send_data_lock, _stop_event))).start()
+
+    while _stop_event.is_set() == False:
+        inputs = bring_data(recv_data_list, recv_data_lock, _stop_event)
+        outputs = processing(inputs, layer)
+        with send_data_lock:
             send_data_list.append(outputs)
-        with recv_time_lock:
-            print("processing time", time.time() - recv_time_list.pop(0))
 
     vid.release()
     cv2.destroyAllWindows()

@@ -14,57 +14,49 @@ def processing(inputs, model):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Tensorflow')
-    parser.add_argument('--set_gpu', default=False, type=str2bool, help='If you want to use GPU, set "True"')
-    parser.add_argument('--vram_limit', default=0, type=int, help='GPU memory limit')
-    parser.add_argument('--self_addr', default='localhost', type=str, help='Previous node address')
-    parser.add_argument('--self_port', default=30001, type=int, help='Previous node port')
-    parser.add_argument('--master_addr', default='localhost', type=str, help='Previous node address')
-    parser.add_argument('--master_port', default=30000, type=int, help='Previous node port')
+    parser = argparse.ArgumentParser(description='Piecewise Partition and Scheduling')
+    parser.add_argument('--vram_limit', default=0.2, type=float, help='GPU memory limit')
+    parser.add_argument('--master_addr', default='localhost', type=str, help='Master node ip address')
+    parser.add_argument('--master_port', default=30000, type=int, help='Master node port')
+    parser.add_argument('--rank', default=0, type=int, help='Master node port', required=True)
     parser.add_argument('--data_path', default='./Data/', type=str, help='Image frame data path')
     parser.add_argument('--video_name', default='vdo.avi', type=str, help='Video file name')
     parser.add_argument('--roi_name', default='roi.jpg', type=str, help='RoI file name')
-    parser.add_argument('--resolution', default=(854, 480), type=tuple, help='image resolution')
-    parser.add_argument('--img_hw', default=416, type=int, help='inference engine input size')
+    parser.add_argument('--resolution', default=(854, 480), type=tuple, help='Image resolution')
+    parser.add_argument('--verbose', default=False, type=str2bool, help='If you want to print debug messages, set True')
     args = parser.parse_args()
 
-    if len(args.addr_list) != len(port_list):
-        raise RuntimeError("The number of addr and port does not match!")
+    os.environ['MASTER_ADDR'] = args.master_addr
+    os.environ['MASTER_PORT'] = args.master_port
+    dist.init_process_group('gloo', rank=args.rank, world_size=args.size)
 
-    if args.set_gpu:
-        gpu_devices = tf.config.list_physical_devices(device_type='GPU')
-        if not gpu_devices:
-            raise ValueError('Cannot detect physical GPU device in TF')
-        tf.config.set_logical_device_configuration(gpu_devices[0], [tf.config.LogicalDeviceConfiguration(memory_limit=args.vram_limit)])
-        tf.config.list_logical_devices()
-    else:
-        tf.config.set_visible_devices([], 'GPU')
+    # gpu setting
+    device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+    torch.backends.cudnn.benchmark = True
+    torch.cuda.set_per_process_memory_fraction(fraction=args.vram_limit, device=device)
+    print(device, torch.cuda.get_device_name(0))
 
-    input('Enter any key...')
+    # cluster connection setup
+    print('Waiting for the cluster connection...')
+    dist.init_process_group('gloo', rank=args.rank, world_size=args.size)
 
-    # connection setup
-    sock_list = []
-    
-
-    # for data multi-processing
-    requests = []
-    requests_lock = threading.Lock()
-    schedule = []
-    schedule_lock = threading.Lock()
-    recv_data_list = [[] for _ in sock_list]
-    recv_lock_list = [threading.Lock() for _ in sock_list]
-    send_data_list = [[] for _ in sock_list]
-    send_lock_list = [threading.Lock() for _ in sock_list]
+    # data sender/receiver thread start
     _stop_event = threading.Event()
-    for i, sock in enumerate(sock_list):
-        threading.Thread(target=edge_recv_data, args=(sock, recv_data_list[i], recv_lock_list[i], requests, requests_lock, _stop_event)).start()
-        threading.Thread(target=edge_send_data, args=(sock, send_data_list[i], send_lock_list[i], schedule, schedule_lock, _stop_event)).start()
-    threading.Thread(target=scheduler, args=(requests, requests_lock, schedule, schedule_lock, _stop_event)).start()
+    recv_data_list = []
+    recv_data_lock = threading.Lock()
+    send_data_list = []
+    send_data_lock = threading.Lock()
+    recv_schedule_list = []
+    recv_schedule_lock = threading.Lock()
+    send_schedule_list = []
+    send_schedule_lock = threading.Lock()
 
-    while True:
-        inputs = bring_data(recv_data_list, recv_lock_list, _stop_event)
-        outputs = processing(inputs, model)
-        with send_lock_list[]:
+    threading.Thread(target=edge_scheduler, args=(recv_schedule_list, recv_schedule_lock, send_schedule_list, send_schedule_lock, _stop_event))).start()
+    threading.Thread(target=recv_thread, args=(recv_schedule_list, recv_schedule_lock, recv_data_list, recv_data_lock, _stop_event))).start()
+    threading.Thread(target=send_thread, args=(send_schedule_list, send_schedule_lock, send_data_list, send_data_lock, _stop_event))).start()
+
+    while _stop_event.is_set() == False:
+        inputs = bring_data(recv_data_list, recv_data_lock, _stop_event)
+        outputs = processing(inputs, layer)
+        with send_data_lock:
             send_data_list.append(outputs)
-
-    prev_sock.close()
-    next_sock.close()
