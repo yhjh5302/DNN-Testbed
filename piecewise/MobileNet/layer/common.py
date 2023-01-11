@@ -1,8 +1,9 @@
-import threading, time, argparse
+import threading, time, argparse, os
 import torch
 import torch.distributed as dist
 
-SCHEDULE_TAG = -1
+REQUEST_TAG = -1
+SCHEDULE_TAG = -2
 
 def str2bool(v):
     if isinstance(v, bool):
@@ -25,59 +26,54 @@ def bring_data(data_list, data_lock, _stop_event):
 
 def recv_thread(schedule_list, schedule_lock, data_list, data_lock, _stop_event):
     while _stop_event.is_set() == False:
+        # 스케줄 리스트에서 받아야할 데이터가 있으면
         if len(schedule_list) > 0:
             with schedule_lock:
-                src, tag, input_shape,  = schedule_list.pop(0)
-        # input data를 받아 mapping하는 부분
-        for 
-            data = torch.zeros(input_shape)
-            dist.recv(tensor=data, src=src, tag=tag)
-        input_data = torch.cat()
-        with data_lock:
-            data_list.append(input_data)
+                schedules = schedule_list.pop(0)
+            # 스레드를 열고 input data를 동시에 받음
+            data = []
+            for src, dst, input_shape, tag in schedules:
+                data.append(torch.Empty(input_shape))
+                dist.recv(tensor=data, src=src, tag=tag)
+            # scheduling decision에 있는 애들이 모두 받아졌으면 merge함
+            input_data = torch.cat(data)
+            with data_lock:
+                data_list.append(input_data)
+        else:
+            time.sleep(0.000001)
 
 def send_thread(schedule_list, schedule_lock, data_list, data_lock, _stop_event):
     while _stop_event.is_set() == False:
         if len(schedule_list) > 0 and len(data_list):
             with schedule_lock:
-                src, tag, input_shape,  = schedule_list.pop(0)
+                schedules = schedule_list.pop(0)
+            # output data를 받아 schedule대로 조각내고 목적지로 전송
             with data_lock:
                 data = data_list.pop(0)
-            # output data를 받아 조각내고 전송하는 부분
-            src, tag, input_shape,  = schedule_list.pop(0)
-            dist.send(tensor=data, dst=, tag=DATA_TAG)
+            for src, dst, slice_shape, tag in schedules:
+                output_data = data[slice_shape]
+                dist.send(tensor=output_data, dst=dst, tag=tag)
         else:
-            time.sleep(0.00001)
+            time.sleep(0.000001)
 
 def schedule_thread(recv_schedule_list, recv_schedule_lock, send_schedule_list, send_schedule_lock, _stop_event):
     while _stop_event.is_set() == False:
-        packet = sock.recv()
-        header = packet[:1].decode('utf-8')
-        data = packet[1:]
-        if header == "d":
-            with data_lock:
-                data_list.append(np.load(io.BytesIO(data), allow_pickle=True))
-        elif header == "s":
-            with schedule_lock:
-                schedule_list.append(np.load(io.BytesIO(data), allow_pickle=True))
+        schedule_list = torch.Empty(schedule_shape)
+        dist.recv(tensor=schedule_list, src=0, tag=SCHEDULE_TAG)
+        with recv_schedule_lock:
+            recv_schedule_list.extend(schedule_list[0])
+        with send_schedule_lock:
+            send_schedule_list.extend(schedule_list[1])
 
 def edge_scheduler(recv_schedule_list, recv_schedule_lock, send_schedule_list, send_schedule_lock, _stop_event):
     while _stop_event.is_set() == False:
-        if len(data_list) > 0:
-            with data_lock:
-                data = data_list.pop(0)
-            f = io.BytesIO()
-            np.save(f, data, allow_pickle=True)
-            f.seek(0)
-            out = "d".encode('utf-8') + f.read()
-            sock.send(out)
-        elif len(requests_list) > 0:
-            with requests_lock:
-                data = requests_list.pop(0)
-            f = io.BytesIO()
-            np.save(f, data, allow_pickle=True)
-            f.seek(0)
-            out = "r".encode('utf-8') + f.read()
-            sock.send(out)
-        else:
-            time.sleep(0.00001)
+        request_list = torch.Empty(request_shape)
+        dist.recv(tensor=request_list, src=None, tag=REQUEST_TAG)
+        # scheduling_decision = scheduling_algorithm(request) TODO
+        for schedule in scheduling_decision:
+            # 만약 로컬에서 처리해야하면 로컬 schedule_list에 채워넣음.
+            # 아니면 해당 device로 보냄.
+            pass
+
+def processing(inputs):
+    return 0

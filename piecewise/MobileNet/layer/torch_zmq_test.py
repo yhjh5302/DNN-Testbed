@@ -101,10 +101,10 @@ def run(rank, size):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Torch')
     parser.add_argument('--size', default=4, type=int, help='')
-    parser.add_argument('--rank', default=0, type=int, help='')
+    parser.add_argument('--rank', default=0, choices=[0,1,2,3], type=int, help='', required=True)
     args = parser.parse_args()
     os.environ['MASTER_ADDR'] = '192.168.1.2'
     os.environ['MASTER_PORT'] = '29500'
-    dist.init_process_group('gloo', rank=args.rank, world_size=args.size)
+    dist.init_process_group(backend='gloo', rank=args.rank, world_size=args.size)
     time.sleep(1)
     run(args.rank, args.size)
