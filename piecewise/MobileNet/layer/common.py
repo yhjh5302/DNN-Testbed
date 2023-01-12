@@ -69,7 +69,7 @@ def edge_scheduler(recv_schedule_list, recv_schedule_lock, send_schedule_list, s
     while _stop_event.is_set() == False:
         request_list = torch.Empty(request_shape)
         dist.recv(tensor=request_list, src=None, tag=REQUEST_TAG)
-        # scheduling_decision = scheduling_algorithm(request) TODO
+        scheduling_decision = scheduling_algorithm(request) # TODO
         for schedule in scheduling_decision:
             # 만약 로컬에서 처리해야하면 로컬 schedule_list에 채워넣음.
             # 아니면 해당 device로 보냄.

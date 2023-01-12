@@ -2,7 +2,7 @@ from common import *
 import cv2, logging
 
 
-def data_generator():
+def data_generator(data_list, data_lock):
     # video data load
     vid = cv2.VideoCapture(args.data_path+args.video_name)
     fps = vid.get(cv2.CAP_PROP_FPS)
@@ -53,7 +53,10 @@ def data_generator():
             cv2.imshow('boxedFrame', boxedFrame)
         
         # send image info to the master and recv scheduling decision
-        pass # TODO
+        # TODO data = Frame info
+        dist.send(tensor=data, src=0, tag=-1)
+        with data_lock:
+            data_list.append(boxedFrame)
 
         if cv2.waitKey(delay) == ord('q'):
             break
@@ -103,6 +106,7 @@ if __name__ == "__main__":
     threading.Thread(target=schedule_thread, args=(recv_schedule_list, recv_schedule_lock, send_schedule_list, send_schedule_lock, _stop_event)).start()
     threading.Thread(target=recv_thread, args=(recv_schedule_list, recv_schedule_lock, recv_data_list, recv_data_lock, _stop_event)).start()
     threading.Thread(target=send_thread, args=(send_schedule_list, send_schedule_lock, send_data_list, send_data_lock, _stop_event)).start()
+    threading.Thread(target=data_generator, args=(send_data_list, send_data_lock)).start()
 
     while _stop_event.is_set() == False:
         inputs = bring_data(recv_data_list, recv_data_lock, _stop_event)
