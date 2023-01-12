@@ -1,4 +1,5 @@
 from common import *
+import cv2, logging
 
 
 def data_generator():
@@ -57,6 +58,9 @@ def data_generator():
         if cv2.waitKey(delay) == ord('q'):
             break
 
+    vid.release()
+    cv2.destroyAllWindows()
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Piecewise Partition and Scheduling')
@@ -96,15 +100,12 @@ if __name__ == "__main__":
     send_schedule_list = []
     send_schedule_lock = threading.Lock()
 
-    threading.Thread(target=schedule_thread, args=(recv_schedule_list, recv_schedule_lock, send_schedule_list, send_schedule_lock, _stop_event))).start()
-    threading.Thread(target=recv_thread, args=(recv_schedule_list, recv_schedule_lock, recv_data_list, recv_data_lock, _stop_event))).start()
-    threading.Thread(target=send_thread, args=(send_schedule_list, send_schedule_lock, send_data_list, send_data_lock, _stop_event))).start()
+    threading.Thread(target=schedule_thread, args=(recv_schedule_list, recv_schedule_lock, send_schedule_list, send_schedule_lock, _stop_event)).start()
+    threading.Thread(target=recv_thread, args=(recv_schedule_list, recv_schedule_lock, recv_data_list, recv_data_lock, _stop_event)).start()
+    threading.Thread(target=send_thread, args=(send_schedule_list, send_schedule_lock, send_data_list, send_data_lock, _stop_event)).start()
 
     while _stop_event.is_set() == False:
         inputs = bring_data(recv_data_list, recv_data_lock, _stop_event)
-        outputs = processing(inputs, layer)
+        outputs = processing(inputs)
         with send_data_lock:
             send_data_list.append(outputs)
-
-    vid.release()
-    cv2.destroyAllWindows()
