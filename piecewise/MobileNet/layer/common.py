@@ -32,7 +32,7 @@ def recv_thread(schedule_list, schedule_lock, data_list, data_lock, _stop_event)
                 schedules = schedule_list.pop(0)
             # 스레드를 열고 input data를 동시에 받음
             data = []
-            for i, (src, dst, input_shape, tag) in enumerate(schedules):
+            for i, (src, input_shape, tag) in enumerate(schedules):
                 data.append(torch.Empty(input_shape))
                 threading.Thread(target=dist.recv, kwargs={'tensor':data[i], 'src':src, 'tag':tag}).start()
             # scheduling decision에 있는 애들이 모두 받아졌으면 merge함
@@ -44,19 +44,19 @@ def recv_thread(schedule_list, schedule_lock, data_list, data_lock, _stop_event)
 
 def send_thread(schedule_list, schedule_lock, data_list, data_lock, _stop_event):
     while _stop_event.is_set() == False:
-        if len(schedule_list) > 0 and len(data_list):
+        if len(schedule_list) > 0 and len(data_list) > 0:
             with schedule_lock:
                 schedules = schedule_list.pop(0)
             # output data를 받아 schedule대로 조각내고 목적지로 전송
             with data_lock:
                 output_data = data_list.pop(0)
-            for src, dst, slice_shape, tag in schedules:
+            for (dst, slice_shape, tag) in schedules:
                 data = output_data[slice_shape]
                 threading.Thread(target=dist.send, kwargs={'tensor':data, 'dst':dst, 'tag':tag}).start()
         else:
             time.sleep(0.000001)
 
-def schedule_thread(recv_schedule_list, recv_schedule_lock, send_schedule_list, send_schedule_lock, _stop_event):
+def schedule_recv_thread(recv_schedule_list, recv_schedule_lock, send_schedule_list, send_schedule_lock, _stop_event):
     while _stop_event.is_set() == False:
         schedule_list = torch.Empty(schedule_shape)
         dist.recv(tensor=schedule_list, src=0, tag=SCHEDULE_TAG)
