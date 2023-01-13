@@ -28,7 +28,7 @@ if __name__ == "__main__":
 
     os.environ['MASTER_ADDR'] = args.master_addr
     os.environ['MASTER_PORT'] = args.master_port
-    dist.init_process_group('gloo', rank=args.rank, world_size=args.size)
+    dist.init_process_group('gloo', rank=args.rank, world_size=dist.get_world_size())
 
     # gpu setting
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
@@ -38,7 +38,7 @@ if __name__ == "__main__":
 
     # cluster connection setup
     print('Waiting for the cluster connection...')
-    dist.init_process_group('gloo', rank=args.rank, world_size=args.size)
+    dist.init_process_group('gloo', rank=args.rank, world_size=dist.get_world_size())
 
     # data sender/receiver thread start
     _stop_event = threading.Event()
