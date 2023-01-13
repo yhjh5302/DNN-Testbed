@@ -17,7 +17,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Piecewise Partition and Scheduling')
     parser.add_argument('--vram_limit', default=0.2, type=float, help='GPU memory limit')
     parser.add_argument('--master_addr', default='localhost', type=str, help='Master node ip address')
-    parser.add_argument('--master_port', default=30000, type=int, help='Master node port')
+    parser.add_argument('--master_port', default='30000', type=str, help='Master node port')
     parser.add_argument('--rank', default=0, type=int, help='Master node port', required=True)
     parser.add_argument('--data_path', default='./Data/', type=str, help='Image frame data path')
     parser.add_argument('--video_name', default='vdo.avi', type=str, help='Video file name')
@@ -46,14 +46,16 @@ if __name__ == "__main__":
     recv_data_lock = threading.Lock()
     send_data_list = []
     send_data_lock = threading.Lock()
-    recv_schedule_list = []
+    # recv_schedule_list = []
+    recv_schedule_list = [[] for i in range(QUEUE_LENGTH)]
     recv_schedule_lock = threading.Lock()
-    send_schedule_list = []
+    # send_schedule_list = []
+    send_schedule_list = [[] for i in range(QUEUE_LENGTH)]
     send_schedule_lock = threading.Lock()
 
-    threading.Thread(target=edge_scheduler, args=(recv_schedule_list, recv_schedule_lock, send_schedule_list, send_schedule_lock, _stop_event))).start()
-    threading.Thread(target=recv_thread, args=(recv_schedule_list, recv_schedule_lock, recv_data_list, recv_data_lock, _stop_event))).start()
-    threading.Thread(target=send_thread, args=(send_schedule_list, send_schedule_lock, send_data_list, send_data_lock, _stop_event))).start()
+    threading.Thread(target=edge_scheduler, args=(recv_schedule_list, recv_schedule_lock, send_schedule_list, send_schedule_lock, _stop_event)).start()
+    threading.Thread(target=recv_thread, args=(recv_schedule_list, recv_schedule_lock, recv_data_list, recv_data_lock, _stop_event)).start()
+    threading.Thread(target=send_thread, args=(send_schedule_list, send_schedule_lock, send_data_list, send_data_lock, _stop_event)).start()
 
     while _stop_event.is_set() == False:
         inputs = bring_data(recv_data_list, recv_data_lock, _stop_event)

@@ -98,9 +98,11 @@ if __name__ == "__main__":
     recv_data_lock = threading.Lock()
     send_data_list = []
     send_data_lock = threading.Lock()
-    recv_schedule_list = []
+    # recv_schedule_list = []
+    recv_schedule_list = [[] for i in range(QUEUE_LENGTH)]
     recv_schedule_lock = threading.Lock()
-    send_schedule_list = []
+    # send_schedule_list = []
+    send_schedule_list = [[] for i in range(QUEUE_LENGTH)]
     send_schedule_lock = threading.Lock()
 
     threading.Thread(target=schedule_thread, args=(recv_schedule_list, recv_schedule_lock, send_schedule_list, send_schedule_lock, _stop_event)).start()

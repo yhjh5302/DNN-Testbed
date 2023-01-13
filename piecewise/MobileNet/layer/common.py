@@ -4,6 +4,7 @@ import torch.distributed as dist
 
 REQUEST_TAG = -1
 SCHEDULE_TAG = -2
+QUEUE_LENGTH = 10
 
 def str2bool(v):
     if isinstance(v, bool):
@@ -51,7 +52,7 @@ def send_thread(schedule_list, schedule_lock, data_list, data_lock, _stop_event)
             with data_lock:
                 output_data = data_list.pop(0)
             for (dst, slice_shape, tag) in schedules:
-                data = output_data[slice_shape]
+                data = torch.index_select(input=output_data, dim=2, index=torch.IntTensor(slice_shape))
                 threading.Thread(target=dist.send, kwargs={'tensor':data, 'dst':dst, 'tag':tag}).start()
         else:
             time.sleep(0.000001)
