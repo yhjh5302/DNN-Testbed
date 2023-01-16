@@ -3,12 +3,13 @@ import argparse
 import os, time
 
 def main_worker(gpu, args):
-    torch.distributed.init_process_group(backend=args.backend, world_size=args.num_nodes*args.num_gpus, rank=args.rank*args.num_gpus+gpu)
-    time.sleep(3)
-
     device = torch.device("cuda:"+str(gpu) if torch.cuda.is_available() else "cpu")
+    torch.cuda.set_device(device)
     print(device)
     print(torch.cuda.get_device_name(gpu))
+
+    torch.distributed.init_process_group(backend=args.backend, world_size=args.num_nodes*args.num_gpus, rank=args.rank*args.num_gpus+gpu)
+    time.sleep(3)
 
     # Define dataset
     transform = transforms.Compose([transforms.Resize(size=(224,224),interpolation=0), transforms.ToTensor(), transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))])
