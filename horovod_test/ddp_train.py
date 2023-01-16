@@ -31,8 +31,8 @@ def main_worker(gpu, args):
     criterion = nn.CrossEntropyLoss()
     optimizer = optim.SGD(model.parameters(), lr=0.001, momentum=0.9)
 
-    epoch_size = 50
-    verbose = 100
+    epoch_size = 10
+    verbose = 1
     for epoch in range(epoch_size):   # repeat process with same data
         running_loss = 0.0
         for i, data in enumerate(train_loader, 0):
@@ -51,7 +51,7 @@ def main_worker(gpu, args):
             # print progress
             running_loss += loss.item()
             if i % verbose == verbose - 1:
-                print('[%2d/%2d,%4d/%4d] loss: %.3f' % (epoch + 1, epoch_size, i + 1, len(train_dataset)/batch_size, running_loss / verbose))
+                print('[%d - %2d/%2d,%4d/%4d] loss: %.3f' % (gpu, epoch + 1, epoch_size, i + 1, len(train_dataset)/batch_size, running_loss / verbose))
                 running_loss = 0.0
 
     print('Finished Training')
@@ -76,4 +76,5 @@ if __name__ == '__main__':
     os.environ['MASTER_ADDR'] = args.master_addr
     os.environ['MASTER_PORT'] = args.master_port
     os.environ['NCCL_SOCKET_IFNAME'] = args.ifname
+    os.environ['GLOO_SOCKET_IFNAME'] = args.ifname
     torch.multiprocessing.spawn(main_worker, nprocs=args.num_gpus, args=(args,))
