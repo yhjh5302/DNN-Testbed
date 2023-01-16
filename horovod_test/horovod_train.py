@@ -17,10 +17,9 @@ if __name__ == '__main__':
     train_dataset = torchvision.datasets.CIFAR10(root='./cifar10_data', train=True, download=True, transform=transform)
 
     # Partition dataset among workers using DistributedSampler
-    batch_size = 16
-    num_workers = 1
+    batch_size = 64
     train_sampler = torch.utils.data.distributed.DistributedSampler(train_dataset, num_replicas=hvd.size(), rank=hvd.rank())
-    train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=batch_size, num_workers=num_workers, sampler=train_sampler)
+    train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=batch_size, sampler=train_sampler)
     classes = ('plane', 'car', 'bird', 'cat', 'deer', 'dog', 'frog', 'horse', 'ship', 'truck')
     
     # Build model
@@ -39,8 +38,8 @@ if __name__ == '__main__':
     # Broadcast parameters from rank 0 to all other processes.
     hvd.broadcast_parameters(model.state_dict(), root_rank=0)
 
-    epoch_size = 10
-    verbose = 25
+    epoch_size = 50
+    verbose = 100
     start = time.time()
     for epoch in range(epoch_size):   # repeat process with same data
         running_loss = 0.0

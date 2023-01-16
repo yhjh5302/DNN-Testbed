@@ -14,7 +14,7 @@ def main_worker(gpu, args):
     train_dataset = torchvision.datasets.CIFAR10(root='./cifar10_data', train=True, download=True, transform=transform)
 
     # Partition dataset among workers using DistributedSampler
-    batch_size = 16
+    batch_size = 64
     train_sampler = torch.utils.data.distributed.DistributedSampler(train_dataset)
     train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=batch_size, num_workers=args.workers, sampler=train_sampler)
     classes = ('plane', 'car', 'bird', 'cat', 'deer', 'dog', 'frog', 'horse', 'ship', 'truck')
@@ -29,8 +29,8 @@ def main_worker(gpu, args):
     criterion = nn.CrossEntropyLoss()
     optimizer = optim.SGD(model.parameters(), lr=0.001, momentum=0.9)
 
-    epoch_size = 10
-    verbose = 25
+    epoch_size = 50
+    verbose = 100
     for epoch in range(epoch_size):   # repeat process with same data
         running_loss = 0.0
         for i, data in enumerate(train_loader, 0):
@@ -61,11 +61,11 @@ def main_worker(gpu, args):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='PyTorch ImageNet Training')
-    parser.add_argument('-j', '--workers', default=1, type=int, metavar='N', help='number of data loading workers (default: 4)')
-    parser.add_argument('--num_nodes', default=1, type=int, help='number of nodes for distributed training')
-    parser.add_argument('--num_gpus', default=1, type=int, help='number of gpus per node')
+    parser.add_argument('-j', '--workers', default=4, type=int, metavar='N', help='number of data loading workers (default: 4)')
+    parser.add_argument('--num_nodes', default=2, type=int, help='number of nodes for distributed training')
+    parser.add_argument('--num_gpus', default=4, type=int, help='number of gpus per node')
     parser.add_argument('--rank', default=0, type=int, help='node rank for distributed training')
     parser.add_argument('--dist_url', default='tcp://localhost:30000', type=str, help='url used to set up distributed training')
     parser.add_argument('--dist_backend', default='gloo', choices=['gloo', 'mpi', 'nccl'], type=str, help='distributed backend')
     args = parser.parse_args()
-    torch.multiprocessing.spawn(main_worker, nprocs=args.num_nodes, args=(args,))
+    torch.multiprocessing.spawn(main_worker, nprocs=args.num_gpus, args=(args,))
