@@ -22,13 +22,14 @@ if __name__ == "__main__":
     parser.add_argument('--data_path', default='./Data/', type=str, help='Image frame data path')
     parser.add_argument('--video_name', default='vdo.avi', type=str, help='Video file name')
     parser.add_argument('--roi_name', default='roi.jpg', type=str, help='RoI file name')
+    parser.add_argument('--num_proc', default=3, type=int, help='Number of processes')
     parser.add_argument('--resolution', default=(854, 480), type=tuple, help='Image resolution')
     parser.add_argument('--verbose', default=False, type=str2bool, help='If you want to print debug messages, set True')
     args = parser.parse_args()
 
     os.environ['MASTER_ADDR'] = args.master_addr
     os.environ['MASTER_PORT'] = args.master_port
-    dist.init_process_group('gloo', rank=args.rank, world_size=dist.get_world_size())
+    dist.init_process_group('gloo', init_method='tcp://%s:%s' % (args.master_addr, args.master_port), rank=args.rank, world_size=args.num_proc)
 
     # gpu setting
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
@@ -38,7 +39,7 @@ if __name__ == "__main__":
 
     # cluster connection setup
     print('Waiting for the cluster connection...')
-    dist.init_process_group('gloo', rank=args.rank, world_size=dist.get_world_size())
+    dist.init_process_group('gloo', init_method='tcp://%s:%s' % (args.master_addr, args.master_port), rank=args.rank, world_size=args.num_proc)
 
     # data sender/receiver thread start
     _stop_event = threading.Event()

@@ -1,5 +1,5 @@
 # FROM tensorflow/tensorflow:latest-gpu
-FROM nvcr.io/nvidia/l4t-tensorflow:r32.6.1-tf2.5-py3
+FROM nvcr.io/nvidia/l4t-pytorch:r32.7.1-pth1.9-py3
 ENV PYTHONUNBUFFERED 1
 # RUN mkdir /code
 WORKDIR /root
