@@ -69,7 +69,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Piecewise Partition and Scheduling')
     parser.add_argument('--vram_limit', default=0.2, type=float, help='GPU memory limit')
     parser.add_argument('--master_addr', default='localhost', type=str, help='Master node ip address')
-    parser.add_argument('--master_port', default=30000, type=int, help='Master node port')
+    parser.add_argument('--master_port', default='30000', type=str, help='Master node port')
     parser.add_argument('--rank', default=0, type=int, help='Master node port', required=True)
     parser.add_argument('--data_path', default='./Data/', type=str, help='Image frame data path')
     parser.add_argument('--video_name', default='vdo.avi', type=str, help='Video file name')

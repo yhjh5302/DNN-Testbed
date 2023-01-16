@@ -3,7 +3,7 @@ import argparse
 import os, time
 
 def main_worker(gpu, args):
-    torch.distributed.init_process_group(backend=args.backend, init_method=args.dist_url, world_size=args.num_nodes*args.num_gpus, rank=args.rank*args.num_gpus+gpu)
+    torch.distributed.init_process_group(backend=args.backend, world_size=args.num_nodes*args.num_gpus, rank=args.rank*args.num_gpus+gpu)
     time.sleep(3)
 
     device = torch.device("cuda:"+str(gpu) if torch.cuda.is_available() else "cpu")
@@ -67,7 +67,7 @@ if __name__ == '__main__':
     parser.add_argument('--num_gpus', default=4, type=int, help='number of gpus per node')
     parser.add_argument('--rank', default=0, type=int, help='node rank for distributed training')
     parser.add_argument('--master_addr', default='localhost', type=str, help='Master node ip address')
-    parser.add_argument('--master_port', default=30000, type=int, help='Master node port')
+    parser.add_argument('--master_port', default='30000', type=str, help='Master node port')
     parser.add_argument('--backend', default='nccl', choices=['gloo', 'mpi', 'nccl'], type=str, help='distributed backend')
     args = parser.parse_args()
 
