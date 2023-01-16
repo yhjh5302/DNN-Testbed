@@ -32,9 +32,9 @@ def recv_thread(schedule_list, schedule_lock, data_list, data_lock, _stop_event)
                 schedules = schedule_list.pop(0)
             # 스레드를 열고 input data를 동시에 받음
             data = []
-            for src, dst, input_shape, tag in schedules:
+            for i, (src, input_shape, tag) in enumerate(schedules):
                 data.append(torch.Empty(input_shape))
-                dist.recv(tensor=data, src=src, tag=tag)
+                threading.Thread(target=dist.recv, kwargs={'tensor':data[i], 'src':src, 'tag':tag}).start()
             # scheduling decision에 있는 애들이 모두 받아졌으면 merge함
             input_data = torch.cat(data)
             with data_lock:
@@ -44,19 +44,19 @@ def recv_thread(schedule_list, schedule_lock, data_list, data_lock, _stop_event)
 
 def send_thread(schedule_list, schedule_lock, data_list, data_lock, _stop_event):
     while _stop_event.is_set() == False:
-        if len(schedule_list) > 0 and len(data_list):
+        if len(schedule_list) > 0 and len(data_list) > 0:
             with schedule_lock:
                 schedules = schedule_list.pop(0)
             # output data를 받아 schedule대로 조각내고 목적지로 전송
             with data_lock:
-                data = data_list.pop(0)
-            for src, dst, slice_shape, tag in schedules:
-                output_data = data[slice_shape]
-                dist.send(tensor=output_data, dst=dst, tag=tag)
+                output_data = data_list.pop(0)
+            for (dst, slice_shape, tag) in schedules:
+                data = output_data[slice_shape]
+                threading.Thread(target=dist.send, kwargs={'tensor':data, 'dst':dst, 'tag':tag}).start()
         else:
             time.sleep(0.000001)
 
-def schedule_thread(recv_schedule_list, recv_schedule_lock, send_schedule_list, send_schedule_lock, _stop_event):
+def schedule_recv_thread(recv_schedule_list, recv_schedule_lock, send_schedule_list, send_schedule_lock, _stop_event):
     while _stop_event.is_set() == False:
         schedule_list = torch.Empty(schedule_shape)
         dist.recv(tensor=schedule_list, src=0, tag=SCHEDULE_TAG)
@@ -69,7 +69,7 @@ def edge_scheduler(recv_schedule_list, recv_schedule_lock, send_schedule_list, s
     while _stop_event.is_set() == False:
         request_list = torch.Empty(request_shape)
         dist.recv(tensor=request_list, src=None, tag=REQUEST_TAG)
-        # scheduling_decision = scheduling_algorithm(request) TODO
+        scheduling_decision = scheduling_algorithm(request) # TODO
         for schedule in scheduling_decision:
             # 만약 로컬에서 처리해야하면 로컬 schedule_list에 채워넣음.
             # 아니면 해당 device로 보냄.
