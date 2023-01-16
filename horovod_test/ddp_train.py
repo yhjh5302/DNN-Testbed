@@ -68,9 +68,11 @@ if __name__ == '__main__':
     parser.add_argument('--rank', default=0, type=int, help='node rank for distributed training')
     parser.add_argument('--master_addr', default='localhost', type=str, help='Master node ip address')
     parser.add_argument('--master_port', default='30000', type=str, help='Master node port')
+    parser.add_argument('--ifname', default='ens3f0', type=str, help='Master node port')
     parser.add_argument('--backend', default='nccl', choices=['gloo', 'mpi', 'nccl'], type=str, help='distributed backend')
     args = parser.parse_args()
 
     os.environ['MASTER_ADDR'] = args.master_addr
     os.environ['MASTER_PORT'] = args.master_port
+    os.environ['NCCL_SOCKET_IFNAME'] = args.ifname
     torch.multiprocessing.spawn(main_worker, nprocs=args.num_gpus, args=(args,))

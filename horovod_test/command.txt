@@ -2,4 +2,4 @@
 (OPTIONAL 1) apt update; apt install nano htop -y; mkdir git; cd git; git clone https://github.com/yhjh5302/DNN-Testbed; cd DNN-Testbed/horovod_test/
 (OPTIONAL 2) mkdir code; cd code; scp -r jin@172.17.0.1:/home/jin/git/DNN/horovod_test/* ./
 horovod로 학습실행: horovodrun --verbose -np 1 python3 horovod_train.py
-DDP로 학습실행: python3 ddp_train.py --rank=0 --num_gpus=4 --num_nodes=2 --dist_url="tcp://localhost:30000"
+DDP로 학습실행: python3 ddp_train.py --rank=0 --num_gpus=4 --num_nodes=2 --master_addr="localhost" --master_port="30000"
