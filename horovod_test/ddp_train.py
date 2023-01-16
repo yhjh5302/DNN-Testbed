@@ -70,7 +70,7 @@ if __name__ == '__main__':
     parser.add_argument('--master_addr', default='localhost', type=str, help='Master node ip address')
     parser.add_argument('--master_port', default='30000', type=str, help='Master node port')
     parser.add_argument('--ifname', default='ens3f0', type=str, help='Master node port')
-    parser.add_argument('--backend', default='nccl', choices=['gloo', 'mpi', 'nccl'], type=str, help='distributed backend')
+    parser.add_argument('--backend', default='gloo', choices=['gloo', 'mpi', 'nccl'], type=str, help='distributed backend')
     args = parser.parse_args()
 
     os.environ['MASTER_ADDR'] = args.master_addr
