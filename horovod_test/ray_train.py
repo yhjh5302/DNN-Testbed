@@ -1,18 +1,18 @@
 from models import *
 from typing import Dict
-import argparse
 import ray.train.torch as RayTrainTorch
 import ray.air.config as RayAirConfig
+
+    
+# Define dataset
+transform = transforms.Compose([transforms.Resize(size=(224,224),interpolation=0), transforms.ToTensor(), transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))])
+train_dataset = torchvision.datasets.CIFAR10(root='./cifar10_data', train=True, download=True, transform=transform)
 
 
 def train_func(config: Dict):
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     print(device)
     print(torch.cuda.get_device_name(0))
-    
-    # Define dataset
-    transform = transforms.Compose([transforms.Resize(size=(224,224),interpolation=0), transforms.ToTensor(), transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))])
-    train_dataset = torchvision.datasets.CIFAR10(root='./cifar10_data', train=True, download=True, transform=transform)
 
     # Partition dataset among workers using DistributedSampler
     batch_size = config["batch_size"]
@@ -33,6 +33,7 @@ def train_func(config: Dict):
 
     epoch_size = config["epoch_size"]
     verbose = config["verbose"]
+    start = time.time()
     for epoch in range(epoch_size):   # repeat process with same data
         running_loss, epoch_loss = 0.0, 0.0
         for i, data in enumerate(train_loader, 0):
@@ -54,7 +55,9 @@ def train_func(config: Dict):
             if i % verbose == verbose - 1:
                 print('[%2d/%2d,%4d/%4d] loss: %.3f' % (epoch + 1, epoch_size, i + 1, len(train_dataset)/batch_size, running_loss / verbose))
                 running_loss = 0.0
-    print('Finished Training')
+
+    torch.cuda.synchronize()
+    print('Finished Training, Took {:3f} sec'.format(time.time() - start))
 
     #### save trained model
     # PATH = './'

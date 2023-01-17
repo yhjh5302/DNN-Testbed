@@ -1,6 +1,5 @@
 from models import *
-import argparse
-import os, time
+import os
 
 def main_worker(gpu, args):
     # Initialize DDP

@@ -1,6 +1,11 @@
 from models import *
 import horovod.torch as hvd
-import time
+
+
+# Define dataset
+transform = transforms.Compose([transforms.Resize(size=(224,224),interpolation=0), transforms.ToTensor(), transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))])
+train_dataset = torchvision.datasets.CIFAR10(root='./cifar10_data', train=True, download=True, transform=transform)
+
 
 if __name__ == '__main__':
     # Initialize Horovod
@@ -11,10 +16,6 @@ if __name__ == '__main__':
     device = torch.device("cuda:"+str(hvd.local_rank()) if torch.cuda.is_available() else "cpu")
     print(device)
     print(torch.cuda.get_device_name(0))
-    
-    # Define dataset
-    transform = transforms.Compose([transforms.Resize(size=(224,224),interpolation=0), transforms.ToTensor(), transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))])
-    train_dataset = torchvision.datasets.CIFAR10(root='./cifar10_data', train=True, download=True, transform=transform)
 
     # Partition dataset among workers using DistributedSampler
     batch_size = 64

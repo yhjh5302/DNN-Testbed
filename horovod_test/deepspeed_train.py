@@ -27,6 +27,7 @@ if __name__ == '__main__':
 
     epoch_size = 10
     verbose = 1
+    start = time.time()
     for epoch in range(epoch_size):   # repeat process with same data
         running_loss = 0.0
         for i, data in enumerate(train_loader, 0):
@@ -48,7 +49,8 @@ if __name__ == '__main__':
                 print('[%2d/%2d,%4d/%4d] loss: %.3f' % (epoch + 1, epoch_size, i + 1, len(train_dataset)/batch_size, running_loss / verbose))
                 running_loss = 0.0
 
-    print('Finished Training')
+    torch.cuda.synchronize()
+    print('Finished Training, Took {:3f} sec'.format(time.time() - start))
 
     #### save trained model
     # PATH = './'
