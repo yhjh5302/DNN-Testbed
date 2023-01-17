@@ -1,6 +1,12 @@
 from models import *
 import os
 
+
+# Define dataset
+transform = transforms.Compose([transforms.Resize(size=(224,224),interpolation=0), transforms.ToTensor(), transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))])
+train_dataset = torchvision.datasets.CIFAR10(root='./cifar10_data', train=True, download=True, transform=transform)
+
+
 def main_worker(gpu, args):
     # Initialize DDP
     torch.distributed.init_process_group(backend=args.backend, world_size=args.num_nodes*args.num_gpus, rank=args.rank*args.num_gpus+gpu)
@@ -10,10 +16,6 @@ def main_worker(gpu, args):
     torch.cuda.set_device(device)
     print(device)
     print(torch.cuda.get_device_name(gpu))
-
-    # Define dataset
-    transform = transforms.Compose([transforms.Resize(size=(224,224),interpolation=0), transforms.ToTensor(), transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))])
-    train_dataset = torchvision.datasets.CIFAR10(root='./cifar10_data', train=True, download=True, transform=transform)
 
     # Partition dataset among workers using DistributedSampler
     batch_size = 64

@@ -3,7 +3,7 @@ from typing import Dict
 import ray.train.torch as RayTrainTorch
 import ray.air.config as RayAirConfig
 
-    
+
 # Define dataset
 transform = transforms.Compose([transforms.Resize(size=(224,224),interpolation=0), transforms.ToTensor(), transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))])
 train_dataset = torchvision.datasets.CIFAR10(root='./cifar10_data', train=True, download=True, transform=transform)
