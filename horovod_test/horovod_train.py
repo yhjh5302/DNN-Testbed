@@ -8,7 +8,7 @@ if __name__ == '__main__':
 
     # Pin GPU to be used to process local rank (one GPU per process)
     torch.cuda.set_device(hvd.local_rank())
-    device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+    device = torch.device("cuda:"+str(hvd.local_rank()) if torch.cuda.is_available() else "cpu")
     print(device)
     print(torch.cuda.get_device_name(0))
     
@@ -38,8 +38,8 @@ if __name__ == '__main__':
     # Broadcast parameters from rank 0 to all other processes.
     hvd.broadcast_parameters(model.state_dict(), root_rank=0)
 
-    epoch_size = 50
-    verbose = 100
+    epoch_size = 10
+    verbose = 1
     start = time.time()
     for epoch in range(epoch_size):   # repeat process with same data
         running_loss = 0.0

@@ -3,13 +3,14 @@ import argparse
 import os, time
 
 def main_worker(gpu, args):
+    # Initialize DDP
+    torch.distributed.init_process_group(backend=args.backend, world_size=args.num_nodes*args.num_gpus, rank=args.rank*args.num_gpus+gpu)
+    time.sleep(3)
+
     device = torch.device("cuda:"+str(gpu) if torch.cuda.is_available() else "cpu")
     torch.cuda.set_device(device)
     print(device)
     print(torch.cuda.get_device_name(gpu))
-
-    torch.distributed.init_process_group(backend=args.backend, world_size=args.num_nodes*args.num_gpus, rank=args.rank*args.num_gpus+gpu)
-    time.sleep(3)
 
     # Define dataset
     transform = transforms.Compose([transforms.Resize(size=(224,224),interpolation=0), transforms.ToTensor(), transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))])
@@ -70,7 +71,7 @@ if __name__ == '__main__':
     parser.add_argument('--master_addr', default='localhost', type=str, help='Master node ip address')
     parser.add_argument('--master_port', default='30000', type=str, help='Master node port')
     parser.add_argument('--ifname', default='ens3f0', type=str, help='Master node port')
-    parser.add_argument('--backend', default='gloo', choices=['gloo', 'mpi', 'nccl'], type=str, help='distributed backend')
+    parser.add_argument('--backend', default='nccl', choices=['gloo', 'mpi', 'nccl'], type=str, help='distributed backend')
     args = parser.parse_args()
 
     os.environ['MASTER_ADDR'] = args.master_addr
