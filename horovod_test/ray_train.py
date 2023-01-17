@@ -1,6 +1,8 @@
 from models import *
 from typing import Dict
-import argparse, ray
+import argparse
+import ray.train.torch as RayTrainTorch
+import ray.air.config as RayAirConfig
 
 
 def train_func(config: Dict):
@@ -15,13 +17,13 @@ def train_func(config: Dict):
     # Partition dataset among workers using DistributedSampler
     batch_size = config["batch_size"]
     train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=batch_size)
-    train_loader = ray.train.torch.prepare_data_loader(train_loader) # ray train data loader
+    train_loader = RayTrainTorch.prepare_data_loader(train_loader)
     classes = ('plane', 'car', 'bird', 'cat', 'deer', 'dog', 'frog', 'horse', 'ship', 'truck')
     
     # Build model
     model = AlexNet()
     model = model.cuda()
-    model = ray.train.torch.prepare_model(model)
+    model = RayTrainTorch.prepare_model(model)
     #from torchsummary import summary
     #summary(model, (3, 224, 224))
 
@@ -68,9 +70,9 @@ if __name__ == '__main__':
     parser.add_argument('--backend', default='nccl', choices=['gloo', 'mpi', 'nccl'], type=str, help='distributed backend')
     args = parser.parse_args()
 
-    trainer = ray.train.torch.TorchTrainer(
+    trainer = RayTrainTorch.TorchTrainer(
         train_loop_per_worker=train_func,
         train_loop_config={"lr": 1e-3, "momentum": 0.9, "batch_size": 64, "epoch_size": 10, "verbose": 1},
-        scaling_config=ray.air.config.ScalingConfig(num_workers=args.workers, use_gpu=True),
+        scaling_config=RayAirConfig.ScalingConfig(num_workers=args.workers, use_gpu=True),
     )
     trainer.fit()
