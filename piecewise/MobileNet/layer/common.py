@@ -2,8 +2,7 @@ import threading, time, argparse, os
 import torch
 import torch.distributed as dist
 
-REQUEST_TAG = -1
-SCHEDULE_TAG = -2
+SCHEDULE_TAG = 0
 QUEUE_LENGTH = 10
 
 def str2bool(v):
@@ -57,9 +56,12 @@ def send_thread(schedule_list, schedule_lock, data_list, data_lock, _stop_event)
         else:
             time.sleep(0.000001)
 
+def send_schedule(info):
+    dist.send(tensor=info, dst=0, tag=SCHEDULE_TAG)
+
 def schedule_recv_thread(recv_schedule_list, recv_schedule_lock, send_schedule_list, send_schedule_lock, _stop_event):
     while _stop_event.is_set() == False:
-        schedule_list = torch.Empty(schedule_shape)
+        schedule_list = torch.empty(schedule_shape, dtype=torch.int16)
         dist.recv(tensor=schedule_list, src=0, tag=SCHEDULE_TAG)
         with recv_schedule_lock:
             recv_schedule_list.extend(schedule_list[0])
@@ -68,8 +70,9 @@ def schedule_recv_thread(recv_schedule_list, recv_schedule_lock, send_schedule_l
 
 def edge_scheduler(recv_schedule_list, recv_schedule_lock, send_schedule_list, send_schedule_lock, _stop_event):
     while _stop_event.is_set() == False:
-        request_list = torch.Empty(request_shape)
-        dist.recv(tensor=request_list, src=None, tag=REQUEST_TAG)
+        request_list = torch.empty(3, dtype=torch.int16)
+        dist.recv(tensor=request_list, src=None, tag=SCHEDULE_TAG)
+        print("\n\n\nrequest_list:", request_list)
         scheduling_decision = scheduling_algorithm(request) # TODO
         for schedule in scheduling_decision:
             # 만약 로컬에서 처리해야하면 로컬 schedule_list에 채워넣음.

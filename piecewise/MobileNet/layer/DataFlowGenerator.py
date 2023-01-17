@@ -51,10 +51,10 @@ def data_generator(data_list, data_lock):
             foregroundPart = cv2.bitwise_and(frame, frame, mask=foreground_mask)
             cv2.imshow('foregroundPart', foregroundPart)
             cv2.imshow('boxedFrame', boxedFrame)
-        
+
         # send image info to the master and recv scheduling decision
-        # TODO data = Frame info
-        dist.send(tensor=data, src=0, tag=-1)
+        info = torch.Tensor(boxedFrame.shape).type(dtype=torch.int16)
+        send_schedule(info)
         with data_lock:
             data_list.append(boxedFrame)
 
@@ -69,19 +69,15 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Piecewise Partition and Scheduling')
     parser.add_argument('--vram_limit', default=0.2, type=float, help='GPU memory limit')
     parser.add_argument('--master_addr', default='localhost', type=str, help='Master node ip address')
-    parser.add_argument('--master_port', default=30000, type=int, help='Master node port')
+    parser.add_argument('--master_port', default='30000', type=str, help='Master node port')
     parser.add_argument('--rank', default=0, type=int, help='Master node port', required=True)
     parser.add_argument('--data_path', default='./Data/', type=str, help='Image frame data path')
     parser.add_argument('--video_name', default='vdo.avi', type=str, help='Video file name')
     parser.add_argument('--roi_name', default='roi.jpg', type=str, help='RoI file name')
-    parser.add_argument('--num_proc', default=3, type=int, help='Number of processes')
+    parser.add_argument('--num_proc', default=2, type=int, help='Number of processes')
     parser.add_argument('--resolution', default=(854, 480), type=tuple, help='Image resolution')
     parser.add_argument('--verbose', default=False, type=str2bool, help='If you want to print debug messages, set True')
     args = parser.parse_args()
-
-    os.environ['MASTER_ADDR'] = args.master_addr
-    os.environ['MASTER_PORT'] = args.master_port
-    dist.init_process_group('gloo', init_method='tcp://%s:%s' % (args.master_addr, args.master_port), rank=args.rank, world_size=args.num_proc)
 
     # gpu setting
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
@@ -91,6 +87,8 @@ if __name__ == "__main__":
 
     # cluster connection setup
     print('Waiting for the cluster connection...')
+    os.environ['MASTER_ADDR'] = args.master_addr
+    os.environ['MASTER_PORT'] = args.master_port
     dist.init_process_group('gloo', init_method='tcp://%s:%s' % (args.master_addr, args.master_port), rank=args.rank, world_size=args.num_proc)
 
     # data sender/receiver thread start
@@ -106,7 +104,7 @@ if __name__ == "__main__":
     send_schedule_list = [[] for i in range(QUEUE_LENGTH)]
     send_schedule_lock = threading.Lock()
 
-    threading.Thread(target=schedule_thread, args=(recv_schedule_list, recv_schedule_lock, send_schedule_list, send_schedule_lock, _stop_event)).start()
+    threading.Thread(target=schedule_recv_thread, args=(recv_schedule_list, recv_schedule_lock, send_schedule_list, send_schedule_lock, _stop_event)).start()
     threading.Thread(target=recv_thread, args=(recv_schedule_list, recv_schedule_lock, recv_data_list, recv_data_lock, _stop_event)).start()
     threading.Thread(target=send_thread, args=(send_schedule_list, send_schedule_lock, send_data_list, send_data_lock, _stop_event)).start()
     threading.Thread(target=data_generator, args=(send_data_list, send_data_lock)).start()
