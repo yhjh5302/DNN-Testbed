@@ -1,3 +1,22 @@
+"""
+    목표 : 서로 다른 디바이스 간 통신시 파티션에대해 올바른 순서로 array 합치기
+
+    주어진 것 :  unique id (service id and partition id) 
+                각 id, device 간 매핑 정보 (alloc_device, alloc_id)
+                id의 predecessor, successor 정보 (pred, succ)
+                각 파티션별 input, output slicing 정보 (sender/receiver start/end row)
+                이외의 정보는 밑의 test config
+                아주 간단한 형태의 CNN 구조를 가정
+    
+    getTag 함수를 통해 디바이스간 통신시 필요한 고유 tag를 얻는다.
+     -> sender의 id와 보내는 index를 통해 결정
+
+    run ->  - 하나의 파티션에 대한 계산을 수행하려면 해당 파티션에 대한 recv와 이전에 수행하던 send를 모두 수행해야 진행한다.
+            - send는 상관없이 recv만 완료하면 수행하도록 하려 했으나 4번 레이어 이후로 수행하지 않고 끝나는 버그가 존재하여
+              임의로 위와 같이 수행했다.
+
+"""
+
 #!/usr/bin/env python
 import os, time, argparse, zmq, numpy as np, io
 import torch
