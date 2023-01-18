@@ -5,67 +5,94 @@ import torch.distributed as dist
 import torch.multiprocessing as mp
 
 ####################  test config  #####################
+
+SIZE_PADDING = 1
+SIZE_MAIN = 3
+SIZE_ALL = 9
+
+ROW_DIM = 0
+
                                     #    1  4
-partitoin_num = [0,1,2,3,4,5,6,7]   # 0  2  5  7
+unique_id = [0,1,2,3,4,5,6,7]       # 0  2  5  7
                                     #    3  6
 alloc_device = [0,0,1,2,0,1,2,0]
-alloc_partition = [[0,1,4,7],[2,5],[3,6]]
+alloc_id = [[0,1,4,7],[2,5],[3,6]]
 
 pred = [[],[0],[0],[0],[1,2],[1,2,3],[2,3],[4,5,6]]
 succ = [[1,2,3],[4,5],[4,5,6],[5,6],[7],[7],[7],[]]
 
-# 모두 지정
-pos_next = [[0,1,2],[1,2],[0,1,2],[0,1],[1],[1],[1],[]]
-pos_prev = [[],[0],[1],[2],[1,0],[2,1,0],[2,1],[1,1,1]]
+sender_start_row = [[0,2,5],[0,3],[0,1,4],[0,1],[0],[1],[1],[]]
+sender_end_row = [[4,7,9],[3,4],[1,4,5],[1,4],[3],[4],[4],[]]
+receiver_start_row = [[],[0],[0],[0],[0,3],[0,1,4],[0,1],[0,3,6]]
+receiver_end_row = [[],[4],[5],[4],[3,4],[1,4,5],[1,4],[3,6,9]]
+
+
 #########################################################
 
-def pack(p_num:int, order:int):
-    p_num = p_num << 2
-    p_num += order
-    return p_num
+def getTag(id:int, order:int):
+    return (id << 2) | order
 
-def isStart(p_num):
-    return len(pred[p_num]) == 0
+def isStart(id):
+    return len(pred[id]) == 0
 
-def isEnd(p_num):
-    return len(succ[p_num]) == 0
+def isEnd(id):
+    return len(succ[id]) == 0
 
-def doCalc(p_num,t):
-    print("Do calc on ", p_num)
+def doCalc(id,t):
+    print("Do calc on ", id, t)
 
 def run(rank):
     obj_lst = []
-    for p_num in alloc_partition[rank]:
-        tensor = [torch.empty(size=(3,3)) for _ in range(len(pred[p_num]))]
-        for idx in range(len(pred[p_num])):
-            if rank == alloc_device[pred[p_num][idx]]:
-                continue
-            pr = pred[p_num][idx]
-            obj = dist.irecv(tensor=tensor[idx], src=alloc_device[pr], tag=pack(p_num,pos_prev[p_num][idx]))
-            print("recv : ",rank,p_num,alloc_device[pr], pr, obj)
-            obj_lst.append(obj)
+    same_dev_tensor = {}
+    for id in alloc_id[rank]:
+        #prepare tensors
+        tensor = []
+        if isStart(id):
+            tensor.append(torch.rand(size=(SIZE_ALL,SIZE_ALL)))
+            #for debug
+            #print(tensor[0])
+        else:
+            for i in range(len(receiver_start_row[id])):
+                tensor.append(torch.empty(size=(receiver_end_row[id][i] - receiver_start_row[id][i],SIZE_ALL)))
+
+        #receive tensor
+        for i in range(len(pred[id])):
+            pr = pred[id][i]
+            p2s_idx = succ[pr].index(id)
+            tag = getTag(pr,p2s_idx)
+            if rank == alloc_device[pr]:
+                tensor[i] = same_dev_tensor[tag]
+            else:
+                obj = dist.irecv(tensor=tensor[i], src=alloc_device[pr], tag=tag)
+                obj_lst.append(obj)
         
+        #for sync
         for obj in obj_lst:
-            print("Waiting... ",rank,p_num,obj)
+            #for debug
+            #print("Waiting... ",rank,id,obj)
             obj.wait()
         obj_lst.clear()
-        
-        doCalc(p_num,tensor)
 
-        st = torch.empty(size=(3,3))
-        for idx in range(len(succ[p_num])):
-            if rank == alloc_device[succ[p_num][idx]]:
-                continue
-            su = succ[p_num][idx]
-            obj = dist.isend(tensor=st, dst=alloc_device[su], tag=pack(su,pos_next[p_num][idx]))
-            print("send : ",rank,p_num,alloc_device[su],su,obj)
-            obj_lst.append(obj)
+        #partition calc
+        tensor = torch.cat(tensor, dim=ROW_DIM)
+        doCalc(id,tensor)
 
-        if isEnd(p_num):
-            print(tensor)
+        #send tensor
+        for i in range(len(succ[id])):
+            su = succ[id][i]
+            tag = getTag(id,i)
+            if rank == alloc_device[su]:
+                same_dev_tensor[tag] = tensor[sender_start_row[id][i]:sender_end_row[id][i]]
+            else:
+                obj = dist.isend(tensor=tensor[sender_start_row[id][i]:sender_end_row[id][i]], dst=alloc_device[su], tag=tag)
+                obj_lst.append(obj)
+
+        #for debug
+        #if isEnd(id):
+        #    print(tensor)
 
     for obj in obj_lst:
-        print("Waiting... ",rank,p_num,obj)
+        print("Waiting... ",rank,id,obj)
         obj.wait()
     obj_lst.clear()
 
@@ -94,3 +121,4 @@ if __name__ == "__main__":
         p.join()
 
     print("Took {:3f} sec".format(time.time() - start_t))
+    
