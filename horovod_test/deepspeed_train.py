@@ -44,20 +44,20 @@ if __name__ == '__main__':
     args = add_argument()
     deepspeed.init_distributed()
 
-    device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+    device = torch.device("cuda:"+str(args.local_rank) if torch.cuda.is_available() else "cpu")
     print(device)
     print(torch.cuda.get_device_name(0))
     
     # Build model
     model = AlexNet().cuda()
-    model_engine, optimizer, train_loader, _ = deepspeed.initialize(args=args, model=model, model_parameters=model.state_dict(), training_data=train_dataset)
+    model_engine, optimizer, train_loader, _ = deepspeed.initialize(args=args, model=model, model_parameters=model.parameters(), training_data=train_dataset)
 
     # import torch.optim as optim
     criterion = nn.CrossEntropyLoss()
     # optimizer = optim.SGD(model.parameters(), lr=0.001, momentum=0.9)
 
     start = time.time()
-    for epoch in range(1):   # repeat process with same data
+    for epoch in range(args.epochs):   # repeat process with same data
         running_loss = 0.0
         for i, data in enumerate(train_loader, 0):
             # receive inputs from data
@@ -75,7 +75,7 @@ if __name__ == '__main__':
             # print progress
             running_loss += loss.item()
             if i % args.log_interval == args.log_interval - 1:
-                print('[%2d/%2d,%4d/%4d] loss: %.3f' % (epoch + 1, args.epochs, i + 1, len(train_dataset)/args.batch_size, running_loss / args.log_interval))
+                print('[%d - %2d/%2d,%4d/%4d] loss: %.3f' % (args.local_rank, epoch + 1, args.epochs, i + 1, len(train_dataset)/args.batch_size, running_loss / args.log_interval))
                 running_loss = 0.0
 
     torch.cuda.synchronize()
