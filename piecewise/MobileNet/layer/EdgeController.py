@@ -1,7 +1,5 @@
 from common import *
-from tensorflow import keras
-import argparse
-#import multiprocessing as mp
+from EnvDataSet import DAGDataSet
 
 
 def scheduler(model_name, next_sock, images, labels, label_list, label_lock, time_list, time_lock, _stop_event, num_model=1):
@@ -13,7 +11,8 @@ def processing(inputs, model):
     return outputs
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description='Tensorflow')
+    dataset = DAGDataSet(num_timeslots=1, num_services=1, apply_partition="horizontal", graph_coarsening=True)
+    
     parser = argparse.ArgumentParser(description='Piecewise Partition and Scheduling')
     parser.add_argument('--vram_limit', default=0.2, type=float, help='GPU memory limit')
     parser.add_argument('--master_addr', default='192.168.1.2', type=str, help='Master node ip address')
