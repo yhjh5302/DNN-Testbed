@@ -4,28 +4,10 @@ import deepspeed
 
 def add_argument():
     parser = argparse.ArgumentParser(description='CIFAR')
-    parser.add_argument('--with_cuda',
-                        default=False,
-                        action='store_true',
-                        help='use CPU in case there\'s no GPU support')
-    parser.add_argument('-b',
-                        '--batch_size',
-                        default=64,
-                        type=int,
-                        help='mini-batch size (default: 64)')
-    parser.add_argument('-e',
-                        '--epochs',
-                        default=10,
-                        type=int,
-                        help='number of total epochs (default: 10)')
     parser.add_argument('--local_rank',
                         type=int,
                         default=-1,
                         help='local rank passed from distributed launcher')
-    parser.add_argument('--log-interval',
-                        type=int,
-                        default=1,
-                        help="output logging information at a given interval")
 
     # Include DeepSpeed configuration arguments
     parser = deepspeed.add_config_arguments(parser)
@@ -49,6 +31,7 @@ if __name__ == '__main__':
     print(torch.cuda.get_device_name(0))
     
     # Build model
+    batch_size = 64
     model = AlexNet().cuda()
     model_engine, optimizer, train_loader, _ = deepspeed.initialize(args=args, model=model, model_parameters=model.parameters(), training_data=train_dataset)
 
@@ -56,8 +39,10 @@ if __name__ == '__main__':
     criterion = nn.CrossEntropyLoss()
     # optimizer = optim.SGD(model.parameters(), lr=0.001, momentum=0.9)
 
+    epoch_size = 10
+    verbose = 1
     start = time.time()
-    for epoch in range(args.epochs):   # repeat process with same data
+    for epoch in range(epoch_size):   # repeat process with same data
         running_loss = 0.0
         for i, data in enumerate(train_loader, 0):
             # receive inputs from data
@@ -74,8 +59,8 @@ if __name__ == '__main__':
 
             # print progress
             running_loss += loss.item()
-            if i % args.log_interval == args.log_interval - 1:
-                print('[%d - %2d/%2d,%4d/%4d] loss: %.3f' % (args.local_rank, epoch + 1, args.epochs, i + 1, len(train_dataset)/args.batch_size, running_loss / args.log_interval))
+            if i % verbose == verbose - 1:
+                print('[%d - %2d/%2d,%4d/%4d] loss: %.3f' % (args.local_rank, epoch + 1, epoch_size, i + 1, len(train_dataset)/batch_size, running_loss / verbose))
                 running_loss = 0.0
 
     torch.cuda.synchronize()
