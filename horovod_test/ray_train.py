@@ -2,15 +2,17 @@ from models import *
 from typing import Dict
 import ray.train.torch as RayTrainTorch
 import ray.air.config as RayAirConfig
+import ray.air.session as RayAirSession
 
 
 # Define dataset
 transform = transforms.Compose([transforms.Resize(size=(224,224),interpolation=0), transforms.ToTensor(), transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))])
 train_dataset = torchvision.datasets.CIFAR10(root='./cifar10_data', train=True, download=True, transform=transform)
+classes = ('plane', 'car', 'bird', 'cat', 'deer', 'dog', 'frog', 'horse', 'ship', 'truck')
 
 
 def train_func(config: Dict):
-    device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+    device = torch.device("cuda:"+str(RayAirSession.get_local_rank()) if torch.cuda.is_available() else "cpu")
     print(device)
     print(torch.cuda.get_device_name(0))
 
@@ -18,14 +20,10 @@ def train_func(config: Dict):
     batch_size = config["batch_size"]
     train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=batch_size)
     train_loader = RayTrainTorch.prepare_data_loader(train_loader)
-    classes = ('plane', 'car', 'bird', 'cat', 'deer', 'dog', 'frog', 'horse', 'ship', 'truck')
     
     # Build model
-    model = AlexNet()
-    model = model.cuda()
+    model = AlexNet().cuda()
     model = RayTrainTorch.prepare_model(model)
-    #from torchsummary import summary
-    #summary(model, (3, 224, 224))
 
     import torch.optim as optim
     criterion = nn.CrossEntropyLoss()

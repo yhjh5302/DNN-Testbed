@@ -5,6 +5,7 @@ import horovod.torch as hvd
 # Define dataset
 transform = transforms.Compose([transforms.Resize(size=(224,224),interpolation=0), transforms.ToTensor(), transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))])
 train_dataset = torchvision.datasets.CIFAR10(root='./cifar10_data', train=True, download=True, transform=transform)
+classes = ('plane', 'car', 'bird', 'cat', 'deer', 'dog', 'frog', 'horse', 'ship', 'truck')
 
 
 if __name__ == '__main__':
@@ -21,13 +22,9 @@ if __name__ == '__main__':
     batch_size = 64
     train_sampler = torch.utils.data.distributed.DistributedSampler(train_dataset, num_replicas=hvd.size(), rank=hvd.rank())
     train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=batch_size, sampler=train_sampler)
-    classes = ('plane', 'car', 'bird', 'cat', 'deer', 'dog', 'frog', 'horse', 'ship', 'truck')
     
     # Build model
-    model = AlexNet()
-    model = model.cuda()
-    #from torchsummary import summary
-    #summary(model, (3, 224, 224))
+    model = AlexNet().cuda()
 
     import torch.optim as optim
     criterion = nn.CrossEntropyLoss()

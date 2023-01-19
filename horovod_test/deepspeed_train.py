@@ -1,31 +1,28 @@
 from models import *
+import deepspeed
 
 
 # Define dataset
 transform = transforms.Compose([transforms.Resize(size=(224,224),interpolation=0), transforms.ToTensor(), transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))])
 train_dataset = torchvision.datasets.CIFAR10(root='./cifar10_data', train=True, download=True, transform=transform)
+classes = ('plane', 'car', 'bird', 'cat', 'deer', 'dog', 'frog', 'horse', 'ship', 'truck')
 
 
 if __name__ == '__main__':
+    # Initialize Deepspeed
+    deepspeed.init_distributed()
+
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     print(device)
     print(torch.cuda.get_device_name(0))
-
-    # Partition dataset among workers using DistributedSampler
-    batch_size = 64
-    num_workers = 1
-    train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=batch_size, num_workers=num_workers)
-    classes = ('plane', 'car', 'bird', 'cat', 'deer', 'dog', 'frog', 'horse', 'ship', 'truck')
     
     # Build model
-    model = AlexNet()
-    model = model.cuda()
-    #from torchsummary import summary
-    #summary(model, (3, 224, 224))
+    model = AlexNet().cuda()
+    model_engine, optimizer, train_loader, _ = deepspeed.initialize(model=model, model_parameters=model.state_dict(), training_data=train_dataset)
 
-    import torch.optim as optim
+    # import torch.optim as optim
     criterion = nn.CrossEntropyLoss()
-    optimizer = optim.SGD(model.parameters(), lr=0.001, momentum=0.9)
+    # optimizer = optim.SGD(model.parameters(), lr=0.001, momentum=0.9)
 
     epoch_size = 10
     verbose = 1
@@ -34,16 +31,16 @@ if __name__ == '__main__':
         running_loss = 0.0
         for i, data in enumerate(train_loader, 0):
             # receive inputs from data
-            inputs, labels = data[0].cuda(), data[1].cuda()
+            inputs, labels = data[0].to(model_engine.local_rank), data[1].to(model_engine.local_rank)
             
             # gradient set to zero
             optimizer.zero_grad()
 
             # forward and back prop and optimize
-            outputs = model(inputs)
+            outputs = model_engine(inputs)
             loss = criterion(outputs, labels)
-            loss.backward()
-            optimizer.step()
+            model_engine.backward(loss)
+            model_engine.step()
 
             # print progress
             running_loss += loss.item()
