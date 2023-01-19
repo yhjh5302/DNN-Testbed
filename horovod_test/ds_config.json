@@ -1,15 +1,11 @@
 {
     "train_batch_size": 64,
-    "gradient_accumulation_steps": 1,
+    "steps_per_print": 1,
     "optimizer": {
-      "type": "Adam",
+      "type": "SGD",
       "params": {
         "lr": 0.001,
         "momentum": 0.9
       }
-    },
-    "fp16": {
-      "enabled": true
-    },
-    "zero_optimization": true
+    }
   }
