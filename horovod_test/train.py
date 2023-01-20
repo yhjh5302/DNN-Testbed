@@ -14,8 +14,7 @@ if __name__ == '__main__':
 
     # Partition dataset among workers using DistributedSampler
     batch_size = 64
-    num_workers = 1
-    train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=batch_size, num_workers=num_workers)
+    train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=batch_size)
     
     # Build model
     model = AlexNet().cuda()

@@ -33,7 +33,7 @@ def train_func(config: Dict):
     verbose = config["verbose"]
     start = time.time()
     for epoch in range(epoch_size):   # repeat process with same data
-        running_loss, epoch_loss = 0.0, 0.0
+        running_loss = 0.0
         for i, data in enumerate(train_loader, 0):
             # receive inputs from data
             inputs, labels = data[0].cuda(), data[1].cuda()
@@ -49,7 +49,6 @@ def train_func(config: Dict):
 
             # print progress
             running_loss += loss.item()
-            epoch_loss += loss.item()
             if i % verbose == verbose - 1:
                 print('[%2d/%2d,%4d/%4d] loss: %.3f' % (epoch + 1, epoch_size, i + 1, len(train_dataset)/batch_size, running_loss / verbose))
                 running_loss = 0.0
