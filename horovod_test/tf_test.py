@@ -96,7 +96,7 @@ if __name__ == '__main__':
     model.compile(loss='sparse_categorical_crossentropy', optimizer=tf.optimizers.SGD(learning_rate=0.001, momentum=0.9), metrics=['accuracy'])
     model.build((None,32,32,3))
     model.summary()
-    history = model.fit(x_train, y_train, batch_size=256, epochs=50)
+    history = model.fit(x_train, y_train, batch_size=64, epochs=10)
 
     # saving weights
     model.features1.save_weights('./VGGNet_features1_weights', save_format='tf')
