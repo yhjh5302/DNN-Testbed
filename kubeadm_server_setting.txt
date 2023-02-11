@@ -4,7 +4,7 @@ docker push yhjh5302/node-web-app-rasp
 docker pull yhjh5302/node-web-app-rasp
 
 #### kustomize install
-curl -s "https://raw.githubusercontent.com/kubernetes-sigs/kustomize/master/hack/install_kustomize.sh" | bash
+curl -s "https://raw.githubusercontent.com/kubernetes-sigs/kustomize/master/hack/install_kustomize.sh" >> test.sh; bash test.sh 4.5.7; rm test.sh; sudo mv kustomize /usr/local/bin/
 
 ##############################
 #### for nvidia
@@ -102,6 +102,7 @@ memorySwap:
   swapBehavior: UnlimitedSwap
 
 sudo mkdir -p /etc/containerd && containerd config default | sudo tee /etc/containerd/config.toml
+sudo sed 's/SystemdCgroup = false/SystemdCgroup = true/g' /etc/containerd/config.toml
 sudo nano /etc/containerd/config.toml
           [plugins."io.containerd.grpc.v1.cri".containerd.runtimes.runc.options]
             BinaryName = ""
