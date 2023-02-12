@@ -321,3 +321,6 @@ kubectl edit statefulset -n istio-system authservice
 #### 오류: config.go:46] config=main.Config{CertFile:"/etc/webhook/certs/tls.crt", KeyFile:"/etc/webhook/certs/tls.key"} Error: too many open files
 sudo sysctl fs.inotify.max_user_instances=1280
 sudo sysctl fs.inotify.max_user_watches=655360
+
+#### after kubeflow install (https://www.kubeflow.org/docs/distributions/ibm/deploy/authentication/)
+kubectl patch svc istio-ingressgateway -n istio-system -p '{"spec":{"type":"NodePort"}}'
