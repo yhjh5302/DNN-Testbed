@@ -225,6 +225,7 @@ curl -s "https://raw.githubusercontent.com/kubernetes-sigs/kustomize/master/hack
 
 #### persistent volume
 sudo mkdir /mnt/pv{1..5}
+sudo rm -rf /mnt/pv{1..5}/*
 
 kubectl create -f - <<EOF
 kind: StorageClass
@@ -305,3 +306,18 @@ spec:
   hostPath:
     path: "/mnt/pv5"
 EOF
+
+#### Kubeflow authservice-0 permission denied 에러 해결
+kubectl edit statefulset -n istio-system authservice
+      initContainers:
+      - name: fix-permission
+        image: busybox
+        command: ['sh', '-c']
+        args: ['chmod -R 777 /var/lib/authservice;']
+        volumeMounts:
+        - mountPath: /var/lib/authservice
+          name: data
+
+#### 오류: config.go:46] config=main.Config{CertFile:"/etc/webhook/certs/tls.crt", KeyFile:"/etc/webhook/certs/tls.key"} Error: too many open files
+sudo sysctl fs.inotify.max_user_instances=1280
+sudo sysctl fs.inotify.max_user_watches=655360
