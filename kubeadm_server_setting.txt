@@ -3,9 +3,6 @@ docker build -t yhjh5302/node-web-app-rasp .
 docker push yhjh5302/node-web-app-rasp
 docker pull yhjh5302/node-web-app-rasp
 
-#### kustomize install
-curl -s "https://raw.githubusercontent.com/kubernetes-sigs/kustomize/master/hack/install_kustomize.sh" >> test.sh; bash test.sh 4.5.7; rm test.sh; sudo mv kustomize /usr/local/bin/
-
 ##############################
 #### for nvidia
 curl -s -L https://nvidia.github.io/nvidia-docker/gpgkey | sudo apt-key add -
@@ -102,7 +99,7 @@ memorySwap:
   swapBehavior: UnlimitedSwap
 
 sudo mkdir -p /etc/containerd && containerd config default | sudo tee /etc/containerd/config.toml
-sudo sed 's/SystemdCgroup = false/SystemdCgroup = true/g' /etc/containerd/config.toml
+sudo sed -i 's/SystemdCgroup = false/SystemdCgroup = true/g' /etc/containerd/config.toml
 sudo nano /etc/containerd/config.toml
           [plugins."io.containerd.grpc.v1.cri".containerd.runtimes.runc.options]
             BinaryName = ""
@@ -218,3 +215,93 @@ kubectl delete services my-service
 kubectl delete deployment node-web-app
 
 sudo kubeadm reset
+sudo rm -rf /etc/cni/net.d
+
+
+
+#### kubeflow
+#### kustomize install
+curl -s "https://raw.githubusercontent.com/kubernetes-sigs/kustomize/master/hack/install_kustomize.sh" >> test.sh; bash test.sh 4.5.7; rm test.sh; sudo mv kustomize /usr/local/bin/
+
+#### persistent volume
+sudo mkdir /mnt/pv{1..5}
+
+kubectl create -f - <<EOF
+kind: StorageClass
+apiVersion: storage.k8s.io/v1
+metadata:
+  name: local-storage
+provisioner: kubernetes.io/no-provisioner
+volumeBindingMode: Immediate
+EOF
+
+kubectl apply -f https://raw.githubusercontent.com/rancher/local-path-provisioner/master/deploy/local-path-storage.yaml
+
+kubectl patch storageclass local-path -p '{"metadata": {"annotations":{"storageclass.kubernetes.io/is-default-class":"true"}}}'
+
+kubectl create -f - <<EOF
+kind: PersistentVolume
+apiVersion: v1
+metadata:
+  name: pv-volume1
+spec:
+  storageClassName: local-path
+  capacity:
+    storage: 20Gi
+  accessModes:
+    - ReadWriteOnce
+  hostPath:
+    path: "/mnt/pv1"
+---
+kind: PersistentVolume
+apiVersion: v1
+metadata:
+  name: pv-volume2
+spec:
+  storageClassName: local-path
+  capacity:
+    storage: 20Gi
+  accessModes:
+    - ReadWriteOnce
+  hostPath:
+    path: "/mnt/pv2"
+---
+kind: PersistentVolume
+apiVersion: v1
+metadata:
+  name: pv-volume3
+spec:
+  storageClassName: local-path
+  capacity:
+    storage: 10Gi
+  accessModes:
+    - ReadWriteOnce
+  hostPath:
+    path: "/mnt/pv3"
+---
+kind: PersistentVolume
+apiVersion: v1
+metadata:
+  name: pv-volume4
+spec:
+  storageClassName: local-path
+  capacity:
+    storage: 10Gi
+  accessModes:
+    - ReadWriteOnce
+  hostPath:
+    path: "/mnt/pv4"
+---
+kind: PersistentVolume
+apiVersion: v1
+metadata:
+  name: pv-volume5
+spec:
+  storageClassName: local-path
+  capacity:
+    storage: 10Gi
+  accessModes:
+    - ReadWriteOnce
+  hostPath:
+    path: "/mnt/pv5"
+EOF

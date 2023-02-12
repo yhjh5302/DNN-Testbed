@@ -1,0 +1,114 @@
+#### [마스터 노드] for nvidia docker
+curl -s -L https://nvidia.github.io/nvidia-docker/gpgkey | sudo apt-key add -
+distribution=$(. /etc/os-release;echo $ID$VERSION_ID)
+curl -s -L https://nvidia.github.io/nvidia-docker/$distribution/nvidia-docker.list | sudo tee /etc/apt/sources.list.d/nvidia-docker.list
+sudo apt-get update
+curl -s -L https://nvidia.github.io/nvidia-docker/gpgkey | sudo apt-key add -
+
+#### [마스터 노드] docker 설치 (docker는 deprecated 되었지만 dependency 설치가 용이하고 테스트 용도로 사용하기도 편리해서 일단 전부 설치, https://docs.docker.com/engine/install/ubuntu/)
+sudo apt-get update
+sudo apt-get install -y ca-certificates curl gnupg lsb-release
+sudo mkdir -m 0755 -p /etc/apt/keyrings
+curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+sudo apt-get update
+
+#### [마스터 노드] kubernetes 설치
+sudo apt-get update
+sudo apt-get install -y apt-transport-https ca-certificates curl
+sudo curl -fsSLo /usr/share/keyrings/kubernetes-archive-keyring.gpg https://packages.cloud.google.com/apt/doc/apt-key.gpg
+echo "deb [signed-by=/usr/share/keyrings/kubernetes-archive-keyring.gpg] https://apt.kubernetes.io/ kubernetes-xenial main" | sudo tee /etc/apt/sources.list.d/kubernetes.list
+sudo apt-get update
+sudo apt-get install -y kubelet kubeadm kubectl kubernetes-cni nvidia-container-runtime nvidia-docker2
+#sudo apt-mark hold kubelet kubeadm kubectl kubernetes-cni
+sudo systemctl enable --now kubelet
+
+#### [jetson nano] kubernetes 설치 jetson nano는 jetpack에 이미 docker/nvidia 설치 다 되어있어서 kubernetes만 설치하면 됨. (오히려 docker/nvidia 최신 버전 사용시 오류남)
+sudo apt-get install -y kubelet kubeadm kubectl kubernetes-cni
+#sudo apt-mark hold kubelet kubeadm kubectl kubernetes-cni
+sudo systemctl enable --now kubelet
+
+#### [jetson nano] jetson-stats은 ubuntu htop, nvidia-smi 처럼 cpu gpu 정보를 보여주는 프로그램.
+sudo apt-get install -y python3-pip nano
+sudo -H pip3 install -U jetson-stats
+
+#### [jetson nano] CPU 및 GPU 절전모드 해제. (이건 재부팅시 유지되지 않으므로 매번 다시 켜줘야함)
+sudo jetson_clocks
+
+#### [jetson nano] OS 슬립모드를 꺼줘야함.
+sudo systemctl mask sleep.target suspend.target hibernate.target hybrid-sleep.target
+
+#### [jetson nano] LAN 카드 절전모드를 꺼줘야함. 아래 파일 열고 wifi.powersave = 3 -> 2로 변경
+sudo nano /etc/NetworkManager/conf.d/default-wifi-powersave-on.conf
+
+
+#### [마스터 노드] 공식 문서 내용 따라서 세팅해줄 것
+https://kubernetes.io/docs/setup/production-environment/container-runtimes/
+
+#### [마스터 노드] run kubeadm
+sudo swapoff -a (이건 재부팅시 유지되지 않으므로 매번 다시 켜줘야함)
+sudo kubeadm init --pod-network-cidr=10.244.0.0/16
+mkdir -p $HOME/.kube
+sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
+sudo chown $(id -u):$(id -g) $HOME/.kube/config
+
+#### [jetson nano] CPU 메모리가 부족하기 때문에 swap memory를 활성화 시켜줘야함
+sudo nano /var/lib/kubelet/config.yaml     <- 실행 후 적절한 위치에 아래 내용을 추가.
+featureGates:
+  NodeSwap: true
+failSwapOn: false
+memorySwap:
+  swapBehavior: UnlimitedSwap
+
+#### [모든 기기] container runtime을 nvidia로 설정해줘야함.
+sudo mkdir -p /etc/containerd && containerd config default | sudo tee /etc/containerd/config.toml
+sudo nano /etc/containerd/config.toml # 아래 내용 찾아서 변경
+          [plugins."io.containerd.grpc.v1.cri".containerd.runtimes.runc.options]
+            BinaryName = ""
+            CriuImagePath = ""
+            CriuPath = ""
+            CriuWorkPath = ""
+            IoGid = 0
+            IoUid = 0
+            NoNewKeyring = false
+            NoPivotRoot = false
+            Root = ""
+            ShimCgroup = ""
+            SystemdCgroup = true        <- 이거 true로 바꾸고 아래 nvidia 런타임 추가
+
+          [plugins."io.containerd.grpc.v1.cri".containerd.runtimes.nvidia]
+            privileged_without_host_devices = false
+            runtime_engine = ""
+            runtime_root = ""
+            runtime_type = "io.containerd.runc.v1"
+
+            [plugins."io.containerd.grpc.v1.cri".containerd.runtimes.nvidia.options]
+              BinaryName = "/usr/bin/nvidia-container-runtime"
+              SystemdCgroup = true
+
+sudo sed -i 's/default_runtime_name = "runc"/default_runtime_name = "nvidia"/g' /etc/containerd/config.toml       # default runtime을 nvidia로 바꿔줌. 직접 바꿔줘도 됨.
+sudo systemctl restart containerd
+
+#### kubelet 에러가 발생할 경우 inspect
+journalctl -fu kubelet
+
+#### [마스터 노드] kubernetes 네트워크 설정
+kubectl apply -f https://raw.githubusercontent.com/flannel-io/flannel/v0.20.2/Documentation/kube-flannel.yml
+kubectl get nodes
+
+#### [마스터 노드] master node untaint 마스터 노드에서 일반 컨테이너 실행을 위한 세팅
+kubectl taint nodes --all node-role.kubernetes.io/control-plane-
+
+#### 마스터 노드에서 yaml 파일 실행
+kubectl apply -f pipeline-deploy.yaml
+kubectl apply -f service.yaml
+kubectl delete -f pipeline-deploy.yaml
+kubectl delete -f service.yaml
+kubectl exec -it layer1-548fd6689c-69t6d -- bash
+
+#### [jetson nano]
+sudo swapoff -a (이건 재부팅시 유지되지 않으므로 매번 다시 켜줘야함)
+sudo kubeadm join 192.168.0.2:6443 --token ffb2dv.1hkm9b8y7vqnwxls --discovery-token-ca-cert-hash sha256:f073c3eb91f54776cef89bf4ee7dc2650bae85d7d3dfc09feb4cbb3092e8dd3d
+
+sudo kubeadm reset
+sudo rm -rf /etc/cni/net.d
