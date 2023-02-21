@@ -13,13 +13,13 @@ spec:
       labels:
         app: edge-controller
     spec:
-      nodeSelector:
-        kubernetes.io/hostname: jin-tfx255
+      # nodeSelector:
+      #   kubernetes.io/hostname: server-1
       containers:
       - name: edge-controller
-        image: yhjh5302/edge-controller-image:latest
+        image: yonseiwinettest/edge-controller-image:latest
         command: ["/bin/bash","-c","while true; do sleep 1000; done"]
-        #command: ["/bin/bash","-c","python3 edge_controller.py --set_gpu='false' --master_addr='10.96.0.200' --prev_port='30000'"]
+        #command: ["/bin/bash","-c","python3 build_script.py build_ext --inplace && python3 edge_controller.py --rank=0 --master_addr='10.96.0.200'"]
         ports:
         - containerPort: 30000
 
@@ -54,28 +54,31 @@ spec:
       labels:
         app: smart-camera
     spec:
-      nodeSelector:
-        kubernetes.io/hostname: wnlab-nano-001
+      # nodeSelector:
+      #   kubernetes.io/hostname: wnlab-nano-002
       containers:
       - name: smart-camera
-        image: yhjh5302/smart-camera-image:latest
+        image: yonseiwinettest/edge-controller-image:latest
         env:
         - name: MASTERADDR
-          value: 10.96.0.200
+          value: "10.96.0.200"
         - name: MASTERPORT
-          value: 30000
+          value: "30000"
         - name: OUTPUT_NAME
           value: smart_camera_001
+        - name: LAYERNAME
+          value: vggnet
         - name: SSH_PASSWARD # 데이터 취합용
-          value: 123qwe123
+          value: 123asd123
         - name: SCP_ADDRESS
-          value: wnlab@165.132.106.119
+          value: hbp@192.168.0.2
         - name: SCP_PATH
           value: ./
         #resources:
         #  limits:
         #    nvidia.com/gpu: 1
-        command: ["/bin/bash","-c","python3 smart_camera.py --set_gpu='false' --master_addr='10.96.0.200' --prev_port='30000' --vram_limit=0.2 1> $(OUTPUT_NAME).txt 2> $(OUTPUT_NAME)_err.txt; sshpass -p $(SSH_PASSWARD) scp -o StrictHostKeyChecking=no $(LAYERNAME)*.txt $(SCP_ADDRESS):$(SCP_PATH);"]
+        # command: ["/bin/bash","-c","python3 build_script.py build_ext --inplace && python3 smart_camera.py --rank=1 --master_addr='10.96.0.200' --vram_limit=0.5"] #1> $(OUTPUT_NAME).txt 2> $(OUTPUT_NAME)_err.txt; sshpass -p $(SSH_PASSWARD) scp -o StrictHostKeyChecking=no $(LAYERNAME)*.txt $(SCP_ADDRESS):$(SCP_PATH);"]
+        command: ["/bin/bash","-c","while true; do sleep 1000; done"]
         ports:
         - containerPort: 30000
 

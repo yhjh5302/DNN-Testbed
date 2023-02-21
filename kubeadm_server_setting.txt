@@ -292,19 +292,6 @@ spec:
     - ReadWriteOnce
   hostPath:
     path: "/mnt/pv4"
----
-kind: PersistentVolume
-apiVersion: v1
-metadata:
-  name: pv-volume5
-spec:
-  storageClassName: local-path
-  capacity:
-    storage: 10Gi
-  accessModes:
-    - ReadWriteOnce
-  hostPath:
-    path: "/mnt/pv5"
 EOF
 
 #### Kubeflow authservice-0 permission denied 에러 해결
@@ -324,3 +311,186 @@ sudo sysctl fs.inotify.max_user_watches=655360
 
 #### after kubeflow install (https://www.kubeflow.org/docs/distributions/ibm/deploy/authentication/)
 kubectl patch svc istio-ingressgateway -n istio-system -p '{"spec":{"type":"NodePort"}}'
+
+#### APP_SECURE_COOKIES -> false
+kubectl -n kubeflow edit deploy jupyter-web-app-deployment
+kubectl -n kubeflow edit deploy volumes-web-app-deployment
+kubectl -n kubeflow edit deploy tensorboards-web-app-deployment
+
+# nvidia cuda install (https://developer.nvidia.com/cuda-11-7-0-download-archive)
+wget https://developer.download.nvidia.com/compute/cuda/11.7.0/local_installers/cuda_11.7.0_515.43.04_linux.run
+sudo sh cuda_11.7.0_515.43.04_linux.run
+
+#### nvidia plugin
+kubectl create -f https://raw.githubusercontent.com/NVIDIA/k8s-device-plugin/v0.13.0/nvidia-device-plugin.yml
+helm repo add nvdp https://nvidia.github.io/gpu-feature-discovery
+helm repo update
+
+# nvidia-device-plugin nvdp/nvgfd 통합 설치 none/single/mixed
+helm upgrade -i nvdp nvdp/nvidia-device-plugin \
+    --version=0.13.0 \
+    --namespace nvidia-device-plugin \
+    --create-namespace \
+    --set compatWithCPUManager=true \
+    --set migStrategy=single \
+    --set gfd.enabled=true
+
+# nvidia-device-plugin nvdp/nvgfd 별도 설치
+helm install \
+    --version=0.13.0 \
+    --generate-name \
+    --namespace nvidia-device-plugin \
+    --create-namespace \
+    --set migStrategy=mixed \
+    nvdp/nvidia-device-plugin
+helm install \
+    --version=0.7.0 \
+    --generate-name \
+    --namespace nvidia-device-plugin \
+    --create-namespace \
+    --set migStrategy=mixed \
+    nvgfd/gpu-feature-discovery
+
+# nvdp 제거
+helm -n nvidia-device-plugin ls | grep nvidia | awk '{print $1}' | xargs helm -n nvidia-device-plugin uninstall
+
+# NVIDIA GPU status check
+nvidia-smi
+
+# GPU persistence mode on
+nvidia-smi -pm 1
+
+# MIG enable
+nvidia-smi -mig 1
+
+# reset GPUs (만약 위 enable이 waring이 뜨거나 에러가 나서 Disable/Enabled* 상태에 머물경우 실행, 그래도 안되면 프로세스 직접 찾아서 꺼야함)
+nvidia-smi --gpu-reset -i 0, 1, 2, 3
+
+# MIG status check
+nvidia-smi -L
+
+# MIG gpu instance profile list check
+nvidia-smi mig -lgip
+
+# create gpu instance (19 - 1g.3gb / 14 - 2g.6gb / 0 - 4g.24gb)
+nvidia-smi mig -cgi 19,19,19,19
+nvidia-smi mig -cgi 14,14
+nvidia-smi mig -cgi 0
+
+# MIG compute instance profile list check
+nvidia-smi mig -lcip
+
+# create compute instance (0 - 1g.3gb / 1 - 2g.6gb / 3 - 4g.24gb)
+nvidia-smi mig -cci 0,0,0,0
+nvidia-smi mig -cci 1,1
+nvidia-smi mig -cci 3
+
+# delete compute instance
+nvidia-smi mig -dci
+
+# delete gpu instance
+nvidia-smi mig -dgi
+
+# nvidia-persistenced 데몬 설정
+git clone https://github.com/NVIDIA/nvidia-persistenced
+cd nvidia-persistenced/init/
+sh install.sh
+
+# nvidia-persistenced 체크
+systemctl status nvidia-persistenced
+
+# MIG 리부팅시 설정
+git clone https://github.com/NVIDIA/mig-parted
+cd mig-parted/deployments/systemd/
+sh install.sh
+
+# MIG-parted config 수정 (1g.3gb는 기본 프로필상에 존재하지 않아 추가가 필요함.)
+nano /etc/nvidia-mig-manager/config.yaml
+-> 맨 아래 config 추가 (indentation 틀릴 경우 에러 발생)
+  all-1g.3gb:
+    - devices: all
+      mig-enabled: true
+      mig-devices:
+        "1g.3gb": 4
+
+# MIG 상태 저장
+nvidia-mig-parted apply -f /etc/nvidia-mig-manager/config.yaml -k /etc/nvidia-mig-manager/hooks.yaml -c all-1g.3gb
+
+
+
+#### user add
+kubectl create -f - <<EOF
+apiVersion: kubeflow.org/v1beta1
+kind: Profile
+metadata:
+  name: profileName   # replace with the name of profile you want, this will be user's namespace name
+spec:
+  owner:
+    kind: User
+    name: userid@email.com   # replace with the email of the user
+  resourceQuotaSpec:    # resource quota can be set optionally
+    hard:
+      cpu: "16"
+      memory: 32Gi
+      # requests.nvidia.com/gpu: "1"
+      persistentvolumeclaims: "10"
+      requests.storage: "32Gi"
+EOF
+kubectl edit cm dex -n auth
+kubectl rollout restart deployment dex -n auth
+
+
+
+#### 노트북 외부 ssh 연결
+kubectl -n kubeflow edit gw kubeflow-gateway
+apiVersion: networking.istio.io/v1beta1
+kind: Gateway
+metadata:
+  name: kubeflow-gateway
+  namespace: kubeflow
+spec:
+  selector:
+    app: istio-ingressgateway
+  servers:                   <- 뒷부분 추가
+  - hosts:
+    - '*'
+    port:
+      number: 22
+      name: ssh
+      protocol: TCP
+
+#### istio virtual service
+kubectl create -f - <<EOF
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: notebook-kubeflow-user-example-com-test-notebook2
+  namespace: kubeflow-user-example-com
+spec:
+  hosts:
+  - '*'
+  gateways:
+  - kubeflow/kubeflow-gateway
+  tcp:
+  - match:
+    - port: 22
+    route:
+    - destination:
+        host: test-notebook.kubeflow-user-example-com.svc.cluster.local
+        port:
+          number: 22
+EOF
+
+#### 데스티네이션 룰 tls disable
+apiVersion: v1
+items:
+- apiVersion: networking.istio.io/v1beta1
+  kind: DestinationRule
+  metadata:
+    name: default
+    namespace: anonymous
+  spec:
+    host: '*.anonymous.svc.cluster.local'
+    trafficPolicy:
+      tls:
+        mode: DISABLE
