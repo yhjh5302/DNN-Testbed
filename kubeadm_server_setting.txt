@@ -90,6 +90,10 @@ sudo kubeadm config images pull
 sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
 sudo chown $(id -u):$(id -g) $HOME/.kube/config
 
+#### Raspberry Pi vxlan
+sudo apt install linux-modules-extra-5.15.0-1005-raspi linux-modules-extra-raspi
+
+
 #### (After kubeadm init and join) Add following options to /var/lib/kubelet/config.yaml for enabling swap memory
 sudo nano /var/lib/kubelet/config.yaml
 featureGates:
@@ -98,6 +102,17 @@ failSwapOn: false
 memorySwap:
   swapBehavior: UnlimitedSwap
 
+
+#### ubuntu swap on
+sudo fallocate -l 2G /swapfile
+sudo chmod 600 /swapfile
+sudo mkswap /swapfile
+sudo swapon /swapfile
+sudo nano /etc/fstab
+/swapfile swap swap defaults 0 0
+
+
+#### containerd runtime setting
 sudo mkdir -p /etc/containerd && containerd config default | sudo tee /etc/containerd/config.toml
 sudo sed -i 's/SystemdCgroup = false/SystemdCgroup = true/g' /etc/containerd/config.toml
 sudo nano /etc/containerd/config.toml
@@ -216,6 +231,19 @@ kubectl delete deployment node-web-app
 
 sudo kubeadm reset
 sudo rm -rf /etc/cni/net.d
+
+
+
+#### image 관리 docker/ctr
+sudo docker images --all
+sudo docker build -t yhjh5302/kubeflow-test .
+sudo docker run --rm -it --network=host --ipc=host yhjh5302/kubeflow-test
+sudo docker ps | grep yhjh5302 | awk '{print $1 " bash"}' | xargs -o sudo docker exec -it
+sudo docker rmi yhjh5302/kubeflow-test
+sudo docker system prune --volumes
+sudo ctr -n k8s.io image list
+sudo ctr -n k8s.io images rm docker.io/yhjh5302/kubeflow-test:latest
+sudo ctr -n k8s.io image list | grep pytorch | awk '{print $1}' | xargs sudo ctr -n k8s.io images rm
 
 
 
@@ -494,3 +522,11 @@ items:
     trafficPolicy:
       tls:
         mode: DISABLE
+
+#### RedHat8 nvidia driver update
+sudo su
+wget https://us.download.nvidia.com/tesla/470.57.02/nvidia-driver-local-repo-rhel8-470.57.02-1.0-1.x86_64.rpm
+dnf remove cuda-drivers
+rpm -i nvidia-driver-local-repo-rhel8-470.57.02-1.0-1.x86_64.rpm
+dnf install cuda-drivers
+rm nvidia-driver-local-repo-rhel8-470.57.02-1.0-1.x86_64.rpm

@@ -1,0 +1,50 @@
+apiVersion: networking.istio.io/v1beta1
+kind: Gateway
+metadata:
+  name: test-gateway
+  namespace: istio-system
+spec:
+  selector:
+    app: istio-ingressgateway
+  servers:
+  - hosts:
+    - "*"
+    port:
+      name: ssh
+      number: 22
+      protocol: TCP
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: test-ssh
+  namespace: kubeflow-user-example-com
+spec:
+  type: NodePort
+  ports:
+  - name: ssh-test
+    targetPort: 22
+    port: 22
+    nodePort: 30001
+    protocol: TCP
+  selector:
+    statefulset: test
+---
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: notebook-kubeflow-user-example-com-test2
+  namespace: kubeflow-user-example-com
+spec:
+  hosts:
+  - '*'
+  gateways:
+  - istio-system/test-gateway
+  tcp:
+  - match:
+    - port: 22
+    route:
+    - destination:
+        host: test-ssh.kubeflow-user-example-com.svc.cluster.local
+        port:
+          number: 22

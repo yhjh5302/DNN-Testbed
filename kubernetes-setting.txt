@@ -42,7 +42,7 @@ sudo systemctl mask sleep.target suspend.target hibernate.target hybrid-sleep.ta
 sudo nano /etc/NetworkManager/conf.d/default-wifi-powersave-on.conf
 
 
-#### [마스터 노드] 공식 문서 내용 따라서 세팅해줄 것
+#### [모든 노드] 공식 문서 내용 따라서 세팅해줄 것
 https://kubernetes.io/docs/setup/production-environment/container-runtimes/
 
 #### [마스터 노드] run kubeadm
