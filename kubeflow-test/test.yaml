@@ -29,14 +29,14 @@ spec:
     - port: 2222
     route:
     - destination:
-        host: test.yhjin.svc.cluster.local
+        host: test-ssh.yhjin.svc.cluster.local
         port:
           number: 2222
 ---
 apiVersion: security.istio.io/v1beta1
 kind: AuthorizationPolicy
 metadata:
-  name: tcp-policy
+  name: ssh-policy
   namespace: yhjin
 spec:
   action: ALLOW
@@ -44,19 +44,17 @@ spec:
   - to:
     - operation:
         ports: ["2222"]
-# ---
-# apiVersion: v1
-# kind: Service
-# metadata:
-#   name: test-ssh
-#   namespace: yhjin
-# spec:
-#   type: NodePort
-#   ports:
-#   - name: test-ssh
-#     targetPort: 2222
-#     port: 2222
-#     nodePort: 30001
-#     protocol: TCP
-#   selector:
-#     statefulset: test
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: test-ssh
+  namespace: yhjin
+spec:
+  ports:
+  - name: test-ssh
+    targetPort: 2222
+    port: 2222
+    protocol: TCP
+  selector:
+    statefulset: test

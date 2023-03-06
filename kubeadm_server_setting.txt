@@ -168,18 +168,8 @@ sudo kubeadm config images list
 sudo kubeadm config images pull
 sudo kubeadm config images pull --image-repository docker.io
 
-#### cluster role binding (WARNING: This allows any user with read access to secrets or the ability to create a pod to access super-user credentials.)
-kubectl create clusterrolebinding serviceaccounts-cluster-admin --clusterrole=cluster-admin --group=system:serviceaccounts
-
 #### dashboard
-kubectl apply -f https://raw.githubusercontent.com/kubernetes/dashboard/v2.2.0/aio/deploy/recommended.yaml
-
-#### getting dashboard key
-kubectl -n kubernetes-dashboard describe secret $(kubectl -n kubernetes-dashboard get secret | grep admin-user | awk '{print $1}')
-
-#### proxy
-kubectl proxy
-http://localhost:8001/api/v1/namespaces/kubernetes-dashboard/services/https:kubernetes-dashboard:/proxy/
+kubectl apply -f dashboard.yaml
 
 
 
@@ -247,13 +237,16 @@ sudo ctr -n k8s.io image list | grep pytorch | awk '{print $1}' | xargs sudo ctr
 
 
 
-#### kubeflow
 #### kustomize install
 curl -s "https://raw.githubusercontent.com/kubernetes-sigs/kustomize/master/hack/install_kustomize.sh" >> test.sh; bash test.sh 4.5.7; rm test.sh; sudo mv kustomize /usr/local/bin/
+
+#### kubeflow install
+https://github.com/kubeflow/manifests/tree/v1.6-branch
 
 #### persistent volume
 sudo mkdir /mnt/pv{1..5}
 sudo rm -rf /mnt/pv{1..5}/*
+
 
 
 # manifest
@@ -343,9 +336,9 @@ sudo sysctl fs.inotify.max_user_watches=655360
 kubectl patch svc istio-ingressgateway -n istio-system -p '{"spec":{"type":"NodePort"}}'
 
 #### APP_SECURE_COOKIES -> false
-kubectl -n kubeflow edit deploy jupyter-web-app-deployment
-kubectl -n kubeflow edit deploy volumes-web-app-deployment
-kubectl -n kubeflow edit deploy tensorboards-web-app-deployment
+kubectl -n kubeflow edit deployment jupyter-web-app-deployment
+kubectl -n kubeflow edit deployment volumes-web-app-deployment
+kubectl -n kubeflow edit deployment tensorboards-web-app-deployment
 
 # nvidia cuda install (https://developer.nvidia.com/cuda-11-7-0-download-archive)
 wget https://developer.download.nvidia.com/compute/cuda/11.7.0/local_installers/cuda_11.7.0_515.43.04_linux.run
@@ -467,6 +460,13 @@ spec:
       requests.storage: "32Gi"
 EOF
 kubectl edit cm dex -n auth
+    - email: user@example.com
+      hash: $2y$12$4K/VkmDd1q1Orb3xAt82zu8gk7Ad6ReFR4LCP9UeYE90NLiN9Df72
+      # https://github.com/dexidp/dex/pull/1601/commits
+      # FIXME: Use hashFromEnv instead
+      username: user
+      userID: "15841185641784"
+python3 -c 'import bcrypt; print(bcrypt.hashpw(b"password", bcrypt.gensalt(rounds=10)).decode("ascii"))'
 kubectl rollout restart deployment dex -n auth
 
 
@@ -486,7 +486,7 @@ spec:
     - "*"
     port:
       name: test-ssh
-      number: 2222
+      number: 22
       protocol: TCP
 --- # istio-ingressgateway통해서 통신할때 사용. virtual service
 apiVersion: networking.istio.io/v1alpha3
@@ -501,24 +501,24 @@ spec:
   - yhjin/test-gateway
   tcp:
   - match:
-    - port: 2222
+    - port: 22
     route:
     - destination:
         host: test.yhjin.svc.cluster.local
         port:
-          number: 2222
+          number: 22
 --- # 포트 authorization 허용 (네임스페이스 전체 적용)
 apiVersion: security.istio.io/v1beta1
 kind: AuthorizationPolicy
 metadata:
-  name: tcp-policy
+  name: ssh-policy
   namespace: yhjin
 spec:
   action: ALLOW
   rules:
   - to:
     - operation:
-        ports: ["2222"]
+        ports: ["22"]
 --- # 서비스 선언 - 새로 추가해서 노드포트 개방
 apiVersion: v1
 kind: Service
@@ -529,8 +529,8 @@ spec:
   type: NodePort
   ports:
   - name: test-ssh
-    targetPort: 2222
-    port: 2222
+    targetPort: 22
+    port: 22
     nodePort: 30001
     protocol: TCP
   selector:
