@@ -10,7 +10,7 @@ authentication:
 authorization:
   mode: Webhook
   webhook:
-    cacheAuthorizedTTL: 0ss
+    cacheAuthorizedTTL: 0s
     cacheUnauthorizedTTL: 0s
 cgroupDriver: systemd
 clusterDNS:
